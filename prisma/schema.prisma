@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+model User {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  password        String
+  fullName        String
+  phone           String?
+  country         String?
+  role            UserRole        @default(USER)
+  balance         Float           @default(0)
+  totalDeposited  Float           @default(0)
+  totalProfit     Float           @default(0)
+  totalWithdrawn  Float           @default(0)
+  referralCode    String          @unique @default(cuid())
+  referredBy      String?
+  kycStatus       KycStatus       @default(NONE)
+  kycRejectedNote String?
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  investments     Investment[]
+  kycSubmissions  KycSubmission[]
+  notifications   Notification[]
+  transactions    Transaction[]
+
+  @@map("users")
+}
+
+model Plan {
+  id            String       @id @default(cuid())
+  name          String       @unique
+  roiPercent    Float
+  minAmount     Float
+  maxAmount     Float
+  durationDays  Int
+  referralBonus Float        @default(5)
+  isActive      Boolean      @default(true)
+  description   String?
+  features      String[]     @default([])
+  createdAt     DateTime     @default(now())
+  investments   Investment[]
+
+  @@map("plans")
+}
+
+model Investment {
+  id             String           @id @default(cuid())
+  userId         String
+  planId         String
+  amount         Float
+  expectedProfit Float
+  status         InvestmentStatus @default(ACTIVE)
+  startDate      DateTime         @default(now())
+  endDate        DateTime
+  completedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  plan           Plan             @relation(fields: [planId], references: [id])
+  user           User             @relation(fields: [userId], references: [id])
+
+  @@map("investments")
+}
+
+model Transaction {
+  id            String            @id @default(cuid())
+  userId        String
+  type          TransactionType
+  status        TransactionStatus @default(PENDING)
+  amount        Float
+  currency      String            @default("USD")
+  txHash        String?
+  proofImageUrl String?
+  walletAddress String?
+  adminNote     String?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  note          String?
+  createdAt     DateTime          @default(now())
+  user          User              @relation(fields: [userId], references: [id])
+
+  @@map("transactions")
+}
+
+model KycSubmission {
+  id             String    @id @default(cuid())
+  userId         String
+  documentType   String
+  documentNumber String
+  frontImageUrl  String
+  backImageUrl   String?
+  selfieUrl      String
+  status         KycStatus @default(PENDING)
+  adminNote      String?
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@map("kyc_submissions")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("info")
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model WalletAddress {
+  id        String   @id @default(cuid())
+  currency  String   @unique
+  label     String
+  address   String
+  network   String   @default("mainnet")
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@map("wallet_addresses")
+}
+
+model RoiProcessingLog {
+  id               String   @id @default(cuid())
+  processedAt      DateTime @default(now())
+  investmentsFound Int
+  investmentsDone  Int
+  totalProfitPaid  Float
+  errors           String?
+
+  @@map("roi_processing_logs")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum KycStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  PROFIT
+  REFERRAL_BONUS
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum InvestmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model EmailLog {
+  id           String    @id @default(cuid())
+  sentBy       String
+  recipients   String[]
+  subject      String
+  bodyHtml     String
+  sentAt       DateTime  @default(now())
+  openedAt     DateTime?
+  openCount    Int       @default(0)
+  lastOpenedAt DateTime?
+  trackingId   String    @unique @default(cuid())
+
+  @@map("email_logs")
+}
