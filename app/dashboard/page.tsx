@@ -46,7 +46,6 @@ export default function DashboardPage() {
     { label: 'Available Balance', value: formatCurrency(data?.balance || 0), icon: DollarSign, color: '#c9a84c', change: 'Available to invest or withdraw' },
     { label: 'Total Deposited', value: formatCurrency(data?.totalDeposited || 0), icon: ArrowDownCircle, color: '#60a5fa', change: 'All-time deposits' },
     { label: 'Total Profit', value: formatCurrency(data?.totalProfit || 0), icon: TrendingUp, color: '#34d399', change: 'Earnings from investments' },
-    { label: 'Total Withdrawn', value: formatCurrency(data?.totalWithdrawn || 0), icon: ArrowUpCircle, color: '#f87171', change: 'All-time withdrawals' },
   ]
 
   return (
@@ -57,7 +56,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
         {stats.map(({ label, value, icon: Icon, color, change }) => (
           <div key={label} className="card-dark p-5">
             <div className="flex items-start justify-between mb-4">

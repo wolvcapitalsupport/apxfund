@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification, Notifs } from '@/lib/notifications'
+import { sendDepositApproved, sendDepositRejected, sendWithdrawalApproved, sendWithdrawalRejected } from '@/lib/mailer'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -89,13 +90,8 @@ export async function PATCH(req: NextRequest) {
         }),
       ])
 
-      await createNotification(
-        tx.userId,
-        Notifs.depositApproved(tx.amount).title,
-        Notifs.depositApproved(tx.amount).message,
-        'success',
-        '/dashboard'
-      )
+      await createNotification(tx.userId, Notifs.depositApproved(tx.amount).title, Notifs.depositApproved(tx.amount).message, 'success', '/dashboard')
+      await sendDepositApproved(tx.user.email, tx.user.fullName, tx.amount, tx.currency || 'Crypto')
     } else if (tx.type === 'WITHDRAWAL') {
       // Mark as approved — funds already deducted on request
       await prisma.transaction.update({
@@ -108,13 +104,8 @@ export async function PATCH(req: NextRequest) {
         },
       })
 
-      await createNotification(
-        tx.userId,
-        Notifs.withdrawalApproved(tx.amount).title,
-        Notifs.withdrawalApproved(tx.amount).message,
-        'success',
-        '/dashboard/transactions'
-      )
+      await createNotification(tx.userId, Notifs.withdrawalApproved(tx.amount).title, Notifs.withdrawalApproved(tx.amount).message, 'success', '/dashboard/transactions')
+      await sendWithdrawalApproved(tx.user.email, tx.user.fullName, tx.amount, tx.currency || 'Crypto')
     }
 
     return NextResponse.json({ message: 'Transaction approved' })
@@ -141,13 +132,8 @@ export async function PATCH(req: NextRequest) {
         }),
       ])
 
-      await createNotification(
-        tx.userId,
-        Notifs.withdrawalRejected(tx.amount, adminNote).title,
-        Notifs.withdrawalRejected(tx.amount, adminNote).message,
-        'error',
-        '/dashboard/transactions'
-      )
+      await createNotification(tx.userId, Notifs.withdrawalRejected(tx.amount, adminNote).title, Notifs.withdrawalRejected(tx.amount, adminNote).message, 'error', '/dashboard/transactions')
+      await sendWithdrawalRejected(tx.user.email, tx.user.fullName, tx.amount, adminNote)
     } else if (tx.type === 'DEPOSIT') {
       // Deposit was never credited — just mark rejected
       await prisma.transaction.update({
@@ -160,13 +146,8 @@ export async function PATCH(req: NextRequest) {
         },
       })
 
-      await createNotification(
-        tx.userId,
-        Notifs.depositRejected(tx.amount, adminNote).title,
-        Notifs.depositRejected(tx.amount, adminNote).message,
-        'error',
-        '/dashboard/transactions'
-      )
+      await createNotification(tx.userId, Notifs.depositRejected(tx.amount, adminNote).title, Notifs.depositRejected(tx.amount, adminNote).message, 'error', '/dashboard/transactions')
+      await sendDepositRejected(tx.user.email, tx.user.fullName, tx.amount, adminNote)
     }
 
     return NextResponse.json({ message: 'Transaction rejected' })

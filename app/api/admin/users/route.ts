@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sendAccountSuspended, sendAccountReinstated } from '@/lib/mailer'
 import { createNotification } from '@/lib/notifications'
 import { addDays } from 'date-fns'
 

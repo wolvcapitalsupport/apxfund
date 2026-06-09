@@ -4,7 +4,6 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.EMAIL_FROM || 'APXFund <noreply@apxfund.xyz>'
 const BASE_URL = process.env.NEXTAUTH_URL || 'https://apxfund.xyz'
 
@@ -65,6 +64,8 @@ export async function POST(req: NextRequest) {
   const errors: string[] = []
   for (const email of recipients) {
     try {
+      const { Resend } = await import('resend')
+      const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({ from: FROM_EMAIL, to: email, subject, html: trackedBody })
       sentCount++
     } catch (err: any) {

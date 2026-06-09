@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sendKycSubmitted } from '@/lib/mailer'
 import { createNotification, Notifs } from '@/lib/notifications'
 import { z } from 'zod'
 
@@ -97,6 +98,8 @@ export async function POST(req: NextRequest) {
       '/dashboard/kyc'
     )
 
+    const kycUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { email: true, fullName: true } })
+    if (kycUser) await sendKycSubmitted(kycUser.email, kycUser.fullName)
     return NextResponse.json({ message: 'KYC submitted successfully', submission }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {

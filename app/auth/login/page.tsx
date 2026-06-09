@@ -34,7 +34,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a14] flex">
+    <div className="min-h-screen bg-[#0a0a14] flex flex-col">
+      {/* Mobile top nav */}
+      <div className="lg:hidden flex items-center justify-between px-5 py-4 border-b border-[#1e1e35] bg-[#0a0a14]">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg gold-gradient flex items-center justify-center">
+            <TrendingUp size={15} className="text-[#0a0a14]" />
+          </div>
+          <span className="text-lg font-bold"><span className="gold-text">APX</span>Fund</span>
+        </Link>
+        <Link href="/" className="text-xs text-gray-400 hover:text-white border border-[#1e1e35] px-3 py-1.5 rounded-lg transition-colors">
+          ← Home
+        </Link>
+      </div>
+      <div className="flex flex-1">
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#12121f] border-r border-[#1e1e35] flex-col justify-between p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{backgroundImage:'linear-gradient(#c9a84c 1px,transparent 1px),linear-gradient(90deg,#c9a84c 1px,transparent 1px)',backgroundSize:'60px 60px'}} />
@@ -120,10 +133,13 @@ export default function LoginPage() {
 
           {/* Demo credentials hint */}
           <div className="mt-8 p-4 bg-[#12121f] border border-[#1e1e35] rounded-xl text-xs text-gray-500">
-            <div className="font-semibold text-gray-400 mb-1"></div>
+            <div className="font-semibold text-gray-400 mb-1">Demo Credentials</div>
+            <div>User: demo@apxfund.xyz / User@123456</div>
+            <div>Admin: admin@apxfund.xyz / Admin@123456</div>
           </div>
         </div>
       </div>
     </div>
+      </div>
   )
 }

@@ -29,6 +29,7 @@ export default function PublicHeader() {
     { label: nav.about,    href: '/about' },
     { label: nav.team,     href: '/our-team' },
     { label: nav.policies, href: '/policies' },
+    { label: 'Contact',     href: '/contact' },
   ]
 
   return (

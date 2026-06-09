@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification, Notifs } from '@/lib/notifications'
+import { sendDepositPending, sendWithdrawalPending } from '@/lib/mailer'
 import { z } from 'zod'
 
 const depositSchema = z.object({
@@ -59,6 +60,10 @@ export async function POST(req: NextRequest) {
         '/dashboard/transactions'
       )
 
+      // Send transactional email
+      const userForEmail = await prisma.user.findUnique({ where: { id: session.user.id }, select: { email: true, fullName: true } })
+      if (userForEmail) await sendDepositPending(userForEmail.email, userForEmail.fullName, amount, currency)
+
       return NextResponse.json({ message: 'Deposit submitted for review', transaction }, { status: 201 })
     }
 
@@ -101,6 +106,10 @@ export async function POST(req: NextRequest) {
         'info',
         '/dashboard/transactions'
       )
+
+      // Send transactional email
+      const userForEmail2 = await prisma.user.findUnique({ where: { id: session.user.id }, select: { email: true, fullName: true } })
+      if (userForEmail2) await sendWithdrawalPending(userForEmail2.email, userForEmail2.fullName, amount, currency)
 
       return NextResponse.json({ message: 'Withdrawal request submitted', transaction }, { status: 201 })
     }

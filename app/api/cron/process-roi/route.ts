@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createNotification, Notifs } from '@/lib/notifications'
+import { sendInvestmentMatured } from '@/lib/mailer'
 
 /**
  * ROI Engine — runs on a schedule (Vercel Cron or external trigger).
@@ -122,6 +123,8 @@ export async function GET(req: NextRequest) {
           '/dashboard'
         )
 
+        // Send maturity email
+        await sendInvestmentMatured(inv.user.email, inv.user.fullName, inv.plan.name, inv.amount, inv.expectedProfit)
         investmentsDone++
         totalProfitPaid += inv.expectedProfit
 

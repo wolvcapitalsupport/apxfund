@@ -23,6 +23,7 @@ const PAYMENT_METHODS = [
   { name: 'Bitcoin',  sym: 'BTC', color: '#f7931a' },
   { name: 'Ethereum', sym: 'ETH', color: '#627eea' },
   { name: 'Tether',   sym: 'USDT',color: '#26a17b' },
+  { name: 'USD Coin', sym: 'USDC', color: '#2775ca' },
 ]
 
 export default function PublicFooter() {
@@ -71,7 +72,7 @@ export default function PublicFooter() {
               </defs>
             </svg>
             <span className="text-xl font-black">
-              <span className="gold-text">Aurex</span><span className="text-white">Connect</span>
+              <span className="gold-text">APX</span><span className="text-white">Fund</span>
             </span>
           </Link>
 
@@ -93,8 +94,8 @@ export default function PublicFooter() {
             </div>
             <div className="flex items-center gap-2.5">
               <span>📞</span>
-              <a href="tel:+447876263213" className="hover:text-[#c9a84c] transition-colors">
-                +44 7876 263 213
+              <a href="tel:+14125550198" className="hover:text-[#c9a84c] transition-colors">
+                +1 (412) 555-0198
               </a>
             </div>
           </div>

@@ -3,10 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
 model User {
   id              String          @id @default(cuid())
   email           String          @unique
@@ -24,6 +24,9 @@ model User {
   kycStatus       KycStatus       @default(NONE)
   kycRejectedNote String?
   isActive        Boolean         @default(true)
+  isEmailVerified Boolean         @default(false)
+  emailVerifyOtp  String?
+  emailVerifyOtpExpiry DateTime?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   investments     Investment[]
@@ -177,16 +180,16 @@ enum InvestmentStatus {
 }
 
 model EmailLog {
-  id           String    @id @default(cuid())
-  sentBy       String
-  recipients   String[]
-  subject      String
-  bodyHtml     String
-  sentAt       DateTime  @default(now())
-  openedAt     DateTime?
-  openCount    Int       @default(0)
+  id          String    @id @default(cuid())
+  sentBy      String
+  recipients  String[]
+  subject     String
+  bodyHtml    String
+  sentAt      DateTime  @default(now())
+  openedAt    DateTime?
+  openCount   Int       @default(0)
   lastOpenedAt DateTime?
-  trackingId   String    @unique @default(cuid())
+  trackingId  String    @unique @default(cuid())
 
   @@map("email_logs")
 }

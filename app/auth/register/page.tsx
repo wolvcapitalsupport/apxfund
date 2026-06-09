@@ -27,7 +27,7 @@ export default function RegisterPage() {
         toast.error(data.error || 'Registration failed')
       } else {
         toast.success('Account created! Please sign in.')
-        router.push('/auth/login')
+        router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)
       }
     } catch {
       toast.error('Something went wrong')
@@ -42,7 +42,20 @@ export default function RegisterPage() {
   const inputClass = "w-full bg-[#12121f] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c] transition-colors"
 
   return (
-    <div className="min-h-screen bg-[#0a0a14] flex">
+    <div className="min-h-screen bg-[#0a0a14] flex flex-col">
+      {/* Mobile top nav */}
+      <div className="lg:hidden flex items-center justify-between px-5 py-4 border-b border-[#1e1e35] bg-[#0a0a14]">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg gold-gradient flex items-center justify-center">
+            <TrendingUp size={15} className="text-[#0a0a14]" />
+          </div>
+          <span className="text-lg font-bold"><span className="gold-text">APX</span>Fund</span>
+        </Link>
+        <Link href="/" className="text-xs text-gray-400 hover:text-white border border-[#1e1e35] px-3 py-1.5 rounded-lg transition-colors">
+          ← Home
+        </Link>
+      </div>
+      <div className="flex flex-1">
       <div className="hidden lg:flex lg:w-5/12 bg-[#12121f] border-r border-[#1e1e35] flex-col justify-between p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{backgroundImage:'linear-gradient(#c9a84c 1px,transparent 1px),linear-gradient(90deg,#c9a84c 1px,transparent 1px)',backgroundSize:'60px 60px'}} />
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 bg-[#c9a84c]/5 rounded-full blur-3xl" />
@@ -133,5 +146,6 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+      </div>
   )
 }

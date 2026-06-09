@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import { Providers } from './providers'
 import { Toaster } from 'react-hot-toast'
+import TawkChat from '@/components/TawkChat'
 import CryptoTicker from './components/CryptoTicker' 
 import Script from 'next/script';
 
@@ -44,7 +45,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }}
           />
         </Providers>
-      </body>
+            <TawkChat />
+    </body>
     </html>
   )
 }

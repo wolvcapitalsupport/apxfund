@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
+import { sendInvestmentActivated } from '@/lib/mailer'
 import { addDays } from 'date-fns'
 import { z } from 'zod'
 
@@ -81,6 +82,8 @@ export async function POST(req: NextRequest) {
       'success',
       '/dashboard'
     )
+
+    await sendInvestmentActivated(user.email, user.fullName, plan.name, amount, expectedProfit, plan.durationDays, endDate)
 
     return NextResponse.json(
       {

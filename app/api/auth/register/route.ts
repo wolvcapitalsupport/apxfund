@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { sendVerificationOtp } from '@/lib/mailer'
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -38,6 +39,9 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(data.password, 12)
 
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
+
     const user = await prisma.user.create({
       data: {
         email: data.email.toLowerCase(),
@@ -46,7 +50,10 @@ export async function POST(req: NextRequest) {
         phone: data.phone,
         country: data.country,
         referredBy,
-        isActive: true, // Auto-verify for now; add email verification later
+        isActive: true,
+        isEmailVerified: false,
+        emailVerifyOtp: otp,
+        emailVerifyOtpExpiry: otpExpiry,
       },
       select: {
         id: true,
@@ -56,7 +63,14 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ message: 'Account created successfully', user }, { status: 201 })
+    // Send verification OTP — non-blocking
+    await sendVerificationOtp(user.email, data.fullName, otp)
+
+    return NextResponse.json({
+      message: 'Account created. Please check your email for a verification code.',
+      user,
+      requiresVerification: true,
+    }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 })
