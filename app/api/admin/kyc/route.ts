@@ -1,10 +1,9 @@
-// updated
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification, Notifs } from '@/lib/notifications'
-import { sendKycSubmitted, sendKycApproved, sendKycRejected } from '@/lib/mailer'
+import { sendKycApproved, sendKycRejected } from '@/lib/mailer'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -12,7 +11,6 @@ async function requireAdmin() {
   return session
 }
 
-// GET — list all KYC submissions with optional status filter
 export async function GET(req: NextRequest) {
   const session = await requireAdmin()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -30,7 +28,7 @@ export async function GET(req: NextRequest) {
       where,
       include: {
         user: {
-          select: { id: true, fullName: true, email: true, kycStatus: true, createdAt: true },
+          select: { id: true, fullName: true, email: true, kycStatus: true },
         },
       },
       orderBy: { submittedAt: 'desc' },
@@ -43,7 +41,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ submissions, total, page, limit })
 }
 
-// PATCH — approve or reject a KYC submission
 export async function PATCH(req: NextRequest) {
   const session = await requireAdmin()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -56,7 +53,7 @@ export async function PATCH(req: NextRequest) {
 
   const submission = await prisma.kycSubmission.findUnique({
     where: { id: submissionId },
-    include: { user: true },
+    include: { user: { select: { id: true, email: true, fullName: true } } },
   })
 
   if (!submission) return NextResponse.json({ error: 'KYC submission not found' }, { status: 404 })
@@ -64,27 +61,25 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'KYC already reviewed' }, { status: 400 })
   }
 
-  const now = new Date()
+  const newStatus = action === 'approve' ? 'APPROVED' : 'REJECTED'
+  const userKycStatus = action === 'approve' ? 'APPROVED' : 'REJECTED'
+
+  await prisma.$transaction([
+    prisma.kycSubmission.update({
+      where: { id: submissionId },
+      data: {
+        status: newStatus,
+        adminNote: adminNote || null,
+        reviewedAt: new Date(),
+      },
+    }),
+    prisma.user.update({
+      where: { id: submission.userId },
+      data: { kycStatus: userKycStatus },
+    }),
+  ])
 
   if (action === 'approve') {
-    await prisma.$transaction([
-      prisma.kycSubmission.update({
-        where: { id: submissionId },
-        data: {
-          status: 'APPROVED',
-          adminNote: adminNote || null,
-          reviewedAt: now,
-        },
-      }),
-      prisma.user.update({
-        where: { id: submission.userId },
-        data: {
-          kycStatus: 'APPROVED',
-          kycRejectedNote: null,
-        },
-      }),
-    ])
-
     await createNotification(
       submission.userId,
       Notifs.kycApproved().title,
@@ -92,28 +87,9 @@ export async function PATCH(req: NextRequest) {
       'success',
       '/dashboard'
     )
-
     await sendKycApproved(submission.user.email, submission.user.fullName)
     return NextResponse.json({ message: 'KYC approved' })
   } else {
-    await prisma.$transaction([
-      prisma.kycSubmission.update({
-        where: { id: submissionId },
-        data: {
-          status: 'REJECTED',
-          adminNote: adminNote || null,
-          reviewedAt: now,
-        },
-      }),
-      prisma.user.update({
-        where: { id: submission.userId },
-        data: {
-          kycStatus: 'REJECTED',
-          kycRejectedNote: adminNote || 'Documents unclear or invalid. Please resubmit.',
-        },
-      }),
-    ])
-
     await createNotification(
       submission.userId,
       Notifs.kycRejected(adminNote).title,
@@ -121,7 +97,6 @@ export async function PATCH(req: NextRequest) {
       'error',
       '/dashboard/kyc'
     )
-
     await sendKycRejected(submission.user.email, submission.user.fullName, adminNote)
     return NextResponse.json({ message: 'KYC rejected' })
   }
