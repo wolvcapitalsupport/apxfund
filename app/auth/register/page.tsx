@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { TrendingUp, Eye, EyeOff, Loader2 } from 'lucide-react'
@@ -8,10 +8,28 @@ import toast from 'react-hot-toast'
 export default function RegisterPage() {
   const router = useRouter()
   const [form, setForm] = useState({
-    fullName: '', email: '', password: '', phone: '', country: '', referralCode: ''
+    fullName: '', email: '', password: '', phone: '', country: '', referralCode: '',
+    utmSource: '', utmMedium: '', utmCampaign: '',
   })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get('ref')
+    const utmSource = params.get('utm_source')
+    const utmMedium = params.get('utm_medium')
+    const utmCampaign = params.get('utm_campaign')
+
+    setForm(current => ({
+      ...current,
+      referralCode: ref ?? current.referralCode,
+      utmSource: utmSource ?? current.utmSource,
+      utmMedium: utmMedium ?? current.utmMedium,
+      utmCampaign: utmCampaign ?? current.utmCampaign,
+    }))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,8 +44,8 @@ export default function RegisterPage() {
       if (!res.ok) {
         toast.error(data.error || 'Registration failed')
       } else {
-        toast.success('Account created! Please sign in.')
-        router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)
+        toast.success('Account created! Please verify your email.')
+        router.push(`/auth/verify-email?email=${encodeURIComponent(form.email)}`)
       }
     } catch {
       toast.error('Something went wrong')
@@ -57,7 +75,7 @@ export default function RegisterPage() {
       </div>
       <div className="flex flex-1">
       <div className="hidden lg:flex lg:w-5/12 bg-[#12121f] border-r border-[#1e1e35] flex-col justify-between p-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{backgroundImage:'linear-gradient(#c9a84c 1px,transparent 1px),linear-gradient(90deg,#c9a84c 1px,transparent 1px)',backgroundSize:'60px 60px'}} />
+        <div className="absolute inset-0 opacity-5 bg-[linear-gradient(#c9a84c_1px,transparent_1px),linear-gradient(90deg,#c9a84c_1px,transparent_1px)] bg-[length:60px_60px]" />
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 bg-[#c9a84c]/5 rounded-full blur-3xl" />
         <Link href="/" className="flex items-center gap-2 relative z-10">
           <div className="w-9 h-9 rounded-lg gold-gradient flex items-center justify-center">

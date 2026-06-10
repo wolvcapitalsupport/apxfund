@@ -11,6 +11,9 @@ const registerSchema = z.object({
   phone: z.string().optional(),
   country: z.string().optional(),
   referralCode: z.string().optional(),
+  utmSource: z.string().optional(),
+  utmMedium: z.string().optional(),
+  utmCampaign: z.string().optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -29,12 +32,13 @@ export async function POST(req: NextRequest) {
     // Validate referral code if provided
     let referredBy: string | undefined
     if (data.referralCode) {
-      const referrer = await prisma.user.findFirst({
+      const referrer = await prisma.user.findUnique({
         where: { referralCode: data.referralCode },
       })
-      if (referrer) {
-        referredBy = referrer.id
+      if (!referrer) {
+        return NextResponse.json({ error: 'Invalid referral code' }, { status: 400 })
       }
+      referredBy = referrer.id
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 12)
@@ -50,6 +54,9 @@ export async function POST(req: NextRequest) {
         phone: data.phone,
         country: data.country,
         referredBy,
+        utmSource: data.utmSource,
+        utmMedium: data.utmMedium,
+        utmCampaign: data.utmCampaign,
         isActive: true,
         isEmailVerified: false,
         emailVerifyOtp: otp,

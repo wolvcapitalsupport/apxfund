@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -19,13 +20,17 @@ model User {
   totalDeposited       Float           @default(0)
   totalWithdrawn       Float           @default(0)
   totalProfit          Float           @default(0)
+  referralCode         String          @unique @default(cuid())
+  referredBy           String?
+  utmSource            String?
+  utmMedium            String?
+  utmCampaign          String?
   kycStatus            KycStatus       @default(NONE)
+  kycRejectedNote      String?
   isActive             Boolean         @default(true)
   isEmailVerified      Boolean         @default(false)
   emailVerifyOtp       String?
   emailVerifyOtpExpiry DateTime?
-  referralCode         String?         @unique
-  referredBy           String?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
   investments          Investment[]
@@ -135,11 +140,11 @@ model WalletAddress {
 }
 
 model RoiProcessingLog {
-  id               String   @id @default(cuid())
-  processedAt      DateTime @default(now())
-  investmentsDone  Int      @default(0)
-  totalProfitPaid  Float    @default(0)
-  errors           String[]
+  id              String   @id @default(cuid())
+  processedAt     DateTime @default(now())
+  investmentsDone Int      @default(0)
+  totalProfitPaid Float    @default(0)
+  errors          String[]
 
   @@map("roi_processing_logs")
 }

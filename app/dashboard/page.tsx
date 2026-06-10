@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [data, setData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [referralLink, setReferralLink] = useState('')
 
   useEffect(() => {
     fetch('/api/user/me')
@@ -27,10 +28,14 @@ export default function DashboardPage() {
       .catch(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setReferralLink(`${window.location.origin}/ref/${data?.referralCode ?? ''}`)
+  }, [data])
+
   const copyReferral = () => {
     if (!data) return
-    const link = `${window.location.origin}/auth/register?ref=${data.referralCode}`
-    navigator.clipboard.writeText(link)
+    navigator.clipboard.writeText(referralLink)
     setCopied(true)
     toast.success('Referral link copied!')
     setTimeout(() => setCopied(false), 2000)
@@ -43,9 +48,9 @@ export default function DashboardPage() {
   )
 
   const stats = [
-    { label: 'Available Balance', value: formatCurrency(data?.balance || 0), icon: DollarSign, color: '#c9a84c', change: 'Available to invest or withdraw' },
-    { label: 'Total Deposited', value: formatCurrency(data?.totalDeposited || 0), icon: ArrowDownCircle, color: '#60a5fa', change: 'All-time deposits' },
-    { label: 'Total Profit', value: formatCurrency(data?.totalProfit || 0), icon: TrendingUp, color: '#34d399', change: 'Earnings from investments' },
+    { label: 'Available Balance', value: formatCurrency(data?.balance || 0), icon: DollarSign, colorClass: 'text-[#c9a84c]', bgClass: 'bg-[#c9a84c]/15', change: 'Available to invest or withdraw' },
+    { label: 'Total Deposited', value: formatCurrency(data?.totalDeposited || 0), icon: ArrowDownCircle, colorClass: 'text-[#60a5fa]', bgClass: 'bg-[#60a5fa]/15', change: 'All-time deposits' },
+    { label: 'Total Profit', value: formatCurrency(data?.totalProfit || 0), icon: TrendingUp, colorClass: 'text-[#34d399]', bgClass: 'bg-[#34d399]/15', change: 'Earnings from investments' },
   ]
 
   return (
@@ -57,15 +62,15 @@ export default function DashboardPage() {
 
       {/* Stats grid */}
       <div className="grid sm:grid-cols-3 gap-4">
-        {stats.map(({ label, value, icon: Icon, color, change }) => (
+        {stats.map(({ label, value, icon: Icon, colorClass, bgClass, change }) => (
           <div key={label} className="card-dark p-5">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">{label}</p>
-                <p className="text-2xl font-black" style={{color}}>{value}</p>
+                <p className={`text-2xl font-black ${colorClass}`}>{value}</p>
               </div>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: `${color}15`}}>
-                <Icon size={20} style={{color}} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bgClass}`}>
+                <Icon size={20} className={colorClass} />
               </div>
             </div>
             <p className="text-gray-600 text-xs">{change}</p>
@@ -76,14 +81,14 @@ export default function DashboardPage() {
       {/* Quick actions */}
       <div className="grid sm:grid-cols-3 gap-4">
         {[
-          { href: '/dashboard/deposit', label: 'Make Deposit', sub: 'Fund your account', icon: ArrowDownCircle, color: '#60a5fa' },
-          { href: '/dashboard/plans', label: 'Invest Now', sub: 'Choose a plan', icon: TrendingUp, color: '#c9a84c' },
-          { href: '/dashboard/withdraw', label: 'Withdraw', sub: 'Cash out earnings', icon: ArrowUpCircle, color: '#34d399' },
-        ].map(({ href, label, sub, icon: Icon, color }) => (
+          { href: '/dashboard/deposit', label: 'Make Deposit', sub: 'Fund your account', icon: ArrowDownCircle, colorClass: 'text-[#60a5fa]', bgClass: 'bg-[#60a5fa]/15' },
+          { href: '/dashboard/plans', label: 'Invest Now', sub: 'Choose a plan', icon: TrendingUp, colorClass: 'text-[#c9a84c]', bgClass: 'bg-[#c9a84c]/15' },
+          { href: '/dashboard/withdraw', label: 'Withdraw', sub: 'Cash out earnings', icon: ArrowUpCircle, colorClass: 'text-[#34d399]', bgClass: 'bg-[#34d399]/15' },
+        ].map(({ href, label, sub, icon: Icon, colorClass, bgClass }) => (
           <Link key={href} href={href}
             className="card-dark p-5 flex items-center gap-4 hover:border-[#c9a84c]/40 transition-all group hover:-translate-y-0.5">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:`${color}15`}}>
-              <Icon size={22} style={{color}} />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${bgClass}`}>
+              <Icon size={22} className={colorClass} />
             </div>
             <div>
               <div className="font-bold text-sm group-hover:text-[#c9a84c] transition-colors">{label}</div>
@@ -164,12 +169,21 @@ export default function DashboardPage() {
             <h2 className="font-bold mb-1">Your Referral Program</h2>
             <p className="text-gray-500 text-sm">Earn up to 15% bonus for every investor you refer</p>
           </div>
-          <div className="flex items-center gap-3 bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3">
-            <code className="text-[#c9a84c] text-sm font-mono">{data?.referralCode}</code>
+          <div className="flex flex-col gap-3 bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Share this link</p>
+              <p className="text-sm truncate text-white">{window?.location ? `${window.location.origin}/ref/${data?.referralCode}` : ''}</p>
+            </div>
             <button onClick={copyReferral} className="text-gray-400 hover:text-[#c9a84c] transition-colors">
               {copied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} />}
             </button>
           </div>
+          <div className="border-t border-[#1e1e35] pt-3">
+            <p className="text-xs text-gray-400 mb-1">Manual referral code</p>
+            <code className="text-[#c9a84c] text-sm font-mono">{data?.referralCode}</code>
+          </div>
+        </div>
         </div>
       </div>
     </div>
