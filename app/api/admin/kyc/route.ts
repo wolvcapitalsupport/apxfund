@@ -73,7 +73,6 @@ export async function PATCH(req: NextRequest) {
         data: {
           status: 'APPROVED',
           adminNote: adminNote || null,
-          reviewedBy: session.user.id,
           reviewedAt: now,
         },
       }),
@@ -103,7 +102,6 @@ export async function PATCH(req: NextRequest) {
         data: {
           status: 'REJECTED',
           adminNote: adminNote || null,
-          reviewedBy: session.user.id,
           reviewedAt: now,
         },
       }),
