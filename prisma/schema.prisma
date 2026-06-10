@@ -8,31 +8,30 @@ datasource db {
 }
 
 model User {
-  id              String          @id @default(cuid())
-  email           String          @unique
-  password        String
-  fullName        String
-  phone           String?
-  country         String?
-  role            UserRole        @default(USER)
-  balance         Float           @default(0)
-  totalDeposited  Float           @default(0)
-  totalProfit     Float           @default(0)
-  totalWithdrawn  Float           @default(0)
-  referralCode    String          @unique @default(cuid())
-  referredBy      String?
-  kycStatus       KycStatus       @default(NONE)
-  kycRejectedNote String?
-  isActive        Boolean         @default(true)
-  isEmailVerified Boolean         @default(false)
-  emailVerifyOtp  String?
+  id                   String          @id @default(cuid())
+  email                String          @unique
+  password             String
+  fullName             String
+  phone                String?
+  country              String?
+  role                 Role            @default(USER)
+  balance              Float           @default(0)
+  totalDeposited       Float           @default(0)
+  totalWithdrawn       Float           @default(0)
+  totalProfit          Float           @default(0)
+  kycStatus            KycStatus       @default(NONE)
+  isActive             Boolean         @default(true)
+  isEmailVerified      Boolean         @default(false)
+  emailVerifyOtp       String?
   emailVerifyOtpExpiry DateTime?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  investments     Investment[]
-  kycSubmissions  KycSubmission[]
-  notifications   Notification[]
-  transactions    Transaction[]
+  referralCode         String?         @unique
+  referredBy           String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  investments          Investment[]
+  transactions         Transaction[]
+  notifications        Notification[]
+  kycSubmissions       KycSubmission[]
 
   @@map("users")
 }
@@ -44,10 +43,10 @@ model Plan {
   minAmount     Float
   maxAmount     Float
   durationDays  Int
-  referralBonus Float        @default(5)
-  isActive      Boolean      @default(true)
+  referralBonus Float        @default(0)
   description   String?
-  features      String[]     @default([])
+  features      String[]
+  isActive      Boolean      @default(true)
   createdAt     DateTime     @default(now())
   investments   Investment[]
 
@@ -65,8 +64,8 @@ model Investment {
   endDate        DateTime
   completedAt    DateTime?
   createdAt      DateTime         @default(now())
-  plan           Plan             @relation(fields: [planId], references: [id])
   user           User             @relation(fields: [userId], references: [id])
+  plan           Plan             @relation(fields: [planId], references: [id])
 
   @@map("investments")
 }
@@ -77,15 +76,15 @@ model Transaction {
   type          TransactionType
   status        TransactionStatus @default(PENDING)
   amount        Float
-  currency      String            @default("USD")
+  currency      String?
   txHash        String?
   proofImageUrl String?
-  walletAddress String?
   adminNote     String?
-  reviewedBy    String?
-  reviewedAt    DateTime?
+  walletAddress String?
+  network       String?
   note          String?
   createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
   user          User              @relation(fields: [userId], references: [id])
 
   @@map("transactions")
@@ -95,16 +94,14 @@ model KycSubmission {
   id             String    @id @default(cuid())
   userId         String
   documentType   String
-  documentNumber String
+  documentNumber String?
   frontImageUrl  String
   backImageUrl   String?
-  selfieUrl      String
+  selfieUrl      String?
   status         KycStatus @default(PENDING)
   adminNote      String?
-  reviewedBy     String?
+  submittedAt    DateTime  @default(now())
   reviewedAt     DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
   user           User      @relation(fields: [userId], references: [id])
 
   @@map("kyc_submissions")
@@ -116,8 +113,8 @@ model Notification {
   title     String
   message   String
   type      String   @default("info")
-  isRead    Boolean  @default(false)
   link      String?
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
@@ -131,6 +128,7 @@ model WalletAddress {
   address   String
   network   String   @default("mainnet")
   isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("wallet_addresses")
@@ -139,15 +137,29 @@ model WalletAddress {
 model RoiProcessingLog {
   id               String   @id @default(cuid())
   processedAt      DateTime @default(now())
-  investmentsFound Int
-  investmentsDone  Int
-  totalProfitPaid  Float
-  errors           String?
+  investmentsDone  Int      @default(0)
+  totalProfitPaid  Float    @default(0)
+  errors           String[]
 
   @@map("roi_processing_logs")
 }
 
-enum UserRole {
+model EmailLog {
+  id           String    @id @default(cuid())
+  sentBy       String
+  recipients   String[]
+  subject      String
+  bodyHtml     String
+  sentAt       DateTime  @default(now())
+  openedAt     DateTime?
+  openCount    Int       @default(0)
+  lastOpenedAt DateTime?
+  trackingId   String    @unique @default(cuid())
+
+  @@map("email_logs")
+}
+
+enum Role {
   USER
   ADMIN
 }
@@ -159,37 +171,22 @@ enum KycStatus {
   REJECTED
 }
 
-enum TransactionType {
-  DEPOSIT
-  WITHDRAWAL
-  PROFIT
-  REFERRAL_BONUS
-}
-
-enum TransactionStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  COMPLETED
-}
-
 enum InvestmentStatus {
   ACTIVE
   COMPLETED
   CANCELLED
 }
 
-model EmailLog {
-  id          String    @id @default(cuid())
-  sentBy      String
-  recipients  String[]
-  subject     String
-  bodyHtml    String
-  sentAt      DateTime  @default(now())
-  openedAt    DateTime?
-  openCount   Int       @default(0)
-  lastOpenedAt DateTime?
-  trackingId  String    @unique @default(cuid())
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  PROFIT
+  REFERRAL
+  ADJUSTMENT
+}
 
-  @@map("email_logs")
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
