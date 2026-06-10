@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
           select: { id: true, fullName: true, email: true, kycStatus: true, createdAt: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { submittedAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit,
     }),
