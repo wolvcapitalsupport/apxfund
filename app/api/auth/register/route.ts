@@ -11,17 +11,22 @@ const registerSchema = z.object({
   phone: z.string().optional(),
   country: z.string().optional(),
   referralCode: z.string().optional(),
-  utmSource: z.string().optional(),
-  utmMedium: z.string().optional(),
-  utmCampaign: z.string().optional(),
 })
+
+function generateReferralCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const data = registerSchema.parse(body)
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: data.email.toLowerCase() },
     })
@@ -29,22 +34,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 400 })
     }
 
-    // Validate referral code if provided
     let referredBy: string | undefined
     if (data.referralCode) {
-      const referrer = await prisma.user.findUnique({
+      const referrer = await prisma.user.findFirst({
         where: { referralCode: data.referralCode },
       })
-      if (!referrer) {
-        return NextResponse.json({ error: 'Invalid referral code' }, { status: 400 })
+      if (referrer) {
+        referredBy = referrer.id
       }
-      referredBy = referrer.id
+    }
+
+    let newReferralCode = generateReferralCode()
+    let codeExists = await prisma.user.findUnique({ where: { referralCode: newReferralCode } })
+    while (codeExists) {
+      newReferralCode = generateReferralCode()
+      codeExists = await prisma.user.findUnique({ where: { referralCode: newReferralCode } })
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 12)
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
-    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
+    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000)
 
     const user = await prisma.user.create({
       data: {
@@ -54,9 +63,7 @@ export async function POST(req: NextRequest) {
         phone: data.phone,
         country: data.country,
         referredBy,
-        utmSource: data.utmSource,
-        utmMedium: data.utmMedium,
-        utmCampaign: data.utmCampaign,
+        referralCode: newReferralCode,
         isActive: true,
         isEmailVerified: false,
         emailVerifyOtp: otp,
@@ -70,7 +77,6 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Send verification OTP — non-blocking
     await sendVerificationOtp(user.email, data.fullName, otp)
 
     return NextResponse.json({
