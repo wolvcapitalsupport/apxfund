@@ -33,7 +33,7 @@ export async function GET() {
       _sum: { amount: true },
     }),
     prisma.transaction.aggregate({
-      where: { type: 'PROFIT', status: 'COMPLETED' },
+      where: { type: 'PROFIT', status: 'APPROVED' },
       _sum: { amount: true },
     }),
   ])
