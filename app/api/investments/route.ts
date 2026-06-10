@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { TransactionType, TransactionStatus } from '@prisma/client'
 import { createNotification } from '@/lib/notifications'
 import { sendInvestmentActivated } from '@/lib/mailer'
 import { addDays } from 'date-fns'
@@ -66,8 +67,8 @@ export async function POST(req: NextRequest) {
       prisma.transaction.create({
         data: {
           userId: user.id,
-          type: 'DEPOSIT',
-          status: 'COMPLETED',
+          type: TransactionType.DEPOSIT,
+          status: TransactionStatus.APPROVED,
           amount,
           note: `Investment purchased — ${plan.name}`,
         },

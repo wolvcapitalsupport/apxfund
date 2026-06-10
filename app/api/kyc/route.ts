@@ -29,7 +29,7 @@ export async function GET() {
     const [submission, user] = await Promise.all([
       prisma.kycSubmission.findFirst({
         where: { userId: session.user.id },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { submittedAt: 'desc' },
       }),
       prisma.user.findUnique({
         where: { id: session.user.id },

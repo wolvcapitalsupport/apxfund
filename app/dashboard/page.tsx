@@ -19,7 +19,6 @@ export default function DashboardPage() {
   const [data, setData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  const [referralLink, setReferralLink] = useState('')
 
   useEffect(() => {
     fetch('/api/user/me')
@@ -28,13 +27,12 @@ export default function DashboardPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    setReferralLink(`${window.location.origin}/ref/${data?.referralCode ?? ''}`)
-  }, [data])
+  const referralLink = data?.referralCode && typeof window !== 'undefined'
+    ? `${window.location.origin}/ref/${data.referralCode}`
+    : ''
 
   const copyReferral = () => {
-    if (!data) return
+    if (!referralLink) return
     navigator.clipboard.writeText(referralLink)
     setCopied(true)
     toast.success('Referral link copied!')
@@ -173,9 +171,15 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wider">Share this link</p>
-              <p className="text-sm truncate text-white">{window?.location ? `${window.location.origin}/ref/${data?.referralCode}` : ''}</p>
+              <p className="text-sm truncate text-white">
+                {loading
+                  ? 'Loading your referral link...'
+                  : referralLink
+                    ? referralLink
+                    : 'No referral code found on your account.'}
+              </p>
             </div>
-            <button onClick={copyReferral} className="text-gray-400 hover:text-[#c9a84c] transition-colors">
+            <button onClick={copyReferral} className="text-gray-400 hover:text-[#c9a84c] transition-colors" disabled={!referralLink}>
               {copied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} />}
             </button>
           </div>

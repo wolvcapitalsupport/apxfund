@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
         take: 30,
       },
       kycSubmissions: {
-        orderBy: { createdAt: 'desc' },
+        orderBy: { submittedAt: 'desc' },
         take: 1,
       },
     },

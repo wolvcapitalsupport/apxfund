@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { TransactionType, TransactionStatus } from '@prisma/client'
 import { createNotification, Notifs } from '@/lib/notifications'
 import { sendInvestmentMatured } from '@/lib/mailer'
 
@@ -70,8 +71,8 @@ export async function GET(req: NextRequest) {
           await tx.transaction.create({
             data: {
               userId: inv.userId,
-              type: 'PROFIT',
-              status: 'COMPLETED',
+              type: TransactionType.PROFIT,
+              status: TransactionStatus.APPROVED,
               amount: inv.expectedProfit,
               note: `ROI from ${inv.plan.name} — ${inv.plan.roiPercent}% over ${inv.plan.durationDays} day(s)`,
             },
@@ -98,8 +99,8 @@ export async function GET(req: NextRequest) {
               await tx.transaction.create({
                 data: {
                   userId: referrer.id,
-                  type: 'REFERRAL_BONUS',
-                  status: 'COMPLETED',
+                  type: TransactionType.REFERRAL,
+                  status: TransactionStatus.APPROVED,
                   amount: referralBonus,
                   note: `Referral bonus from ${inv.user.fullName}'s ${inv.plan.name} investment`,
                 },
@@ -141,10 +142,9 @@ export async function GET(req: NextRequest) {
     // ── Log this run ────────────────────────────────────────
     await prisma.roiProcessingLog.create({
       data: {
-        investmentsFound: dueInvestments.length,
         investmentsDone,
         totalProfitPaid,
-        errors: errors.length > 0 ? errors.join('\n') : null,
+        errors: errors.length > 0 ? errors : undefined,
       },
     })
 
@@ -166,10 +166,9 @@ export async function GET(req: NextRequest) {
 
     await prisma.roiProcessingLog.create({
       data: {
-        investmentsFound: 0,
         investmentsDone,
         totalProfitPaid,
-        errors: `Fatal: ${error.message}`,
+        errors: [`Fatal: ${error.message}`],
       },
     })
 

@@ -62,7 +62,7 @@ export async function PATCH(req: NextRequest) {
 
   if (!tx) return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
   if (tx.status !== 'PENDING') {
-    return NextResponse.json({ error: 'Transaction already processed' }, { status: 400 })
+    return NextResponse.json({ error: 'Transaction already reviewed' }, { status: 400 })
   }
 
   const now = new Date()

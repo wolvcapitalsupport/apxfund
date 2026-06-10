@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { TransactionType, TransactionStatus } from '@prisma/client'
 import { sendAccountSuspended, sendAccountReinstated } from '@/lib/mailer'
 import { createNotification } from '@/lib/notifications'
 import { addDays } from 'date-fns'
@@ -113,12 +114,10 @@ export async function PATCH(req: NextRequest) {
       prisma.transaction.create({
         data: {
           userId,
-          type: 'PROFIT',
-          status: 'COMPLETED',
+          type: TransactionType.PROFIT,
+          status: TransactionStatus.APPROVED,
           amount,
           note: note || 'Admin credit',
-          reviewedBy: session.user.id,
-          reviewedAt: new Date(),
         },
       }),
     ])
@@ -152,12 +151,10 @@ export async function PATCH(req: NextRequest) {
       prisma.transaction.create({
         data: {
           userId,
-          type: 'WITHDRAWAL',
-          status: 'COMPLETED',
+          type: TransactionType.WITHDRAWAL,
+          status: TransactionStatus.APPROVED,
           amount,
           note: note || 'Admin debit',
-          reviewedBy: session.user.id,
-          reviewedAt: new Date(),
         },
       }),
     ])
@@ -218,12 +215,10 @@ export async function PATCH(req: NextRequest) {
       prisma.transaction.create({
         data: {
           userId,
-          type: 'DEPOSIT',
-          status: 'COMPLETED',
+          type: TransactionType.DEPOSIT,
+          status: TransactionStatus.APPROVED,
           amount,
           note: `Admin-assigned investment — ${plan.name}`,
-          reviewedBy: session.user.id,
-          reviewedAt: new Date(),
         },
       }),
     ]
