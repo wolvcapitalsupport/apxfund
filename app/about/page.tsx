@@ -48,7 +48,7 @@ export default function AboutPage() {
             <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">Our Story</div>
             <h2 className="text-4xl font-black mb-6 leading-tight">Built on <span className="gold-text">Expertise & Trust</span></h2>
             <div className="space-y-4 text-gray-400 text-sm leading-relaxed">
-              <p>APXFund is a United States-based Asset and Stock Management Company with affiliates in Europe, Asia, and the Middle East. We are dedicated to managing our clients' portfolios with unmatched precision.</p>
+              <p>APXFund is a United States-based Asset and Stock Management Company with affiliates in Europe, Asia, and the Middle East. We are dedicated to managing our clients&apos; portfolios with unmatched precision.</p>
               <p>Our deep sector knowledge and unrivaled insight into the private fund market allows us to raise capital profitably and efficiently. We thrive on working alongside the most innovative funds and consistently partner with the highest-quality fund managers.</p>
               <p>We employ over 130 professionals and invest heavily in the ongoing research-driven evolution of our quantitative alpha-generating systems across a wide range of liquid asset classes. The company emphasises strong corporate governance and first-class investor service.</p>
               <p>Our directors, together with employees and the Employee Benefit Trust, currently own approximately 98% of the company — giving every member of our team a personal stake in your success.</p>

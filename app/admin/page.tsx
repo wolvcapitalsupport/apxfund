@@ -584,7 +584,7 @@ function WithdrawalsTab() {
     <div className="space-y-5">
       <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-start gap-3">
         <AlertTriangle size={16} className="text-yellow-400 flex-shrink-0 mt-0.5" />
-        <p className="text-yellow-400 text-xs"><strong>Important:</strong> Approving means you have already sent the crypto. Rejecting refunds the user's balance automatically.</p>
+        <p className="text-yellow-400 text-xs"><strong>Important:</strong> Approving means you have already sent the crypto. Rejecting refunds the user&apos;s balance automatically.</p>
       </div>
       <div className="flex gap-2 flex-wrap">
         {['PENDING', 'APPROVED', 'REJECTED', 'ALL'].map(s => (

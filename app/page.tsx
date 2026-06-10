@@ -314,7 +314,7 @@ export default function HomePage() {
                     <Star key={i} size={14} className="text-[#c9a84c] fill-[#c9a84c]" />
                   ))}
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed mb-5">"{text}"</p>
+                <p className="text-gray-400 text-sm leading-relaxed mb-5">&ldquo;{text}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                     <Image src={avatar} alt={name} fill className="object-cover" sizes="40px" />
