@@ -59,7 +59,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map(({ label, value, icon: Icon, colorClass, bgClass, change }) => (
           <div key={label} className="card-dark p-5">
             <div className="flex items-start justify-between mb-4">
@@ -77,7 +77,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { href: '/dashboard/deposit', label: 'Make Deposit', sub: 'Fund your account', icon: ArrowDownCircle, colorClass: 'text-[#60a5fa]', bgClass: 'bg-[#60a5fa]/15' },
           { href: '/dashboard/plans', label: 'Invest Now', sub: 'Choose a plan', icon: TrendingUp, colorClass: 'text-[#c9a84c]', bgClass: 'bg-[#c9a84c]/15' },
@@ -145,9 +145,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-sm">{formatCurrency(tx.amount)}</div>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(tx.status)}`}>
-                      {tx.status}
-                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(tx.status)}`}>{tx.status}</span>
                   </div>
                 </div>
               ))}
@@ -162,32 +160,29 @@ export default function DashboardPage() {
 
       {/* Referral card */}
       <div className="card-dark p-6 border-[#c9a84c]/20">
-        <div className="flex items-start justify-between flex-wrap gap-4">
+        <h2 className="font-bold mb-1">Your Referral Program</h2>
+        <p className="text-gray-500 text-sm mb-4">Earn up to 15% bonus for every investor you refer</p>
+        <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 space-y-3">
+          {/* Link row — full width, copy button always visible */}
           <div>
-            <h2 className="font-bold mb-1">Your Referral Program</h2>
-            <p className="text-gray-500 text-sm">Earn up to 15% bonus for every investor you refer</p>
-          </div>
-          <div className="flex flex-col gap-3 bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wider">Share this link</p>
-              <p className="text-sm truncate text-white">
-                {loading
-                  ? 'Loading your referral link...'
-                  : referralLink
-                    ? referralLink
-                    : 'No referral code found on your account.'}
+            <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Share this link</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-white flex-1 min-w-0 truncate">
+                {loading ? 'Loading...' : referralLink || 'No referral code found.'}
               </p>
+              <button
+                onClick={copyReferral}
+                disabled={!referralLink}
+                className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e1e35] hover:bg-[#c9a84c]/20 text-gray-400 hover:text-[#c9a84c] transition-colors disabled:opacity-40"
+              >
+                {copied ? <CheckCircle size={15} className="text-green-400" /> : <Copy size={15} />}
+              </button>
             </div>
-            <button onClick={copyReferral} className="text-gray-400 hover:text-[#c9a84c] transition-colors" disabled={!referralLink}>
-              {copied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} />}
-            </button>
           </div>
           <div className="border-t border-[#1e1e35] pt-3">
             <p className="text-xs text-gray-400 mb-1">Manual referral code</p>
             <code className="text-[#c9a84c] text-sm font-mono">{data?.referralCode}</code>
           </div>
-        </div>
         </div>
       </div>
     </div>

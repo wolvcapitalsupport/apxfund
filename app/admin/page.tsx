@@ -714,10 +714,10 @@ function KycTab() {
         )}
       </div>
       {reviewing && (
-        <ReviewModal title="Review KYC Submission" subtitle={`${reviewing.user?.fullName} · ${reviewing.documentType.replace(/_/g, ' ')}`}
+        <ReviewModal title="Review KYC Submission" subtitle={`${reviewing.user?.fullName} · ${reviewing.documentType?.replace(/_/g, ' ') ?? ''}`}
           onClose={() => setReviewing(null)} onApprove={n => handleReview('approve', n)} onReject={n => handleReview('reject', n)} loading={actionLoading}>
           <div className="bg-[#0a0a14] rounded-xl p-4 space-y-2 text-sm">
-            {[['Name', reviewing.user?.fullName], ['Email', reviewing.user?.email], ['Document', reviewing.documentType.replace(/_/g, ' ')], ['Number', reviewing.documentNumber]].map(([l, v]) => (
+            {[['Name', reviewing.user?.fullName], ['Email', reviewing.user?.email], ['Document', reviewing.documentType?.replace(/_/g, ' ') ?? ''], ['Number', reviewing.documentNumber]].map(([l, v]) => (
               <div key={l as string} className="flex justify-between"><span className="text-gray-500">{l}</span><span>{v}</span></div>
             ))}
           </div>
