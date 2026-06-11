@@ -64,7 +64,7 @@ export default function PublicHeader() {
             <span>✉️ support@apxfund.xyz</span>
           </div>
           <div className="flex items-center gap-4">
-            <span>📞 +44 7876 263 213</span>
+            <span>📞 +1 (412) 555-0198</span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
               Markets Open

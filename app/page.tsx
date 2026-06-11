@@ -36,8 +36,8 @@ const HERO_SLIDES = [
 ]
 
 const STATS = [
-  { label: 'Active Investors', value: '14,000+', icon: Users },
-  { label: 'Total Paid Out',   value: '$48M+',   icon: DollarSign },
+  { label: 'Active Investors', value: '8,400+', icon: Users },
+  { label: 'Total Paid Out',   value: '$312M+',   icon: DollarSign },
   { label: 'Countries Served', value: '120+',    icon: Globe },
   { label: 'Uptime',           value: '99.9%',   icon: Clock },
 ]
@@ -91,18 +91,18 @@ const PLANS = [
 const TESTIMONIALS = [
   {
     name: 'Michael R.', country: 'United States', rating: 5,
-    text: 'APXFund turned my $2,000 into $2,500 in just one day. The platform is transparent and withdrawals are instant.',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&q=80&auto=format&fit=crop&facepad=2',
+    text: 'I started with the Starter Portfolio and rolled returns into the Growth Fund. Fourteen days later my balance reflected exactly what was promised. Withdrawals processed same day.',
+    initials: 'MR', color: '#c9a84c',
   },
   {
     name: 'Amira K.', country: 'UAE', rating: 5,
     text: 'The Basic plan gave me returns I never thought possible. I have been with APXFund for 8 months and never had an issue.',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80&auto=format&fit=crop&facepad=2',
+    initials: 'AK', color: '#60a5fa',
   },
   {
     name: 'James T.', country: 'United Kingdom', rating: 5,
     text: 'Transparent, reliable, and the support team is genuinely available 24/7. I recommend APXFund to everyone I know.',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&q=80&auto=format&fit=crop&facepad=2',
+    initials: 'JT', color: '#34d399',
   },
 ]
 
