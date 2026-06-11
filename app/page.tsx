@@ -2,7 +2,6 @@
 import AnimatedHero from './components/AnimatedHero'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import PublicHeader from '@/components/layout/PublicHeader'
 import PublicFooter from '@/components/layout/PublicFooter'
 import {
@@ -181,128 +180,7 @@ export default function HomePage() {
           </div>
 
           {/* CEO photo */}
-          <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden" style={{minHeight:"420px",background:"linear-gradient(135deg,#c9a84c18,#c9a84c05)",border:"1px solid #c9a84c25",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem 2rem"}}>
-              <div style={{width:"112px",height:"112px",borderRadius:"16px",background:"#c9a84c20",border:"2px solid #c9a84c40",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:"1.5rem"}}>
-                <span style={{fontSize:"2.5rem",fontWeight:900,color:"#c9a84c"}}>BM</span>
-              </div>
-              <h3 style={{fontSize:"1.25rem",fontWeight:700,textAlign:"center"}}>Bryce J. McFarlane</h3>
-              <p style={{color:"#c9a84c",fontSize:"0.875rem",fontWeight:600,marginTop:"0.25rem"}}>Chief Executive Officer</p>
-              <p style={{color:"#6b7280",fontSize:"0.75rem",marginTop:"0.75rem",textAlign:"center",maxWidth:"280px",lineHeight:"1.6"}}>20+ years in global asset management. Former Goldman Sachs VP. Expert in quantitative trading and hedge fund operations.</p>
-            </div>
-            {/* Floating stat */}
-            <div className="absolute -top-4 -right-4 bg-[#12121f] border border-[#c9a84c]/30 rounded-2xl p-4 shadow-xl">
-              <div className="text-2xl font-black gold-text">$48M+</div>
-              <div className="text-xs text-gray-400">Paid to investors</div>
-            </div>
-            <div className="absolute -bottom-4 -left-4 bg-[#12121f] border border-[#1e1e35] rounded-2xl p-4 shadow-xl">
-              <div className="text-2xl font-black text-green-400">99.9%</div>
-              <div className="text-xs text-gray-400">Uptime guaranteed</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SERVICES ────────────────────────────────────────────── */}
-      <section id="services" className="py-24 bg-[#12121f] border-y border-[#1e1e35]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">What We Offer</div>
-            <h2 className="text-4xl md:text-5xl font-black">Our <span className="gold-text">Services</span></h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICES.map(({ title, icon: Icon, desc, img }) => (
-              <div key={title} className="group card-dark overflow-hidden hover:border-[#c9a84c]/40 transition-all hover:-translate-y-1">
-                {/* Service image */}
-                <div className="relative h-44 overflow-hidden">
-                  <Image src={img} alt={title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="400px" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#12121f] via-[#12121f]/40 to-transparent" />
-                  <div className="absolute bottom-3 left-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#c9a84c]/20 backdrop-blur border border-[#c9a84c]/30 flex items-center justify-center">
-                      <Icon size={18} className="text-[#c9a84c]" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-lg mb-2">{title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── INVESTMENT PLANS ────────────────────────────────────── */}
-      <section id="investment-plans" className="py-24 max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">Earn With Us</div>
-          <h2 className="text-4xl md:text-5xl font-black">Investment <span className="gold-text">Plans</span></h2>
-          <p className="text-gray-400 mt-4 max-w-xl mx-auto">Choose a plan that fits your goals. All plans include guaranteed returns and 24/7 portfolio monitoring.</p>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {PLANS.map((plan, i) => (
-            <div key={plan.name} className={`card-dark p-6 flex flex-col relative overflow-hidden transition-all hover:-translate-y-1 ${plan.popular ? 'shadow-[0_0_40px_rgba(201,168,76,0.12)]' : ''}`}
-              style={plan.popular ? { borderColor: `${plan.color}50` } : {}}>
-              {plan.popular && <div className="absolute top-0 inset-x-0 h-0.5" style={{ background: plan.color }} />}
-              {plan.popular && (
-                <div className="absolute top-4 right-4 text-xs font-black px-2 py-0.5 rounded-full text-[#0a0a14]" style={{ background: plan.color }}>
-                  POPULAR
-                </div>
-              )}
-              <div className="mb-6 pt-1">
-                <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: plan.color }}>{plan.name} Plan</div>
-                <div className="text-5xl font-black" style={{ color: plan.color }}>{plan.roi}</div>
-                <div className="text-gray-500 text-xs mt-1">Return on Investment</div>
-              </div>
-              <ul className="space-y-3 flex-1 mb-6">
-                {[
-                  ['Min Investment', plan.min],
-                  ['Max Investment', plan.max],
-                  ['Duration',       plan.duration],
-                  ['Referral Bonus', plan.referral],
-                ].map(([label, val]) => (
-                  <li key={label} className="flex justify-between text-sm border-b border-[#1e1e35] pb-2">
-                    <span className="text-gray-500">{label}</span>
-                    <span className="font-semibold">{val}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/auth/register"
-                className={`w-full text-center py-3 rounded-xl font-bold text-sm transition-all ${plan.popular ? 'btn-gold' : 'border border-[#1e1e35] hover:border-[#c9a84c] text-gray-300 hover:text-white'}`}>
-                Invest Now
-              </Link>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-10">
-          <Link href="/investment-plans" className="text-[#c9a84c] hover:underline text-sm flex items-center gap-1 justify-center">
-            View full plan details <ArrowRight size={14} />
-          </Link>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ────────────────────────────────────────── */}
-      <section className="py-24 bg-[#12121f] border-y border-[#1e1e35]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">Client Reviews</div>
-            <h2 className="text-4xl font-black">What Investors <span className="gold-text">Say</span></h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(({ name, country, text, rating, avatar }) => (
-              <div key={name} className="card-dark p-6 hover:border-[#c9a84c]/30 transition-all">
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: rating }).map((_, i) => (
-                    <Star key={i} size={14} className="text-[#c9a84c] fill-[#c9a84c]" />
-                  ))}
-                </div>
-                <p className="text-gray-400 text-sm leading-relaxed mb-5">&ldquo;{text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                    <Image src={avatar} alt={name} fill className="object-cover" sizes="40px" />
-                  </div>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 font-black text-sm" style={{background:`${(t as any).color}20`,border:`2px solid ${(t as any).color}40`,color:(t as any).color}}>{(t as any).initials}</div>
                   <div>
                     <div className="font-semibold text-sm">{name}</div>
                     <div className="text-gray-500 text-xs">{country}</div>
