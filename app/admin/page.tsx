@@ -698,7 +698,7 @@ function KycTab() {
                     <td className="px-5 py-4 text-sm text-gray-300 capitalize">{s.documentType.replace(/_/g, ' ')}</td>
                     <td className="px-5 py-4"><code className="text-xs text-gray-400">{s.documentNumber}</code></td>
                     <td className="px-5 py-4"><span className={`text-xs px-2.5 py-1 rounded-full font-medium ${KYC_COLOR[s.status]}`}>{s.status}</span></td>
-                    <td className="px-5 py-4 text-xs text-gray-500">{formatDate(s.createdAt)}</td>
+                    <td className="px-5 py-4 text-xs text-gray-500">{formatDate(s.submittedAt)}</td>
                     <td className="px-5 py-4">
                       {s.status === 'PENDING' ? (
                         <button onClick={() => setReviewing(s)} className="flex items-center gap-1.5 text-xs bg-blue-400/10 text-blue-400 border border-blue-400/30 px-3 py-1.5 rounded-lg hover:bg-blue-400/20">
