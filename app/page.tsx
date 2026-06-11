@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PublicHeader from '@/components/layout/PublicHeader'
 import PublicFooter from '@/components/layout/PublicFooter'
+import { useLang } from '@/lib/useLang'
+import { t } from '@/lib/i18n'
 import {
   Shield, TrendingUp, Clock, Users,
   Bitcoin, DollarSign, BarChart3, Globe,
@@ -12,11 +14,11 @@ import {
   ChevronDown, ChevronRight
 } from 'lucide-react'
 
-const STATS = [
-  { label: 'Active Investors', value: '8,400+', icon: Users },
-  { label: 'Total Paid Out',   value: '$312M+', icon: DollarSign },
-  { label: 'Countries Served', value: '120+',   icon: Globe },
-  { label: 'Uptime',           value: '99.9%',  icon: Clock },
+const STATS: { labelKey: string; value: string; icon: any }[] = [
+  { labelKey: 'home.statsInvestors', value: '8,400+', icon: Users },
+  { labelKey: 'home.statsPaid',      value: '$312M+', icon: DollarSign },
+  { labelKey: 'home.statsCountries', value: '120+',   icon: Globe },
+  { labelKey: 'home.statsUptime',    value: '99.9%',  icon: Clock },
 ]
 
 const SERVICES = [
@@ -58,6 +60,7 @@ const WHY_US = [
 ]
 
 export default function HomePage() {
+  const { lang } = useLang()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   return (
@@ -68,13 +71,13 @@ export default function HomePage() {
       {/* STATS */}
       <section className="py-12 bg-[#12121f] border-y border-[#1e1e35]">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="text-center">
+          {STATS.map(({ labelKey, value, icon: Icon }) => (
+            <div key={labelKey} className="text-center">
               <div className="w-12 h-12 rounded-xl bg-[#c9a84c]/10 border border-[#c9a84c]/20 flex items-center justify-center mx-auto mb-3">
                 <Icon size={22} className="text-[#c9a84c]" />
               </div>
               <div className="text-3xl font-black gold-text mb-1">{value}</div>
-              <div className="text-gray-500 text-sm">{label}</div>
+              <div className="text-gray-500 text-sm">{t(lang, labelKey)}</div>
             </div>
           ))}
         </div>
@@ -251,11 +254,11 @@ export default function HomePage() {
             Ready to <span className="gold-text">Start Earning?</span>
           </h2>
           <p className="text-gray-400 mb-8 text-lg">
-            Join 8,400+ investors already growing their wealth with APXFund. Register in under 2 minutes.
+            {t(lang, 'home.ctaSub')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/register" className="btn-gold px-8 py-4 rounded-xl text-base flex items-center gap-2 justify-center">
-              Create Free Account <ChevronRight size={18} />
+              {t(lang, 'home.ctaRegister')} <ChevronRight size={18} />
             </Link>
             <Link href="/investment-plans" className="px-8 py-4 rounded-xl border border-white/20 text-gray-300 hover:border-[#c9a84c] hover:text-white transition-all flex items-center gap-2 justify-center">
               View Plans
