@@ -19,19 +19,16 @@ const HERO_SLIDES = [
     title: 'We Serve You',
     accent: 'Better',
     sub: 'Certified traders working around the clock to grow your wealth with precision.',
-    img: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&q=80&auto=format&fit=crop',
   },
   {
     title: 'Invest With a Firm You Can',
     accent: 'Trust',
     sub: '24/7 real-time monitoring of every investment position. Your capital, always watched.',
-    img: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=1600&q=80&auto=format&fit=crop',
   },
   {
     title: 'More Convenient',
     accent: 'Than Others',
     sub: 'Let your money do the hard work. Start with as little as $50 and earn daily.',
-    img: 'https://images.unsplash.com/photo-1642790551116-18e4f468b72c?w=1600&q=80&auto=format&fit=crop',
   },
 ]
 
@@ -47,37 +44,31 @@ const SERVICES = [
     title: 'Cryptocurrencies',
     icon: Bitcoin,
     desc: 'Trade and invest in top digital assets with fully automated portfolio management and real-time market execution.',
-    img: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80&auto=format&fit=crop',
   },
   {
     title: 'Forex Trading',
     icon: BarChart3,
     desc: 'Access global currency markets with expert algorithmic strategies and institutional-grade liquidity.',
-    img: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80&auto=format&fit=crop',
   },
   {
     title: 'Hedge Funds',
     icon: TrendingUp,
     desc: 'Diversified hedge fund exposure managed by seasoned professionals across liquid asset classes.',
-    img: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600&q=80&auto=format&fit=crop',
   },
   {
     title: 'Escrow Services',
     icon: Shield,
     desc: 'Secure transaction escrow ensuring your capital is protected throughout every deal.',
-    img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&q=80&auto=format&fit=crop',
   },
   {
     title: 'Loans',
     icon: DollarSign,
     desc: 'Flexible lending solutions backed by your investment portfolio. Capital when you need it.',
-    img: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80&auto=format&fit=crop',
   },
   {
     title: 'NFP Trading',
     icon: BarChart3,
     desc: 'Capitalise on Non-Farm Payroll announcements — one of the most predictable forex market events.',
-    img: 'https://images.unsplash.com/photo-1535320903710-d993d3d77d29?w=600&q=80&auto=format&fit=crop',
   },
 ]
 
@@ -191,20 +182,13 @@ export default function HomePage() {
 
           {/* CEO photo */}
           <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/5]">
-              <Image
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80&auto=format&fit=crop&facepad=3"
-                alt="Bryce J. McFarlane — CEO"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a14] via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-xl font-bold">Bryce J. McFarlane</h3>
-                <p className="text-[#c9a84c] text-sm font-medium">Chief Executive Officer</p>
-                <p className="text-gray-400 text-xs mt-1">20+ years in global asset management</p>
+            <div className="relative rounded-2xl overflow-hidden" style={{minHeight:"420px",background:"linear-gradient(135deg,#c9a84c18,#c9a84c05)",border:"1px solid #c9a84c25",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3rem 2rem"}}>
+              <div style={{width:"112px",height:"112px",borderRadius:"16px",background:"#c9a84c20",border:"2px solid #c9a84c40",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:"1.5rem"}}>
+                <span style={{fontSize:"2.5rem",fontWeight:900,color:"#c9a84c"}}>BM</span>
               </div>
+              <h3 style={{fontSize:"1.25rem",fontWeight:700,textAlign:"center"}}>Bryce J. McFarlane</h3>
+              <p style={{color:"#c9a84c",fontSize:"0.875rem",fontWeight:600,marginTop:"0.25rem"}}>Chief Executive Officer</p>
+              <p style={{color:"#6b7280",fontSize:"0.75rem",marginTop:"0.75rem",textAlign:"center",maxWidth:"280px",lineHeight:"1.6"}}>20+ years in global asset management. Former Goldman Sachs VP. Expert in quantitative trading and hedge fund operations.</p>
             </div>
             {/* Floating stat */}
             <div className="absolute -top-4 -right-4 bg-[#12121f] border border-[#c9a84c]/30 rounded-2xl p-4 shadow-xl">
@@ -358,13 +342,7 @@ export default function HomePage() {
       {/* ── CTA BANNER ──────────────────────────────────────────── */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&q=80&auto=format&fit=crop"
-            alt="CTA background"
-            fill
-            className="object-cover opacity-20"
-            sizes="100vw"
-          />
+          
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a14] via-[#0a0a14]/90 to-[#0a0a14]" />
         </div>
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
