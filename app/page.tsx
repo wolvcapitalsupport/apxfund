@@ -88,7 +88,7 @@ const PLANS = [
   { name: 'Sovereign Tier', roi: '38%', min: '$100,000', max: '$500,000', duration: '30 Days', referral: '15%', color: '#c084fc', popular: false },
 ]
 
-const TESTIMONIALS = [
+const TESTIMONIALS: any[] = [
   {
     name: 'Michael R.', country: 'United States', rating: 5,
     text: 'I started with the Starter Portfolio and rolled returns into the Growth Fund. Fourteen days later my balance reflected exactly what was promised. Withdrawals processed same day.',
