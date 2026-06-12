@@ -1,17 +1,24 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { formatCurrency } from '@/lib/utils'
-import { ArrowUpCircle, Loader2 } from 'lucide-react'
+import { ArrowUpCircle, Loader2, Lock, TrendingUp } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Link from 'next/link'
 
 export default function WithdrawPage() {
   const [balance, setBalance] = useState(0)
+  const [hasCompletedInvestment, setHasCompletedInvestment] = useState(false)
   const [form, setForm] = useState({ amount: '', walletAddress: '', currency: 'BTC' })
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    fetch('/api/user/me').then(r => r.json()).then(d => { setBalance(d.balance); setLoading(false) })
+    fetch('/api/user/me').then(r => r.json()).then(d => {
+      setBalance(d.balance)
+      const completed = (d.investments || []).some((i: any) => i.status === 'COMPLETED')
+      setHasCompletedInvestment(completed)
+      setLoading(false)
+    })
   }, [])
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -63,38 +70,70 @@ export default function WithdrawPage() {
         </div>
       </div>
 
-      <div className="card-dark p-6">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Currency</label>
-            <select value={form.currency} onChange={set('currency')} className={inputClass}>
-              <option value="BTC">Bitcoin (BTC)</option>
-              <option value="ETH">Ethereum (ETH)</option>
-              <option value="USDT">Tether (USDT)</option>
-            </select>
+      {!hasCompletedInvestment ? (
+        <div className="card-dark p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-yellow-400/10 flex items-center justify-center flex-shrink-0">
+              <Lock size={22} className="text-yellow-400" />
+            </div>
+            <div>
+              <h2 className="font-bold text-yellow-400">Withdrawals Locked</h2>
+              <p className="text-gray-500 text-xs mt-0.5">You have no matured investments yet</p>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Your Wallet Address</label>
-            <input type="text" required value={form.walletAddress} onChange={set('walletAddress')}
-              placeholder="Your crypto wallet address" className={inputClass} />
+
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-yellow-400 text-sm space-y-2">
+            <p className="font-semibold">How withdrawals work on APXFund:</p>
+            <ul className="text-xs space-y-1.5 text-yellow-300 list-none">
+              <li>→ Deposit funds into your account</li>
+              <li>→ Purchase an investment plan</li>
+              <li>→ Wait for your plan to mature (complete)</li>
+            </ul>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Amount (USD)</label>
-            <input type="number" required min="10" max={balance} value={form.amount}
-              onChange={set('amount')} placeholder="Min: $10" className={inputClass} />
-            {form.amount && parseFloat(form.amount) > balance && (
-              <p className="text-red-400 text-xs mt-1">Insufficient balance</p>
-            )}
-          </div>
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-blue-400 text-xs">
-            ℹ️ Minimum withdrawal: $10. Funds will be sent to your wallet within 24 hours of approval.
-          </div>
-          <button type="submit" disabled={submitting || !form.amount || parseFloat(form.amount) > balance}
-            className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
-            {submitting ? <><Loader2 size={16} className="animate-spin" />Processing...</> : <><ArrowUpCircle size={16} />Request Withdrawal</>}
-          </button>
-        </form>
-      </div>
+
+          <p className="text-gray-500 text-xs leading-relaxed">
+            APXFund is an investment platform. Funds deposited must be invested in a plan and allowed to mature before withdrawal is permitted. This ensures returns are generated for all investors.
+          </p>
+
+          <Link href="/dashboard/plans"
+            className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm">
+            <TrendingUp size={16} /> Browse Investment Plans
+          </Link>
+        </div>
+      ) : (
+        <div className="card-dark p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Currency</label>
+              <select value={form.currency} onChange={set('currency')} className={inputClass}>
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+                <option value="USDT">Tether (USDT)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Your Wallet Address</label>
+              <input type="text" required value={form.walletAddress} onChange={set('walletAddress')}
+                placeholder="Your crypto wallet address" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Amount (USD)</label>
+              <input type="number" required min="10" max={balance} value={form.amount}
+                onChange={set('amount')} placeholder="Min: $10" className={inputClass} />
+              {form.amount && parseFloat(form.amount) > balance && (
+                <p className="text-red-400 text-xs mt-1">Insufficient balance</p>
+              )}
+            </div>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-blue-400 text-xs">
+              ℹ️ Minimum withdrawal: $10. Funds will be sent to your wallet within 24 hours of approval.
+            </div>
+            <button type="submit" disabled={submitting || !form.amount || parseFloat(form.amount) > balance}
+              className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
+              {submitting ? <><Loader2 size={16} className="animate-spin" />Processing...</> : <><ArrowUpCircle size={16} />Request Withdrawal</>}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }

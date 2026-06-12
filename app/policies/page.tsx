@@ -21,7 +21,7 @@ const SECTIONS = [
   },
   {
     title: '5. Withdrawals',
-    content: `Withdrawal requests are processed within 24 hours of submission. The minimum withdrawal amount is $10 USD. Users are responsible for providing accurate wallet addresses. APXFund accepts no liability for funds sent to incorrect addresses provided by the user. Withdrawals may be subject to compliance checks and may be delayed where suspicious activity is detected.`,
+    content: `Withdrawals are only available to users who have at least one fully matured investment plan. Funds deposited must be placed into an active investment plan and allowed to complete its full duration before a withdrawal request can be submitted. The minimum withdrawal amount is $10 USD. Withdrawal requests are processed within 24 hours of submission. Users are responsible for providing accurate wallet addresses — APXFund accepts no liability for funds sent to incorrect addresses. Withdrawals may be subject to compliance checks and may be delayed where suspicious activity is detected.`,
   },
   {
     title: '6. KYC & Identity Verification',
