@@ -143,6 +143,7 @@ model WalletAddress {
 model RoiProcessingLog {
   id              String   @id @default(cuid())
   processedAt     DateTime @default(now())
+  investmentsFound Int      @default(0)
   investmentsDone Int      @default(0)
   totalProfitPaid Float    @default(0)
   errors          String[]

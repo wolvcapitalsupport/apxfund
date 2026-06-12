@@ -1,7 +1,7 @@
 'use client'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter, usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import {
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle,
@@ -20,12 +20,66 @@ const NAV = [
   { href: '/dashboard/profile', label: 'Profile', icon: User },
 ]
 
+const IDLE_TIMEOUT = 10 * 60 * 1000 // 10 minutes
+const WARN_BEFORE  = 60 * 1000       // warn 1 minute before logout
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [showWarning, setShowWarning] = useState(false)
+  const [countdown, setCountdown] = useState(60)
+
+  const idleTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const warnTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const countdownInterval = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const clearAllTimers = () => {
+    if (idleTimer.current)   clearTimeout(idleTimer.current)
+    if (warnTimer.current)   clearTimeout(warnTimer.current)
+    if (countdownInterval.current) clearInterval(countdownInterval.current)
+  }
+
+  const doLogout = useCallback(() => {
+    clearAllTimers()
+    signOut({ callbackUrl: '/auth/login?reason=idle' })
+  }, [])
+
+  const resetIdleTimer = useCallback(() => {
+    if (status !== 'authenticated') return
+    clearAllTimers()
+    setShowWarning(false)
+    setCountdown(60)
+
+    // Show warning 1 min before logout
+    warnTimer.current = setTimeout(() => {
+      setShowWarning(true)
+      setCountdown(60)
+      countdownInterval.current = setInterval(() => {
+        setCountdown(c => {
+          if (c <= 1) { clearInterval(countdownInterval.current!) ; return 0 }
+          return c - 1
+        })
+      }, 1000)
+    }, IDLE_TIMEOUT - WARN_BEFORE)
+
+    // Auto logout after full idle timeout
+    idleTimer.current = setTimeout(doLogout, IDLE_TIMEOUT)
+  }, [status, doLogout])
+
+  // Attach activity listeners
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click']
+    events.forEach(e => window.addEventListener(e, resetIdleTimer, { passive: true }))
+    resetIdleTimer()
+    return () => {
+      events.forEach(e => window.removeEventListener(e, resetIdleTimer))
+      clearAllTimers()
+    }
+  }, [status, resetIdleTimer])
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/login')
@@ -124,6 +178,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-[#0a0a14] flex">
+
+      {/* Idle warning modal */}
+      {showWarning && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#12121f] border border-yellow-500/30 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center mx-auto mb-4">
+              <LogOut size={28} className="text-yellow-400" />
+            </div>
+            <h2 className="text-xl font-black mb-2">Still there?</h2>
+            <p className="text-gray-400 text-sm mb-2">
+              You have been inactive for 9 minutes. For your security, you will be automatically logged out in:
+            </p>
+            <div className="text-5xl font-black text-yellow-400 my-4">{countdown}s</div>
+            <button
+              onClick={resetIdleTimer}
+              className="btn-gold w-full py-3 rounded-xl font-bold text-sm">
+              Keep Me Logged In
+            </button>
+            <button
+              onClick={doLogout}
+              className="mt-3 w-full py-3 rounded-xl text-sm text-gray-500 hover:text-red-400 transition-colors">
+              Log Out Now
+            </button>
+          </div>
+        </div>
+      )}
+
       <aside className="hidden lg:flex w-64 bg-[#12121f] border-r border-[#1e1e35] flex-col fixed inset-y-0 left-0 z-40">
         <SidebarContent />
       </aside>
