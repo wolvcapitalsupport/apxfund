@@ -1,4 +1,5 @@
 'use client'
+import CryptoTicker from '@/components/CryptoTicker'
 
 import AnimatedHero from './components/AnimatedHero'
 import { useState, useEffect } from 'react'
@@ -66,6 +67,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#0a0a14] text-white">
       <PublicHeader />
+      <CryptoTicker />
       <AnimatedHero />
 
       {/* STATS */}

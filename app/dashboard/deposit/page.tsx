@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react'
 import { Copy, CheckCircle, Upload, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useLang } from '@/lib/useLang'
+import { t } from '@/lib/i18n'
 
 const COIN_ICONS: Record<string, string> = { BTC: '₿', ETH: 'Ξ', USDT: '₮', USDC: '$', XRP: '✕' }
-
 type Wallet = { id: string; currency: string; label: string; address: string; network: string }
 
 async function uploadFile(file: File): Promise<string> {
@@ -17,6 +18,7 @@ async function uploadFile(file: File): Promise<string> {
 }
 
 export default function DepositPage() {
+  const { lang } = useLang()
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [loadingWallets, setLoadingWallets] = useState(true)
   const [selected, setSelected] = useState<Wallet | null>(null)
@@ -29,34 +31,23 @@ export default function DepositPage() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    fetch('/api/wallet-addresses')
-      .then(r => r.json())
-      .then((data: Wallet[]) => { setWallets(data); if (data.length > 0) setSelected(data[0]); setLoadingWallets(false) })
-      .catch(() => setLoadingWallets(false))
+    fetch('/api/wallet-addresses').then(r => r.json()).then((data: Wallet[]) => {
+      setWallets(data); if (data.length > 0) setSelected(data[0]); setLoadingWallets(false)
+    }).catch(() => setLoadingWallets(false))
   }, [])
 
   const copy = () => {
     if (!selected) return
     navigator.clipboard.writeText(selected.address)
-    setCopied(true)
-    toast.success('Address copied!')
-    setTimeout(() => setCopied(false), 2000)
+    setCopied(true); toast.success('Address copied!'); setTimeout(() => setCopied(false), 2000)
   }
 
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0]; if (!file) return
     setProofUploading(true)
-    try {
-      const url = await uploadFile(file)
-      setProofUrl(url)
-      setProofDone(true)
-      toast.success('Proof uploaded')
-    } catch (err: any) {
-      toast.error(err.message || 'Upload failed')
-    } finally {
-      setProofUploading(false)
-    }
+    try { const url = await uploadFile(file); setProofUrl(url); setProofDone(true); toast.success('Proof uploaded') }
+    catch (err: any) { toast.error(err.message || 'Upload failed') }
+    finally { setProofUploading(false) }
   }
 
   const handleSubmit = async () => {
@@ -64,35 +55,25 @@ export default function DepositPage() {
     if (parseFloat(amount) < 50) return toast.error('Minimum deposit is $50')
     setSubmitting(true)
     const res = await fetch('/api/transactions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'DEPOSIT', amount: parseFloat(amount), currency: selected.currency, txHash, proofImageUrl: proofUrl || undefined }),
     })
     const data = await res.json()
-    if (res.ok) {
-      toast.success('Deposit submitted! Your balance will be updated within 30 minutes after review.')
-      setAmount(''); setTxHash(''); setProofUrl(''); setProofDone(false)
-    } else {
-      toast.error(data.error || 'Submission failed')
-    }
+    if (res.ok) { toast.success('Deposit submitted! Your balance will be updated within 30 minutes after review.'); setAmount(''); setTxHash(''); setProofUrl(''); setProofDone(false) }
+    else toast.error(data.error || 'Submission failed')
     setSubmitting(false)
   }
 
-  if (loadingWallets) return (
-    <div className="flex items-center justify-center h-40">
-      <div className="w-8 h-8 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" />
-    </div>
-  )
+  if (loadingWallets) return <div className="flex items-center justify-center h-40"><div className="w-8 h-8 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" /></div>
 
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-black mb-1">Make a Deposit</h1>
-        <p className="text-gray-500 text-sm">Send crypto to the address below, then submit your transaction hash for verification.</p>
+        <h1 className="text-2xl font-black mb-1">{t(lang,'dashboard.depositTitle')}</h1>
+        <p className="text-gray-500 text-sm">{t(lang,'dashboard.depositSub')}</p>
       </div>
-
       <div className="card-dark p-6">
-        <h2 className="font-bold mb-4">Select Payment Method</h2>
+        <h2 className="font-bold mb-4">{t(lang,'dashboard.selectPayment')}</h2>
         <div className={`grid gap-3 ${wallets.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
           {wallets.map(w => (
             <button key={w.id} onClick={() => setSelected(w)}
@@ -104,11 +85,10 @@ export default function DepositPage() {
           ))}
         </div>
       </div>
-
       {selected && (
         <div className="card-dark p-6">
           <h2 className="font-bold mb-1">Send {selected.label} to this address</h2>
-          <p className="text-gray-500 text-xs mb-4">Only send <strong className="text-white">{selected.currency}</strong> on the <strong className="text-white">{selected.network}</strong> network. Sending on the wrong network will result in permanent loss of funds.</p>
+          <p className="text-gray-500 text-xs mb-4">Only send <strong className="text-white">{selected.currency}</strong> on the <strong className="text-white">{selected.network}</strong> network.</p>
           <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl p-4 flex items-center gap-3 mb-4">
             <code className="flex-1 text-[#c9a84c] text-sm font-mono break-all">{selected.address}</code>
             <button onClick={copy} className="flex-shrink-0 text-gray-400 hover:text-[#c9a84c] transition-colors">
@@ -116,45 +96,39 @@ export default function DepositPage() {
             </button>
           </div>
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-yellow-400 text-xs">
-            ⚠️ Minimum deposit: <strong>$50</strong>. Deposits are reviewed and credited within 30 minutes.
+            ⚠️ {t(lang,'dashboard.minDeposit')}: <strong>$50</strong>. {t(lang,'dashboard.depositNote')}
           </div>
         </div>
       )}
-
       <div className="card-dark p-6">
-        <h2 className="font-bold mb-4">Confirm Your Deposit</h2>
+        <h2 className="font-bold mb-4">{t(lang,'dashboard.confirmDeposit')}</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Amount (USD) *</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.amountUsd')} *</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-              <input type="number" min="50" value={amount} onChange={e => setAmount(e.target.value)}
-                placeholder="0.00"
+              <input type="number" min="50" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00"
                 className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl pl-8 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]" />
             </div>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Transaction Hash / ID *</label>
-            <input type="text" value={txHash} onChange={e => setTxHash(e.target.value)}
-              placeholder="Paste your TX hash here"
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.txHash')} *</label>
+            <input type="text" value={txHash} onChange={e => setTxHash(e.target.value)} placeholder="Paste your TX hash here"
               className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]" />
-            <p className="text-gray-600 text-xs mt-1">Found in your wallet or exchange after sending</p>
+            <p className="text-gray-600 text-xs mt-1">{t(lang,'dashboard.txHashSub')}</p>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Proof Screenshot <span className="text-gray-500">(optional)</span></label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.proofScreenshot')} <span className="text-gray-500">({t(lang,'dashboard.optional')})</span></label>
             <label className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl border cursor-pointer text-sm transition-colors ${proofDone ? 'border-green-500/50 bg-green-500/10 text-green-400' : 'border-[#1e1e35] bg-[#0a0a14] text-gray-400 hover:border-[#c9a84c]'}`}>
               {proofUploading ? <Loader2 size={16} className="animate-spin" /> : proofDone ? <CheckCircle size={16} /> : <Upload size={16} />}
               {proofUploading ? 'Uploading...' : proofDone ? 'Screenshot uploaded ✓' : 'Choose screenshot to upload'}
               <input type="file" accept="image/*" className="hidden" onChange={handleProofUpload} disabled={proofUploading} />
             </label>
           </div>
-
           <button onClick={handleSubmit} disabled={submitting || !amount || !txHash || !selected}
             className="w-full btn-gold py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50">
             {submitting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-            {submitting ? 'Submitting...' : 'Submit Deposit for Review'}
+            {submitting ? t(lang,'dashboard.processing') : t(lang,'dashboard.submitDeposit')}
           </button>
         </div>
       </div>

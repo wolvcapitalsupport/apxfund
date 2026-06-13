@@ -4,8 +4,11 @@ import { formatCurrency } from '@/lib/utils'
 import { ArrowUpCircle, Loader2, Lock, TrendingUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
+import { useLang } from '@/lib/useLang'
+import { t } from '@/lib/i18n'
 
 export default function WithdrawPage() {
+  const { lang } = useLang()
   const [balance, setBalance] = useState(0)
   const [hasCompletedInvestment, setHasCompletedInvestment] = useState(false)
   const [form, setForm] = useState({ amount: '', walletAddress: '', currency: 'BTC' })
@@ -15,8 +18,7 @@ export default function WithdrawPage() {
   useEffect(() => {
     fetch('/api/user/me').then(r => r.json()).then(d => {
       setBalance(d.balance)
-      const completed = (d.investments || []).some((i: any) => i.status === 'COMPLETED')
-      setHasCompletedInvestment(completed)
+      setHasCompletedInvestment((d.investments || []).some((i: any) => i.status === 'COMPLETED'))
       setLoading(false)
     })
   }, [])
@@ -30,81 +32,61 @@ export default function WithdrawPage() {
     setSubmitting(true)
     try {
       const res = await fetch('/api/transactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'WITHDRAWAL', ...form, amount: parseFloat(form.amount) }),
       })
       const data = await res.json()
       if (!res.ok) toast.error(data.error)
-      else {
-        toast.success('Withdrawal request submitted! Processing within 24 hours.')
-        setForm({ amount: '', walletAddress: '', currency: 'BTC' })
-        setBalance(b => b - parseFloat(form.amount))
-      }
+      else { toast.success('Withdrawal request submitted! Processing within 24 hours.'); setForm({ amount: '', walletAddress: '', currency: 'BTC' }); setBalance(b => b - parseFloat(form.amount)) }
     } catch { toast.error('Request failed') }
     finally { setSubmitting(false) }
   }
 
   const inputClass = "w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c] transition-colors"
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-10 h-10 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" />
-    </div>
-  )
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-10 h-10 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" /></div>
 
   return (
     <div className="max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-black mb-1">Withdraw Funds</h1>
-        <p className="text-gray-500 text-sm">Submit a withdrawal request. Processed within 24 hours.</p>
+        <h1 className="text-2xl font-black mb-1">{t(lang,'dashboard.withdrawTitle')}</h1>
+        <p className="text-gray-500 text-sm">{t(lang,'dashboard.withdrawPageSub')}</p>
       </div>
-
       <div className="card-dark p-5 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-green-400/10 flex items-center justify-center">
-          <ArrowUpCircle size={22} className="text-green-400" />
-        </div>
+        <div className="w-12 h-12 rounded-xl bg-green-400/10 flex items-center justify-center"><ArrowUpCircle size={22} className="text-green-400" /></div>
         <div>
-          <div className="text-gray-500 text-xs uppercase tracking-wider">Available Balance</div>
+          <div className="text-gray-500 text-xs uppercase tracking-wider">{t(lang,'dashboard.availableBalance')}</div>
           <div className="text-2xl font-black gold-text">{formatCurrency(balance)}</div>
         </div>
       </div>
-
       {!hasCompletedInvestment ? (
         <div className="card-dark p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-yellow-400/10 flex items-center justify-center flex-shrink-0">
-              <Lock size={22} className="text-yellow-400" />
-            </div>
+            <div className="w-12 h-12 rounded-xl bg-yellow-400/10 flex items-center justify-center flex-shrink-0"><Lock size={22} className="text-yellow-400" /></div>
             <div>
-              <h2 className="font-bold text-yellow-400">Withdrawals Locked</h2>
-              <p className="text-gray-500 text-xs mt-0.5">You have no matured investments yet</p>
+              <h2 className="font-bold text-yellow-400">{t(lang,'dashboard.withdrawalsLocked')}</h2>
+              <p className="text-gray-500 text-xs mt-0.5">{t(lang,'dashboard.withdrawalsLockedSub')}</p>
             </div>
           </div>
-
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-yellow-400 text-sm space-y-2">
-            <p className="font-semibold">How withdrawals work on APXFund:</p>
-            <ul className="text-xs space-y-1.5 text-yellow-300 list-none">
-              <li>→ Deposit funds into your account</li>
-              <li>→ Purchase an investment plan</li>
-              <li>→ Wait for your plan to mature (complete)</li>
+            <p className="font-semibold">{t(lang,'dashboard.withdrawHow')}</p>
+            <ul className="text-xs space-y-1.5 text-yellow-300">
+              <li>{t(lang,'dashboard.withdrawStep1')}</li>
+              <li>{t(lang,'dashboard.withdrawStep2')}</li>
+              <li>{t(lang,'dashboard.withdrawStep3')}</li>
+              <li>{t(lang,'dashboard.withdrawStep4')}</li>
             </ul>
           </div>
-
-          <p className="text-gray-500 text-xs leading-relaxed">
-            APXFund is an investment platform. Funds deposited must be invested in a plan and allowed to mature before withdrawal is permitted. This ensures returns are generated for all investors.
-          </p>
-
-          <Link href="/dashboard/plans"
-            className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm">
-            <TrendingUp size={16} /> Browse Investment Plans
+          <p className="text-gray-500 text-xs leading-relaxed">{t(lang,'dashboard.withdrawNote')}</p>
+          <Link href="/dashboard/plans" className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm">
+            <TrendingUp size={16} /> {t(lang,'dashboard.browseInvestmentPlans')}
           </Link>
         </div>
       ) : (
         <div className="card-dark p-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Currency</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.currency')}</label>
               <select value={form.currency} onChange={set('currency')} className={inputClass}>
                 <option value="BTC">Bitcoin (BTC)</option>
                 <option value="ETH">Ethereum (ETH)</option>
@@ -112,24 +94,20 @@ export default function WithdrawPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Your Wallet Address</label>
-              <input type="text" required value={form.walletAddress} onChange={set('walletAddress')}
-                placeholder="Your crypto wallet address" className={inputClass} />
+              <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.walletAddress')}</label>
+              <input type="text" required value={form.walletAddress} onChange={set('walletAddress')} placeholder={t(lang,'dashboard.walletPlaceholder')} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Amount (USD)</label>
-              <input type="number" required min="10" max={balance} value={form.amount}
-                onChange={set('amount')} placeholder="Min: $10" className={inputClass} />
-              {form.amount && parseFloat(form.amount) > balance && (
-                <p className="text-red-400 text-xs mt-1">Insufficient balance</p>
-              )}
+              <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.amountUsd')}</label>
+              <input type="number" required min="10" max={balance} value={form.amount} onChange={set('amount')} placeholder="Min: $10" className={inputClass} />
+              {form.amount && parseFloat(form.amount) > balance && <p className="text-red-400 text-xs mt-1">Insufficient balance</p>}
             </div>
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-blue-400 text-xs">
-              ℹ️ Minimum withdrawal: $10. Funds will be sent to your wallet within 24 hours of approval.
+              ℹ️ {t(lang,'dashboard.minDeposit')}: $10. {t(lang,'dashboard.depositNote')}
             </div>
             <button type="submit" disabled={submitting || !form.amount || parseFloat(form.amount) > balance}
               className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
-              {submitting ? <><Loader2 size={16} className="animate-spin" />Processing...</> : <><ArrowUpCircle size={16} />Request Withdrawal</>}
+              {submitting ? <><Loader2 size={16} className="animate-spin" />{t(lang,'dashboard.processing')}</> : <><ArrowUpCircle size={16} />{t(lang,'dashboard.requestWithdrawal')}</>}
             </button>
           </form>
         </div>
