@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
   // If no transactions return a flat line with current balance
   if (transactions.length === 0) {
-    const points = []
+    const points: { date: string; balance: number }[] = []
     for (let i = days; i >= 0; i--) {
       const d = new Date()
       d.setDate(d.getDate() - i)

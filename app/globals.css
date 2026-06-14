@@ -93,3 +93,40 @@ body {
 .animate-ticker:hover {
   animation-play-state: paused;
 }
+
+/* Profit glow effect */
+@keyframes profitGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.15); }
+  50% { box-shadow: 0 0 24px 4px rgba(52, 211, 153, 0.15); }
+}
+.profit-glow {
+  animation: profitGlow 3s ease-in-out infinite;
+  border-color: rgba(52, 211, 153, 0.25) !important;
+}
+
+/* Card hover lift + glow */
+.card-dark {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px -10px rgba(201, 168, 76, 0.25);
+  border-color: rgba(201, 168, 76, 0.3);
+}
+
+@keyframes profitGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.0); }
+  50% { box-shadow: 0 0 28px 4px rgba(52, 211, 153, 0.18); }
+}
+.profit-glow {
+  animation: profitGlow 3s ease-in-out infinite;
+  border-color: rgba(52, 211, 153, 0.25) !important;
+}
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px -10px rgba(201, 168, 76, 0.25);
+  border-color: rgba(201, 168, 76, 0.3);
+}
