@@ -17,6 +17,7 @@ export default function PlansPage() {
   const [loading, setLoading] = useState(true)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [amount, setAmount] = useState('')
+  const [autoReinvest, setAutoReinvest] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState<'buy' | 'mine'>('buy')
 
@@ -51,7 +52,7 @@ export default function PlansPage() {
         toast.success('Investment created successfully!')
         setBalance(b => b - amt)
         setInvestments(prev => [data.investment, ...prev])
-        setSelectedPlan(null); setAmount(''); setTab('mine')
+        setSelectedPlan(null); setAutoReinvest(true); setAmount(''); setTab('mine')
       }
     } catch { toast.error('Investment failed') }
     finally { setSubmitting(false) }
@@ -176,7 +177,7 @@ export default function PlansPage() {
               )}
 
               <div className="flex gap-3">
-                <button onClick={() => { setSelectedPlan(null); setAmount('') }}
+                <button onClick={() => { setSelectedPlan(null); setAutoReinvest(true); setAmount('') }}
                   className="flex-1 py-3 rounded-xl border border-[#1e1e35] text-gray-400 text-sm hover:text-white transition-colors">
                   {t(lang,'dashboard.cancel')}
                 </button>
