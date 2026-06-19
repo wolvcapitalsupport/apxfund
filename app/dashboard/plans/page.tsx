@@ -7,7 +7,7 @@ import { useLang } from '@/lib/useLang'
 import { t } from '@/lib/i18n'
 
 type Plan = { id: string; name: string; roiPercent: number; minAmount: number; maxAmount: number; durationDays: number; referralBonus: number; description?: string; features: string[] }
-type Investment = { id: string; plan: Plan; amount: number; expectedProfit: number; status: string; startDate: string; endDate: string; completedAt?: string }
+type Investment = { id: string; planId: string; plan: Plan; amount: number; expectedProfit: number; status: string; startDate: string; endDate: string; completedAt?: string; autoReinvest: boolean; isPaused?: boolean }
 
 export default function PlansPage() {
   const { lang } = useLang()
@@ -20,6 +20,7 @@ export default function PlansPage() {
   const [autoReinvest, setAutoReinvest] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState<'buy' | 'mine'>('buy')
+  const [migrateInv, setMigrateInv] = useState<Investment | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -244,6 +245,23 @@ export default function PlansPage() {
                             <span>{Math.round(progress)}% {t(lang,'dashboard.complete')}</span>
                             <span>{Math.ceil((new Date(inv.endDate).getTime() - Date.now()) / 86400000)} days {t(lang,'dashboard.remaining')}</span>
                           </div>
+                          {/* Maturity banner — show when <= 2 days remaining */}
+                          {Math.ceil((new Date(inv.endDate).getTime() - Date.now()) / 86400000) <= 2 && (
+                            <div className="mt-3 bg-[#c9a84c]/10 border border-[#c9a84c]/30 rounded-xl p-3">
+                              <div className="text-xs text-[#c9a84c] font-bold mb-1">⏳ Maturing Soon</div>
+                              <p className="text-xs text-gray-400 mb-2">
+                                {inv.autoReinvest
+                                  ? 'Capital will auto-reinvest in the same plan. Want to upgrade to a higher plan instead?'
+                                  : 'Your capital and profit will be credited to your balance at maturity.'}
+                              </p>
+                              <button onClick={() => setMigrateInv(inv)}
+                                className="w-full text-xs btn-gold py-2 rounded-lg font-bold flex items-center justify-center gap-1.5">
+                                <TrendingUp size={12} /> Migrate to Higher Plan
+                              </button>
+                            </div>
+                          )}
+                          <div className="hidden">
+                          </div>
                         </div>
                       )
                     })}
@@ -277,6 +295,117 @@ export default function PlansPage() {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// ── Migration Modal ───────────────────────────────────────────────────
+function MigrateModal({ inv, plans, balance, onClose, onSuccess }: {
+  inv: Investment
+  plans: Plan[]
+  balance: number
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [targetPlanId, setTargetPlanId] = useState('')
+  const [topUp, setTopUp] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const targetPlan = plans.find(p => p.id === targetPlanId)
+  const topUpAmount = parseFloat(topUp || '0')
+  const newCapital = inv.amount + topUpAmount
+  const shortfall = targetPlan ? Math.max(0, targetPlan.minAmount - inv.amount) : 0
+  const expectedProfit = targetPlan ? ((newCapital * targetPlan.roiPercent) / 100).toFixed(2) : '0'
+  const eligible = plans.filter(p => p.id !== inv.planId && p.isActive)
+
+  const submit = async () => {
+    if (!targetPlanId) return toast.error('Select a plan')
+    setLoading(true)
+    const res = await fetch('/api/investments/migrate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ investmentId: inv.id, targetPlanId, topUpAmount }),
+    })
+    const data = await res.json()
+    if (res.ok) { toast.success(data.message); onSuccess(); onClose() }
+    else toast.error(data.error)
+    setLoading(false)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-[#12121f] border border-[#1e1e35] rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-[#1e1e35]">
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <TrendingUp size={18} className="text-[#c9a84c]" /> Migrate Investment
+          </h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-white"><X size={20} /></button>
+        </div>
+        <div className="p-6 space-y-5">
+          <div className="bg-[#0a0a14] rounded-xl border border-[#1e1e35] p-4">
+            <div className="text-xs text-gray-500 mb-1">Current Contract</div>
+            <div className="font-bold">{inv.plan.name}</div>
+            <div className="text-[#c9a84c] font-black text-xl">${inv.amount.toLocaleString()}</div>
+            <div className="text-xs text-gray-500">capital available to migrate</div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-400 mb-2">Upgrade To</label>
+            <div className="space-y-2">
+              {eligible.map(p => (
+                <button key={p.id} onClick={() => setTargetPlanId(p.id)}
+                  className={`w-full text-left p-4 rounded-xl border transition-all ${targetPlanId === p.id ? 'border-[#c9a84c] bg-[#c9a84c]/8' : 'border-[#1e1e35] hover:border-[#c9a84c]/40'}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-sm">{p.name}</div>
+                      <div className="text-xs text-gray-500">${p.minAmount.toLocaleString()} – ${p.maxAmount.toLocaleString()} · {p.durationDays} days</div>
+                    </div>
+                    <div className="text-[#c9a84c] font-black text-lg">{p.roiPercent}%</div>
+                  </div>
+                  {inv.amount < p.minAmount && (
+                    <div className="text-xs text-yellow-400 mt-1">
+                      ⚠ Need ${(p.minAmount - inv.amount).toLocaleString()} more to qualify
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {targetPlan && shortfall > 0 && (
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5">
+                Top-up from Balance <span className="text-gray-600">(available: ${balance.toFixed(2)})</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <input type="number" min={shortfall} max={balance} value={topUp}
+                  onChange={e => setTopUp(e.target.value)} placeholder={shortfall.toFixed(2)}
+                  className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl pl-8 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]" />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Minimum top-up needed: <span className="text-white font-semibold">${shortfall.toFixed(2)}</span></p>
+            </div>
+          )}
+
+          {targetPlan && newCapital >= targetPlan.minAmount && (
+            <div className="bg-[#0a0a14] rounded-xl border border-[#c9a84c]/20 p-4 space-y-2">
+              <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">New Contract Preview</div>
+              <div className="flex justify-between text-sm"><span className="text-gray-400">Capital</span><span className="font-bold">${newCapital.toFixed(2)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-400">Expected Profit</span><span className="text-green-400 font-bold">+${expectedProfit}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-400">Duration</span><span className="font-bold">{targetPlan.durationDays} days</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-400">ROI</span><span className="text-[#c9a84c] font-bold">{targetPlan.roiPercent}%</span></div>
+            </div>
+          )}
+        </div>
+        <div className="flex gap-3 p-6 pt-0">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-[#1e1e35] text-gray-400 text-sm">Cancel</button>
+          <button onClick={submit} disabled={loading || !targetPlanId || (targetPlan ? newCapital < targetPlan.minAmount : true)}
+            className="flex-1 btn-gold py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40">
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
+            Migrate Capital
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

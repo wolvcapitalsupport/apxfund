@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email'
+type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email' | 'investments'
 
 // ─────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -936,6 +936,7 @@ export default function AdminPage() {
     { id: 'withdrawals', label: 'Withdrawals', icon: ArrowUpCircle },
     { id: 'kyc',         label: 'KYC Review',  icon: FileCheck },
     { id: 'users',       label: 'Users',       icon: Users },
+    { id: 'investments', label: 'Investments', icon: TrendingUp },
     { id: 'wallets',     label: 'Wallets',     icon: Wallet },
     { id: 'email',       label: 'Email',       icon: Mail },
     { id: 'roi',         label: 'ROI Engine',  icon: TrendingUp },
@@ -969,6 +970,7 @@ export default function AdminPage() {
         {activeTab === 'kyc' && <KycTab />}
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'roi' && <RoiTab />}
+        {activeTab === 'investments' && <InvestmentsTab />}
         {activeTab === 'wallets' && <WalletsTab />}
         {activeTab === 'email' && <EmailTab />}
       </div>
@@ -1504,6 +1506,140 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
             {loading ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />} Create User
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Admin Investments Tab — view, pause, cancel, force-complete
+// ─────────────────────────────────────────────────────────────────────
+function InvestmentsTab() {
+  const [investments, setInvestments] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState('ACTIVE')
+  const [acting, setActing] = useState<string | null>(null)
+
+  const fetch_ = async (status = statusFilter) => {
+    setLoading(true)
+    const res = await fetch(`/api/admin/investments?status=${status}`)
+    const data = await res.json()
+    setInvestments(data.investments || [])
+    setTotal(data.total || 0)
+    setLoading(false)
+  }
+
+  useEffect(() => { fetch_() }, [])
+
+  const act = async (id: string, action: string, extra?: any) => {
+    setActing(id + action)
+    const res = await fetch('/api/admin/investments', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action, ...extra }),
+    })
+    const data = await res.json()
+    if (res.ok) { toast.success(data.message); fetch_() }
+    else toast.error(data.error)
+    setActing(null)
+  }
+
+  const daysLeft = (endDate: string) => Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000)
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h3 className="font-bold">Active Investments</h3>
+          <p className="text-gray-500 text-sm">{total} total</p>
+        </div>
+        <div className="flex gap-2">
+          {['ACTIVE', 'COMPLETED', 'CANCELLED', 'ALL'].map(s => (
+            <button key={s} onClick={() => { setStatusFilter(s); fetch_(s) }}
+              className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all ${statusFilter === s ? 'bg-[#c9a84c] text-[#0a0a14] border-[#c9a84c]' : 'border-[#1e1e35] text-gray-400 hover:text-white'}`}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="card-dark overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center h-40">
+            <div className="w-8 h-8 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" />
+          </div>
+        ) : investments.length === 0 ? (
+          <div className="text-center py-16 text-gray-600">
+            <TrendingUp size={36} className="mx-auto mb-3 opacity-30" />
+            <p>No {statusFilter.toLowerCase()} investments</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#0a0a14]">
+                <tr>
+                  {['Investor', 'Plan', 'Capital', 'Expected Profit', 'Matures', 'Auto-Reinvest', 'Actions'].map(h => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1e1e35]">
+                {investments.map((inv: any) => {
+                  const days = daysLeft(inv.endDate)
+                  const isActing = acting?.startsWith(inv.id)
+                  return (
+                    <tr key={inv.id} className="hover:bg-white/2">
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-semibold">{inv.user.fullName}</div>
+                        <div className="text-xs text-gray-500">{inv.user.email}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-semibold">{inv.plan.name}</div>
+                        <div className="text-xs text-gray-500">{inv.plan.roiPercent}% / {inv.plan.durationDays}d</div>
+                      </td>
+                      <td className="px-4 py-3 text-sm font-bold text-[#c9a84c]">${inv.amount.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm font-bold text-green-400">+${inv.expectedProfit.toFixed(2)}</td>
+                      <td className="px-4 py-3">
+                        <div className={`text-xs font-semibold ${days <= 1 ? 'text-red-400' : days <= 3 ? 'text-yellow-400' : 'text-gray-300'}`}>
+                          {inv.status === 'ACTIVE' ? (days <= 0 ? 'Due now' : `${days}d left`) : inv.status}
+                        </div>
+                        <div className="text-xs text-gray-600">{new Date(inv.endDate).toLocaleDateString()}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => act(inv.id, 'toggleAutoReinvest')}
+                          className={`text-xs px-2.5 py-1 rounded-full font-semibold border transition-all ${inv.autoReinvest ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-gray-500 border-gray-700'}`}>
+                          {inv.autoReinvest ? 'ON' : 'OFF'}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        {inv.status === 'ACTIVE' && (
+                          <div className="flex gap-1.5 flex-wrap">
+                            <button onClick={() => act(inv.id, 'pause', { extendDays: 1 })}
+                              disabled={!!isActing}
+                              className="text-xs px-2.5 py-1.5 rounded-lg border border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10 transition-all">
+                              +1d
+                            </button>
+                            <button onClick={() => { if (confirm('Force complete this investment and credit user?')) act(inv.id, 'complete') }}
+                              disabled={!!isActing}
+                              className="text-xs px-2.5 py-1.5 rounded-lg border border-green-400/30 text-green-400 hover:bg-green-400/10 transition-all">
+                              Complete
+                            </button>
+                            <button onClick={() => { if (confirm('Cancel and refund capital to user balance?')) act(inv.id, 'cancel') }}
+                              disabled={!!isActing}
+                              className="text-xs px-2.5 py-1.5 rounded-lg border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-all">
+                              Cancel
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )
