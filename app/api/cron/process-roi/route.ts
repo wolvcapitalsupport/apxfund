@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { TransactionType, TransactionStatus } from '@prisma/client'
 import { createNotification, Notifs } from '@/lib/notifications'
-import { sendInvestmentMatured } from '@/lib/mailer'
+import { sendInvestmentMatured, sendPlanUpgradeNudge } from '@/lib/mailer'
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')

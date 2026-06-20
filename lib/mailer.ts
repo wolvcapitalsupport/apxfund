@@ -407,3 +407,106 @@ export async function sendPlanUpgradeNudge(
   `)
   await send(to, `Don't Miss Out — Upgrade to ${nextPlan} and Earn ${nextRoi}% This Cycle`, html)
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// 15. PLAN UPGRADE NUDGE
+// ═══════════════════════════════════════════════════════════════════════
+export async function sendPlanUpgradeNudge(
+  to: string,
+  name: string,
+  currentPlan: { name: string; roiPercent: number; durationDays: number },
+  nextPlan: { name: string; roiPercent: number; durationDays: number; minAmount: number },
+  userCapital: number,
+  userBalance: number,
+  qualifies: boolean
+) {
+  const totalHave = userCapital + userBalance
+  const gap = nextPlan.minAmount - totalHave
+  const currentPlanProfit = parseFloat(((userCapital * currentPlan.roiPercent) / 100).toFixed(2))
+  const nextPlanProfit = parseFloat(((nextPlan.minAmount * nextPlan.roiPercent) / 100).toFixed(2))
+  const uplift = parseFloat((nextPlanProfit - currentPlanProfit).toFixed(2))
+
+  const html = wrap(`
+    ${heading(qualifies
+      ? `You Already Qualify for ${nextPlan.name} 🚀`
+      : `You Need Just $${gap.toFixed(2)} More to Unlock ${nextPlan.name}`
+    )}
+    ${para(`Hi <strong style="color:#fff">${name}</strong>, your money is working — but it could be working <strong style="color:#34d399">significantly harder</strong>.`)}
+    <div style="background:#0a0a14;border:1px solid #1e1e35;border-radius:14px;padding:20px;margin:20px 0">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:16px">Your Earning Comparison</div>
+      <div style="display:flex;gap:12px;align-items:stretch">
+        <div style="flex:1;background:#12121f;border:1px solid #2a2a45;border-radius:10px;padding:16px;text-align:center">
+          <div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">You Are Earning</div>
+          <div style="font-size:14px;font-weight:700;color:#c9a84c;margin-bottom:6px">${currentPlan.name}</div>
+          <div style="font-size:32px;font-weight:900;color:#ffffff;line-height:1">${currentPlan.roiPercent}%</div>
+          <div style="font-size:11px;color:#555;margin-top:4px">over ${currentPlan.durationDays} days</div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e1e35">
+            <div style="font-size:10px;color:#555;margin-bottom:4px">Est. profit on $${userCapital.toFixed(0)}</div>
+            <div style="font-size:18px;font-weight:900;color:#c9a84c">+$${currentPlanProfit.toFixed(2)}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;color:#34d399;font-size:20px;font-weight:900;flex-shrink:0">→</div>
+        <div style="flex:1;background:#0d1f0d;border:2px solid #34d399;border-radius:10px;padding:16px;text-align:center">
+          <div style="font-size:10px;color:#34d399;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">You Could Earn</div>
+          <div style="font-size:14px;font-weight:700;color:#34d399;margin-bottom:6px">${nextPlan.name}</div>
+          <div style="font-size:32px;font-weight:900;color:#ffffff;line-height:1">${nextPlan.roiPercent}%</div>
+          <div style="font-size:11px;color:#34d399;margin-top:4px">over ${nextPlan.durationDays} days</div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e1e35">
+            <div style="font-size:10px;color:#555;margin-bottom:4px">Est. profit on $${nextPlan.minAmount.toFixed(0)}</div>
+            <div style="font-size:18px;font-weight:900;color:#34d399">+$${nextPlanProfit.toFixed(2)}</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;background:#34d39918;border:1px solid #34d39940;border-radius:8px;padding:12px;text-align:center">
+        <span style="font-size:13px;color:#aaa">By upgrading you could earn an extra </span>
+        <span style="font-size:16px;font-weight:900;color:#34d399">+$${uplift.toFixed(2)}</span>
+        <span style="font-size:13px;color:#aaa"> per cycle</span>
+      </div>
+    </div>
+    <div style="background:#0a0a14;border:1px solid #1e1e35;border-radius:10px;padding:16px;margin:16px 0">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Your Current Position</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;color:#aaa">Active Capital</span>
+        <span style="font-size:13px;font-weight:700;color:#fff">$${userCapital.toLocaleString()}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;color:#aaa">Available Balance</span>
+        <span style="font-size:13px;font-weight:700;color:#fff">$${userBalance.toFixed(2)}</span>
+      </div>
+      <div style="height:1px;background:#1e1e35;margin:8px 0"></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;color:#aaa">Total Available</span>
+        <span style="font-size:14px;font-weight:900;color:#c9a84c">$${totalHave.toFixed(2)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:13px;color:#aaa">${nextPlan.name} Minimum</span>
+        <span style="font-size:14px;font-weight:900;color:#fff">$${nextPlan.minAmount.toLocaleString()}</span>
+      </div>
+      ${!qualifies ? `
+      <div style="margin-top:12px;background:#c9a84c18;border:1px solid #c9a84c40;border-radius:8px;padding:10px;text-align:center">
+        <span style="font-size:13px;color:#aaa">You need just </span>
+        <span style="font-size:16px;font-weight:900;color:#c9a84c">$${gap.toFixed(2)} more</span>
+        <span style="font-size:13px;color:#aaa"> to unlock ${nextPlan.name}</span>
+      </div>` : `
+      <div style="margin-top:12px;background:#34d39918;border:1px solid #34d39940;border-radius:8px;padding:10px;text-align:center">
+        <span style="font-size:16px;font-weight:900;color:#34d399">✓ You already qualify — migrate now</span>
+      </div>`}
+    </div>
+    ${divider()}
+    ${qualifies
+      ? para(`Your capital is ready. <strong style="color:#fff">Migrate to ${nextPlan.name} right now</strong> from your dashboard — it takes less than 30 seconds.`)
+      : para(`Top up just <strong style="color:#c9a84c">$${gap.toFixed(2)}</strong> to your account and migrate your capital to <strong style="color:#fff">${nextPlan.name}</strong>. Your next cycle will earn at the higher rate.`)
+    }
+    ${btn(
+      qualifies ? `Migrate to ${nextPlan.name} Now` : `Top Up $${gap.toFixed(2)} and Upgrade`,
+      `${BASE}/dashboard/plans`
+    )}
+    ${note('You can migrate your active contract directly from the Investment Plans page — no need to wait for maturity.')}
+  `)
+
+  const subject = qualifies
+    ? `You Already Qualify for ${nextPlan.name} — Migrate Now and Earn ${nextPlan.roiPercent}%`
+    : `$${gap.toFixed(2)} Away from ${nextPlan.name} — Here is What You are Missing`
+
+  await send(to, subject, html)
+}

@@ -31,6 +31,8 @@ model User {
   isEmailVerified      Boolean         @default(false)
   emailVerifyOtp       String?
   emailVerifyOtpExpiry DateTime?
+  lastNudgedPlanId     String?
+  lastNudgedAt         DateTime?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
   investments          Investment[]
