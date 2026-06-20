@@ -66,6 +66,7 @@ model Investment {
   expectedProfit Float
   status         InvestmentStatus @default(ACTIVE)
   autoReinvest   Boolean          @default(true)
+  isPaused       Boolean          @default(false)
   startDate      DateTime         @default(now())
   endDate        DateTime
   completedAt    DateTime?

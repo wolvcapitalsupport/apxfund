@@ -29,6 +29,12 @@ export async function GET(req: NextRequest) {
 
     for (const inv of activeInvestments) {
       try {
+        // Skip paused investments entirely
+        if (inv.isPaused) {
+          console.log(`[ROI Engine] ⏸ Skipped paused investment ${inv.id} — ${inv.user.email}`)
+          continue
+        }
+
         const isMature = now >= new Date(inv.endDate)
         const dailyProfit = parseFloat(((inv.amount * inv.plan.roiPercent) / 100 / inv.plan.durationDays).toFixed(2))
 

@@ -1616,10 +1616,10 @@ function InvestmentsTab() {
                       <td className="px-4 py-3">
                         {inv.status === 'ACTIVE' && (
                           <div className="flex gap-1.5 flex-wrap">
-                            <button onClick={() => act(inv.id, 'pause', { extendDays: 1 })}
+                            <button onClick={() => act(inv.id, inv.isPaused ? 'resume' : 'pause')}
                               disabled={!!isActing}
-                              className="text-xs px-2.5 py-1.5 rounded-lg border border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10 transition-all">
-                              +1d
+                              className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all ${inv.isPaused ? 'border-green-400/30 text-green-400 hover:bg-green-400/10' : 'border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10'}`}>
+                              {inv.isPaused ? '▶ Resume' : '⏸ Pause'}
                             </button>
                             <button onClick={() => { if (confirm('Force complete this investment and credit user?')) act(inv.id, 'complete') }}
                               disabled={!!isActing}

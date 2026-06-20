@@ -49,15 +49,13 @@ export async function PATCH(req: NextRequest) {
   if (!inv) return NextResponse.json({ error: 'Investment not found' }, { status: 404 })
 
   if (action === 'pause') {
-    // Pause = push endDate forward by the same number of days paused
-    // We store isPaused via extending endDate effectively
-    const newEnd = new Date(inv.endDate)
-    newEnd.setDate(newEnd.getDate() + (extendDays || 1))
-    await prisma.investment.update({
-      where: { id },
-      data: { endDate: newEnd },
-    })
-    return NextResponse.json({ message: `ROI paused — end date extended by ${extendDays || 1} day(s)` })
+    await prisma.investment.update({ where: { id }, data: { isPaused: true } })
+    return NextResponse.json({ message: 'ROI paused — daily profit will not run for this investment' })
+  }
+
+  if (action === 'resume') {
+    await prisma.investment.update({ where: { id }, data: { isPaused: false } })
+    return NextResponse.json({ message: 'ROI resumed — daily profit will run normally' })
   }
 
   if (action === 'cancel') {
