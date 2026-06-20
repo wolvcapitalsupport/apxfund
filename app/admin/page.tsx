@@ -1530,7 +1530,8 @@ function InvestmentsTab() {
     setLoading(false)
   }
 
-  useEffect(() => { fetch_() }, [statusFilter])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetch_() }, [])
 
   const act = async (id: string, action: string, extra?: any) => {
     setActing(id + action)

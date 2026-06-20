@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { useLang } from '@/lib/useLang'
 import { t } from '@/lib/i18n'
 
-type Plan = { id: string; name: string; roiPercent: number; minAmount: number; maxAmount: number; durationDays: number; referralBonus: number; description?: string; features: string[] }
+type Plan = { isActive: boolean; id: string; name: string; roiPercent: number; minAmount: number; maxAmount: number; durationDays: number; referralBonus: number; description?: string; features: string[] }
 type Investment = { id: string; planId: string; plan: Plan; amount: number; expectedProfit: number; status: string; startDate: string; endDate: string; completedAt?: string; autoReinvest: boolean; isPaused?: boolean }
 
 export default function PlansPage() {
