@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { TrendingUp, CheckCircle, Loader2, ChevronRight, Clock, BarChart3 } from 'lucide-react'
+import { TrendingUp, X, ArrowRight, CheckCircle, Loader2, ChevronRight, Clock, BarChart3 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLang } from '@/lib/useLang'
 import { t } from '@/lib/i18n'
@@ -409,3 +409,4 @@ function MigrateModal({ inv, plans, balance, onClose, onSuccess }: {
     </div>
   )
 }
+// Sat Jun 20 01:27:44 WAT 2026

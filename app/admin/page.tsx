@@ -1530,7 +1530,7 @@ function InvestmentsTab() {
     setLoading(false)
   }
 
-  useEffect(() => { fetch_() }, [])
+  useEffect(() => { fetch_() }, [statusFilter])
 
   const act = async (id: string, action: string, extra?: any) => {
     setActing(id + action)
