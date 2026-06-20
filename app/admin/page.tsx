@@ -1216,6 +1216,27 @@ const EMAIL_TEMPLATES = [
 </div>`,
   },
   {
+    name: 'Plan Upgrade Nudge',
+    subject: "Don't Miss Out — Upgrade Your Plan and Earn More This Cycle",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a14;color:#ffffff;padding:40px;border-radius:12px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <h1 style="color:#c9a84c;font-size:28px;margin:0;">APX<span style="color:#ffffff;">Fund</span></h1>
+  </div>
+  <h2 style="color:#c9a84c;">You&apos;re Leaving Money on the Table 💰</h2>
+  <p>Your current plan is performing well — but there&apos;s a significantly better option waiting for you.</p>
+  <div style="background:#0d1f0d;border:2px solid #34d399;border-radius:12px;padding:20px;text-align:center;margin:24px 0;">
+    <div style="font-size:12px;color:#34d399;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Upgrade Available</div>
+    <div style="font-size:36px;font-weight:900;color:#34d399;">Growth Fund</div>
+    <div style="font-size:20px;color:#ffffff;margin-top:4px;">12% Total Return · 14 Days</div>
+  </div>
+  <p>The difference between staying in your current plan and upgrading is not just percentage points — on larger capital it compounds into significantly higher payouts every single cycle.</p>
+  <div style="text-align:center;margin:32px 0;">
+    <a href="https://apxfund.xyz/dashboard/plans" style="background:linear-gradient(135deg,#c9a84c,#e8cc7a);color:#0a0a14;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:bold;">Upgrade My Plan Now</a>
+  </div>
+  <p style="color:#666;font-size:12px;">APXFund | support@apxfund.xyz</p>
+</div>`,
+  },
+  {
     name: 'Withdrawal Processed',
     subject: 'Your Withdrawal Has Been Processed — APXFund',
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a14;color:#ffffff;padding:40px;border-radius:12px;">
