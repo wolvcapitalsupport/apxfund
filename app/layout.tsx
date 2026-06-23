@@ -4,7 +4,7 @@ import './globals.css'
 import { Providers } from './providers'
 import { Toaster } from 'react-hot-toast'
 import CryptoTicker from './components/CryptoTicker' 
-import SmartsuppChat from '@/components/SmartsuppChat'
+import TawkChat from '@/components/TawkChat'
 
 const inter = localFont({
   src: './fonts/Inter-Variable.ttf',
@@ -24,8 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           
           {/* This renders your custom component with the correct initialization key */}
-          <SmartsuppChat />
-
+      <TawkChat />
           <Toaster
             position="top-right"
             toastOptions={{
