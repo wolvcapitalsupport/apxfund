@@ -25,6 +25,8 @@ export async function GET() {
         referredBy: true,
         isActive: true,
         createdAt: true,
+        adminBanner: true,
+        adminBannerType: true,
         investments: {
           include: { plan: true },
           orderBy: { createdAt: 'desc' },

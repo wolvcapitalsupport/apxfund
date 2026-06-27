@@ -10,6 +10,8 @@ import toast from 'react-hot-toast'
 
 interface UserData {
   balance: number
+  adminBanner?: string
+  adminBannerType?: string
   totalDeposited: number
   totalProfit: number
   totalWithdrawn: number
@@ -88,6 +90,32 @@ export default function DashboardPage() {
 
       {/* Upgrade banner */}
       <UpgradeBanner balance={data?.balance || 0} investments={data?.investments || []} />
+      {data?.adminBanner && (
+        <div className={`rounded-2xl border px-5 py-4 flex items-start gap-4 ${
+          data.adminBannerType === 'warning'
+            ? 'bg-yellow-500/10 border-yellow-500/30'
+            : data.adminBannerType === 'error'
+            ? 'bg-red-500/10 border-red-500/30'
+            : 'bg-blue-500/10 border-blue-500/30'
+        }`}>
+          <div className="flex-shrink-0 mt-0.5">
+            {data.adminBannerType === 'warning' ? '⚠️' : data.adminBannerType === 'error' ? '🚫' : 'ℹ️'}
+          </div>
+          <div className="flex-1">
+            <div className={`font-bold text-sm mb-1 ${
+              data.adminBannerType === 'warning' ? 'text-yellow-400' : 
+              data.adminBannerType === 'error' ? 'text-red-400' : 'text-blue-400'
+            }`}>
+              {data.adminBannerType === 'warning' ? 'Account Notice' : 
+               data.adminBannerType === 'error' ? 'Account Restricted' : 'Information'}
+            </div>
+            <p className="text-gray-300 text-sm leading-relaxed">{data.adminBanner}</p>
+            <a href="mailto:support@apxfund.xyz" className="text-[#c9a84c] text-xs hover:underline mt-2 inline-block">
+              Contact Support →
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Trust bar */}
       <div className="grid grid-cols-3 gap-3">
