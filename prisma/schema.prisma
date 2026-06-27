@@ -33,6 +33,8 @@ model User {
   emailVerifyOtpExpiry DateTime?
   lastNudgedPlanId     String?
   lastNudgedAt         DateTime?
+  adminBanner          String?
+  adminBannerType      String?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
   investments          Investment[]
