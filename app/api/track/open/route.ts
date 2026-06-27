@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// 1x1 transparent GIF in base64
-const PIXEL = Buffer.from(
-  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-  'base64'
-)
+const PIXEL = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64')
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -15,9 +11,8 @@ export async function GET(req: NextRequest) {
     try {
       const log = await (prisma as any).emailLog.findUnique({
         where: { trackingId },
-        select: { id: true, openedAt: true, openCount: true },
+        select: { id: true, openedAt: true },
       })
-
       if (log) {
         await (prisma as any).emailLog.update({
           where: { trackingId },
@@ -28,8 +23,8 @@ export async function GET(req: NextRequest) {
           },
         })
       }
-    } catch {
-      // silently fail — never block image delivery
+    } catch (e) {
+      // silent fail — never block image delivery
     }
   }
 
@@ -37,7 +32,7 @@ export async function GET(req: NextRequest) {
     status: 200,
     headers: {
       'Content-Type': 'image/gif',
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
     },
