@@ -22,6 +22,7 @@ interface UserData {
 
 export default function DashboardPage() {
   const [data, setData] = useState<UserData | null>(null)
+  const [bannerDismissed, setBannerDismissed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
 
@@ -90,30 +91,65 @@ export default function DashboardPage() {
 
       {/* Upgrade banner */}
       <UpgradeBanner balance={data?.balance || 0} investments={data?.investments || []} />
-      {data?.adminBanner && (
-        <div className={`rounded-2xl border px-5 py-4 flex items-start gap-4 ${
+      {data?.adminBanner && !bannerDismissed && (
+        <div className={`rounded-2xl border px-5 py-4 flex items-start gap-4 relative ${
           data.adminBannerType === 'warning'
             ? 'bg-yellow-500/10 border-yellow-500/30'
             : data.adminBannerType === 'error'
             ? 'bg-red-500/10 border-red-500/30'
             : 'bg-blue-500/10 border-blue-500/30'
         }`}>
-          <div className="flex-shrink-0 mt-0.5">
-            {data.adminBannerType === 'warning' ? '⚠️' : data.adminBannerType === 'error' ? '🚫' : 'ℹ️'}
+          {/* Icon */}
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+            data.adminBannerType === 'warning' ? 'bg-yellow-500/15 border border-yellow-500/30' :
+            data.adminBannerType === 'error' ? 'bg-red-500/15 border border-red-500/30' :
+            'bg-blue-500/15 border border-blue-500/30'
+          }`}>
+            <span className="text-base">
+              {data.adminBannerType === 'warning' ? '⚠️' : data.adminBannerType === 'error' ? '🚫' : 'ℹ️'}
+            </span>
           </div>
-          <div className="flex-1">
-            <div className={`font-bold text-sm mb-1 ${
-              data.adminBannerType === 'warning' ? 'text-yellow-400' : 
-              data.adminBannerType === 'error' ? 'text-red-400' : 'text-blue-400'
-            }`}>
-              {data.adminBannerType === 'warning' ? 'Account Notice' : 
-               data.adminBannerType === 'error' ? 'Account Restricted' : 'Information'}
+
+          {/* Content */}
+          <div className="flex-1 min-w-0 pr-6">
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0 ${
+                data.adminBannerType === 'warning' ? 'bg-yellow-400' :
+                data.adminBannerType === 'error' ? 'bg-red-400' : 'bg-blue-400'
+              }`} />
+              <span className={`font-bold text-xs uppercase tracking-wider ${
+                data.adminBannerType === 'warning' ? 'text-yellow-400' :
+                data.adminBannerType === 'error' ? 'text-red-400' : 'text-blue-400'
+              }`}>
+                {data.adminBannerType === 'warning' ? 'Important Notice' :
+                 data.adminBannerType === 'error' ? 'Account Restricted' : 'Information'}
+              </span>
             </div>
-            <p className="text-gray-300 text-sm leading-relaxed">{data.adminBanner}</p>
-            <a href="mailto:support@apxfund.xyz" className="text-[#c9a84c] text-xs hover:underline mt-2 inline-block">
-              Contact Support →
-            </a>
+            <p className="text-gray-300 text-sm leading-relaxed mb-3">{data.adminBanner}</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <a href="mailto:support@apxfund.xyz"
+                className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                  data.adminBannerType === 'warning'
+                    ? 'text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/10'
+                    : data.adminBannerType === 'error'
+                    ? 'text-red-400 border-red-400/30 hover:bg-red-400/10'
+                    : 'text-blue-400 border-blue-400/30 hover:bg-blue-400/10'
+                }`}>
+                Contact Support →
+              </a>
+              <span className="text-xs text-gray-600">This notice reappears on each login</span>
+            </div>
           </div>
+
+          {/* Dismiss button */}
+          <button
+            onClick={() => setBannerDismissed(true)}
+            className="absolute top-3 right-3 w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-500 hover:text-gray-300 transition-all flex-shrink-0"
+            title="Dismiss for this session">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
         </div>
       )}
 
