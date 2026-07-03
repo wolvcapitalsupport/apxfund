@@ -6,6 +6,7 @@ import { TransactionType, TransactionStatus } from '@prisma/client'
 import { sendAccountSuspended, sendAccountReinstated } from '@/lib/mailer'
 import { createNotification } from '@/lib/notifications'
 import { addDays } from 'date-fns'
+import { isStarterPlan, MAX_STARTER_CYCLES } from '@/lib/planRules'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -183,6 +184,13 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Plan not found or inactive' }, { status: 404 })
     }
 
+    if (isStarterPlan(plan.name) && user.starterCyclesUsed >= MAX_STARTER_CYCLES) {
+      return NextResponse.json(
+        { error: 'This user has used both Starter Portfolio cycles. Migrate their locked capital to a higher plan instead.' },
+        { status: 400 }
+      )
+    }
+
     if (amount < plan.minAmount || amount > plan.maxAmount) {
       return NextResponse.json(
         { error: `Amount must be between $${plan.minAmount} and $${plan.maxAmount} for this plan` },
@@ -223,12 +231,14 @@ export async function PATCH(req: NextRequest) {
       }),
     ]
 
+    const starterIncrement = isStarterPlan(plan.name) ? { starterCyclesUsed: { increment: 1 } } : {}
+
     // Only deduct balance if not bypassing AND user has enough
     if (!bypassBalance) {
       ops.push(
         prisma.user.update({
           where: { id: userId },
-          data: { balance: { decrement: amount } },
+          data: { balance: { decrement: amount }, ...starterIncrement },
         })
       )
     } else {
@@ -236,7 +246,7 @@ export async function PATCH(req: NextRequest) {
       ops.push(
         prisma.user.update({
           where: { id: userId },
-          data: { totalDeposited: { increment: amount } },
+          data: { totalDeposited: { increment: amount }, ...starterIncrement },
         })
       )
     }

@@ -7,6 +7,7 @@ import { createNotification } from '@/lib/notifications'
 import { sendInvestmentActivated } from '@/lib/mailer'
 import { addDays } from 'date-fns'
 import { z } from 'zod'
+import { isStarterPlan, MAX_STARTER_CYCLES } from '@/lib/planRules'
 
 const investSchema = z.object({
   planId: z.string().min(1, 'Plan is required'),
@@ -30,6 +31,13 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
     if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
     if (!plan.isActive) return NextResponse.json({ error: 'This plan is no longer available' }, { status: 400 })
+
+    if (isStarterPlan(plan.name) && user.starterCyclesUsed >= MAX_STARTER_CYCLES) {
+      return NextResponse.json(
+        { error: 'Starter Portfolio is limited to 2 cycles per account. Please migrate your locked capital to a higher plan to continue investing.' },
+        { status: 400 }
+      )
+    }
 
     if (amount < plan.minAmount || amount > plan.maxAmount) {
       return NextResponse.json(
@@ -62,7 +70,10 @@ export async function POST(req: NextRequest) {
       }),
       prisma.user.update({
         where: { id: user.id },
-        data: { balance: { decrement: amount } },
+        data: {
+          balance: { decrement: amount },
+          ...(isStarterPlan(plan.name) ? { starterCyclesUsed: { increment: 1 } } : {}),
+        },
       }),
       prisma.transaction.create({
         data: {

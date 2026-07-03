@@ -100,6 +100,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Clear migration-pending flags — this covers the Starter Portfolio
+    // "awaitingMigration" banner as well as any ad-hoc migration of an
+    // active/matured contract that wasn't flagged.
+    if (user.awaitingMigration || user.lockedCapital > 0) {
+      ops.push(
+        prisma.user.update({
+          where: { id: user.id },
+          data: { awaitingMigration: false, lockedCapital: 0 },
+        })
+      )
+    }
+
     const [, newInvestment] = await prisma.$transaction(ops)
 
     await sendInvestmentActivated(

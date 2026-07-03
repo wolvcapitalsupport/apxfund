@@ -443,3 +443,53 @@ export async function sendPlanUpgradeNudge(
 
   await send(to, subject, html)
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// 16. CYCLE RENEWED (auto-roll — capital stays invested, new cycle starts)
+// ═══════════════════════════════════════════════════════════════════════
+export async function sendCycleRenewed(to: string, name: string, planName: string, principal: number, profit: number, cycleNumber?: number) {
+  const html = wrap(`
+    ${heading('🔄 Cycle Complete — Reinvested Automatically')}
+    ${para(`Hi <strong style="color:#fff">${name}</strong>, your ${planName} cycle has completed. Your profit has been credited to your balance and your capital has automatically started a new cycle.`)}
+    ${statusBox('Plan', planName, '#c9a84c')}
+    ${statusBox('Capital (reinvested)', `$${principal.toFixed(2)}`, '#60a5fa')}
+    ${statusBox('Profit Credited', `+$${profit.toFixed(2)}`, '#34d399')}
+    ${cycleNumber ? statusBox('Cycle', `${cycleNumber} of 2`, '#a78bfa') : ''}
+    ${divider()}
+    ${para('Your profit is withdrawable now. Your capital remains invested and will keep earning through the new cycle.')}
+    ${btn('View Dashboard', `${BASE}/dashboard`)}
+  `)
+  await send(to, `🔄 ${planName} Cycle Complete — Reinvested`, html)
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// 17. STARTER PORTFOLIO — MIGRATION AVAILABLE (2 cycles complete)
+// ═══════════════════════════════════════════════════════════════════════
+export async function sendMigrationAvailable(
+  to: string,
+  name: string,
+  lockedCapital: number,
+  options: { planName: string; minAmount: number; topUpNeeded: number }[]
+) {
+  const html = wrap(`
+    ${heading('Your Starter Portfolio Has Completed Both Cycles 🎉')}
+    ${para(`Hi <strong style="color:#fff">${name}</strong>, congratulations on completing both Starter Portfolio cycles. Your profits from both cycles are already in your balance.`)}
+    ${statusBox('Locked Capital', `$${lockedCapital.toFixed(2)}`, '#c9a84c')}
+    ${divider()}
+    ${para('To release this capital, migrate it to one of the plans below. Your capital plus a top-up becomes your new contract:')}
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0">
+      ${options.map(o => `
+      <tr><td style="background:#0a0a14;border:1px solid #1e1e35;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:block">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#fff">${o.planName}</span>
+          <span style="font-size:13px;color:#c9a84c;font-weight:900">
+            ${o.topUpNeeded > 0 ? `+$${o.topUpNeeded.toFixed(2)} top-up` : 'Ready now'}
+          </span>
+        </div>
+      </td></tr>`).join('<tr><td style="height:8px"></td></tr>')}
+    </table>
+    ${note('Your locked capital stays safe and untouched until you choose to migrate — there is no time limit.')}
+    ${btn('Choose Your Next Plan', `${BASE}/dashboard/plans`)}
+  `)
+  await send(to, 'Migration Available — Release Your Locked Capital', html)
+}

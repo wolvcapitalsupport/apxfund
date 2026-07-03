@@ -7,13 +7,16 @@ import { useLang } from '@/lib/useLang'
 import { t } from '@/lib/i18n'
 
 type Plan = { isActive: boolean; id: string; name: string; roiPercent: number; minAmount: number; maxAmount: number; durationDays: number; referralBonus: number; description?: string; features: string[] }
-type Investment = { id: string; planId: string; plan: Plan; amount: number; expectedProfit: number; status: string; startDate: string; endDate: string; completedAt?: string; autoReinvest: boolean; isPaused?: boolean }
+type Investment = { id: string; planId: string; plan: Plan; amount: number; expectedProfit: number; status: string; startDate: string; endDate: string; completedAt?: string; autoReinvest: boolean; isPaused?: boolean; cycleNumber?: number }
+
+const STARTER_PLAN_NAME = 'Starter Portfolio'
 
 export default function PlansPage() {
   const { lang } = useLang()
   const [plans, setPlans] = useState<Plan[]>([])
   const [investments, setInvestments] = useState<Investment[]>([])
   const [balance, setBalance] = useState(0)
+  const [starterCyclesUsed, setStarterCyclesUsed] = useState(0)
   const [loading, setLoading] = useState(true)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [amount, setAmount] = useState('')
@@ -21,6 +24,7 @@ export default function PlansPage() {
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState<'buy' | 'mine'>('buy')
   const [migrateInv, setMigrateInv] = useState<Investment | null>(null)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -31,9 +35,29 @@ export default function PlansPage() {
       setPlans(Array.isArray(p) ? p : [])
       setInvestments(Array.isArray(inv) ? inv : [])
       setBalance(user.balance || 0)
+      setStarterCyclesUsed(user.starterCyclesUsed || 0)
       setLoading(false)
     })
   }, [])
+
+  const toggleAutoRenew = async (inv: Investment) => {
+    setTogglingId(inv.id)
+    try {
+      const res = await fetch(`/api/investments/${inv.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoReinvest: !inv.autoReinvest }),
+      })
+      const data = await res.json()
+      if (!res.ok) return toast.error(data.error)
+      toast.success(data.message)
+      setInvestments(prev => prev.map(i => i.id === inv.id ? { ...i, autoReinvest: !inv.autoReinvest } : i))
+    } catch {
+      toast.error('Failed to update')
+    } finally {
+      setTogglingId(null)
+    }
+  }
 
   const handleInvest = async () => {
     if (!selectedPlan || !amount) return
@@ -96,9 +120,10 @@ export default function PlansPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
             {plans.map(plan => {
               const isSelected = selectedPlan?.id === plan.id
+              const starterLocked = plan.name === STARTER_PLAN_NAME && starterCyclesUsed >= 2
               return (
-                <div key={plan.id} onClick={() => { setSelectedPlan(isSelected ? null : plan); setAmount('') }}
-                  className={`card-dark p-6 cursor-pointer transition-all hover:-translate-y-0.5 ${isSelected ? 'border-[#c9a84c]/60 bg-[#c9a84c]/5' : 'hover:border-[#c9a84c]/30'}`}>
+                <div key={plan.id} onClick={() => { if (starterLocked) return; setSelectedPlan(isSelected ? null : plan); setAmount('') }}
+                  className={`card-dark p-6 transition-all ${starterLocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-0.5'} ${isSelected ? 'border-[#c9a84c]/60 bg-[#c9a84c]/5' : !starterLocked ? 'hover:border-[#c9a84c]/30' : ''}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="font-black text-lg">{plan.name}</h3>
@@ -129,9 +154,13 @@ export default function PlansPage() {
                     ))}
                   </ul>
                   <div className="mt-4 pt-4 border-t border-[#1e1e35] text-center">
-                    <span className={`text-xs font-semibold ${isSelected ? 'text-[#c9a84c]' : 'text-gray-500'}`}>
-                      {isSelected ? t(lang,'dashboard.selected') : t(lang,'dashboard.selectPlan')}
-                    </span>
+                    {starterLocked ? (
+                      <span className="text-xs font-semibold text-purple-400">Both cycles used — migrate to continue</span>
+                    ) : (
+                      <span className={`text-xs font-semibold ${isSelected ? 'text-[#c9a84c]' : 'text-gray-500'}`}>
+                        {isSelected ? t(lang,'dashboard.selected') : t(lang,'dashboard.selectPlan')}
+                      </span>
+                    )}
                   </div>
                 </div>
               )
@@ -224,11 +253,19 @@ export default function PlansPage() {
                   <div className="space-y-3">
                     {activeInvestments.map(inv => {
                       const progress = getDayProgress(inv)
+                      const isStarter = inv.plan?.name === STARTER_PLAN_NAME
                       return (
                         <div key={inv.id} className="card-dark p-5">
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <div className="font-bold">{inv.plan?.name}</div>
+                              <div className="flex items-center gap-2">
+                                <div className="font-bold">{inv.plan?.name}</div>
+                                {isStarter && (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/30">
+                                    Cycle {inv.cycleNumber || 1}/2
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-gray-500 text-xs mt-0.5 flex items-center gap-1">
                                 <Clock size={11} /> {t(lang,'dashboard.maturesOn')} {formatDate(inv.endDate)}
                               </div>
@@ -245,12 +282,35 @@ export default function PlansPage() {
                             <span>{Math.round(progress)}% {t(lang,'dashboard.complete')}</span>
                             <span>{Math.ceil((new Date(inv.endDate).getTime() - Date.now()) / 86400000)} days {t(lang,'dashboard.remaining')}</span>
                           </div>
+                          {/* Stop Renewing toggle — not shown for Starter Portfolio (fixed 2-cycle flow) */}
+                          {!isStarter && (
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#1e1e35]">
+                              <span className="text-xs text-gray-500">
+                                {inv.autoReinvest ? 'Auto-renews at maturity' : 'Will release to balance at maturity'}
+                              </span>
+                              <button
+                                onClick={() => toggleAutoRenew(inv)}
+                                disabled={togglingId === inv.id}
+                                className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
+                                  inv.autoReinvest
+                                    ? 'border-[#1e1e35] text-gray-400 hover:text-white hover:border-gray-500'
+                                    : 'border-yellow-500/40 text-yellow-400 bg-yellow-500/10'
+                                }`}
+                              >
+                                {togglingId === inv.id ? '...' : inv.autoReinvest ? 'Stop Renewing' : 'Renewing Stopped'}
+                              </button>
+                            </div>
+                          )}
                           {/* Maturity banner — show when <= 2 days remaining */}
                           {Math.ceil((new Date(inv.endDate).getTime() - Date.now()) / 86400000) <= 2 && (
                             <div className="mt-3 bg-[#c9a84c]/10 border border-[#c9a84c]/30 rounded-xl p-3">
                               <div className="text-xs text-[#c9a84c] font-bold mb-1">⏳ Maturing Soon</div>
                               <p className="text-xs text-gray-400 mb-2">
-                                {inv.autoReinvest
+                                {isStarter
+                                  ? (inv.cycleNumber === 2
+                                      ? 'This is your final Starter cycle. Profit will be credited, but capital stays locked until you migrate to a higher plan.'
+                                      : 'Capital will auto-continue into cycle 2 of Starter Portfolio. Profit is credited to your balance now.')
+                                  : inv.autoReinvest
                                   ? 'Capital will auto-reinvest in the same plan. Want to upgrade to a higher plan instead?'
                                   : 'Your capital and profit will be credited to your balance at maturity.'}
                               </p>

@@ -16,6 +16,10 @@ const SECTIONS = [
     content: `APXFund offers four investment plans: Gold (8% ROI/24h), Platinum (15% ROI/3 days), Diamond (25% ROI/7 days), and VIP (50% ROI/14 days). Returns are credited automatically upon maturity. All plans include capital insurance covering the principal invested. Past performance does not guarantee future results. Investment activities carry inherent risk.`,
   },
   {
+    title: '3a. Starter Portfolio Cycle Limit & Migration',
+    content: `Starter Portfolio is limited to 2 cycles per account lifetime. Profits from each Starter Portfolio cycle are always withdrawable at completion. Capital, however, remains locked in the platform between the completion of the second cycle and migration to a higher plan — it is not released to your balance automatically. Migrating your locked capital to Growth Fund, Apex Fund, or Sovereign Tier releases it into a new, larger contract. There is no time limit to migrate; locked capital is held safely until you choose to do so. Auto-rollover (automatic reinvestment of capital into a new cycle at maturity) applies by default to all plans above Starter Portfolio, and can be disabled per-investment from the dashboard.`,
+  },
+  {
     title: '4. Deposits',
     content: `Deposits are accepted via Bitcoin (BTC), Ethereum (ETH), and Tether (USDT/TRC20). All deposits must include a valid transaction hash for verification. Deposits are subject to administrative review and are typically credited within 30 minutes of blockchain confirmation. APXFund reserves the right to reject deposits that cannot be verified or that originate from sanctioned addresses.`,
   },

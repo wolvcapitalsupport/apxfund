@@ -27,6 +27,9 @@ export async function GET() {
         createdAt: true,
         adminBanner: true,
         adminBannerType: true,
+        starterCyclesUsed: true,
+        awaitingMigration: true,
+        lockedCapital: true,
         investments: {
           include: { plan: true },
           orderBy: { createdAt: 'desc' },

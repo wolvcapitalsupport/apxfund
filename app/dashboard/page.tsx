@@ -5,6 +5,7 @@ import { DollarSign, TrendingUp, ArrowUpCircle, ArrowDownCircle, Clock, Copy, Ch
 import Link from 'next/link'
 import AnimatedNumber from '@/components/AnimatedNumber'
 import UpgradeBanner from '@/components/UpgradeBanner'
+import MigrationBanner from '@/components/MigrationBanner'
 import TickingBalance from '@/components/TickingBalance'
 import toast from 'react-hot-toast'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -19,6 +20,9 @@ interface UserData {
   referralCode: string
   investments: any[]
   transactions: any[]
+  starterCyclesUsed?: number
+  awaitingMigration?: boolean
+  lockedCapital?: number
 }
 
 // ── Build chart data from live transactions ───────────────────────────
@@ -189,6 +193,12 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* ── Migration banner (Starter Portfolio, 2 cycles complete) ── */}
+      <MigrationBanner
+        awaitingMigration={!!data?.awaitingMigration}
+        lockedCapital={data?.lockedCapital || 0}
+      />
 
       {/* ── Stat cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
