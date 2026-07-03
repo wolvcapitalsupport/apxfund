@@ -121,8 +121,8 @@ export default function DepositPage() {
               {copied ? <CheckCircle size={20} style={{ color: '#10B981' }} /> : <Copy size={20} className="text-gray-400 hover:text-white" />}
             </button>
           </div>
-          <div style={{ background: '#EAB30810', border: '1px solid #EAB30830', borderRadius: 10, padding: '12px 16px' }}
-            className="flex items-center gap-2 text-xs" style={{ color: '#EAB308' } as any}>
+          <div style={{ background: '#EAB30810', border: '1px solid #EAB30830', borderRadius: 10, padding: '12px 16px', color: '#EAB308' }}
+            className="flex items-center gap-2 text-xs">
             <AlertTriangle size={14} style={{ flexShrink: 0 }} />
             {t(lang, 'dashboard.minDeposit')}: <strong>$50</strong>. {t(lang, 'dashboard.depositNote')}
           </div>

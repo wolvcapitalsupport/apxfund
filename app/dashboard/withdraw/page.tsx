@@ -65,7 +65,7 @@ export default function WithdrawPage() {
       </div>
 
       {!hasCompletedInvestment ? (
-        <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px', space: '16px' }}>
+        <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
           <div className="flex items-center gap-4 mb-5">
             <div style={{ width: 52, height: 52, borderRadius: 14, background: '#EAB30810', border: '1px solid #EAB30830', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Lock size={24} style={{ color: '#EAB308' }} />
