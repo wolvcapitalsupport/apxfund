@@ -12,10 +12,10 @@ const DOC_TYPES = [
 ]
 
 const STATUS_CONFIG = {
-  NONE: { icon: Shield, color: 'text-gray-400', bg: 'bg-gray-400/10 border-gray-400/20', label: 'Not Submitted', message: 'Complete KYC verification to unlock all platform features.' },
-  PENDING: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20', label: 'Under Review', message: 'Your documents are being reviewed. This typically takes 24–48 hours.' },
-  APPROVED: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/20', label: 'Verified', message: 'Your identity has been verified. You have full access to all platform features.' },
-  REJECTED: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-400/10 border-red-400/20', label: 'Rejected', message: 'Your KYC was rejected. Please review the reason below and resubmit.' },
+  NONE:     { icon: Shield,       color: '#64748b', bg: '#64748b15', border: '#64748b25', label: 'Not Submitted',  message: 'Complete KYC verification to unlock all platform features.' },
+  PENDING:  { icon: Clock,        color: '#EAB308', bg: '#EAB30815', border: '#EAB30830', label: 'Under Review',   message: 'Your documents are being reviewed. This typically takes 24–48 hours.' },
+  APPROVED: { icon: CheckCircle,  color: '#10B981', bg: '#10B98115', border: '#10B98130', label: 'Verified',       message: 'Your identity has been verified. You have full access to all platform features.' },
+  REJECTED: { icon: XCircle,      color: '#f87171', bg: '#f8717115', border: '#f8717130', label: 'Rejected',       message: 'Your KYC was rejected. Please review the reason below and resubmit.' },
 }
 
 async function uploadFile(file: File): Promise<string> {
@@ -39,8 +39,8 @@ function FileInput({ label, required, onChange }: { label: string; required?: bo
   }
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-300 mb-2">{label}{required && ' *'}</label>
-      <label className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl border cursor-pointer text-sm transition-colors ${done ? 'border-green-500/50 bg-green-500/10 text-green-400' : 'border-[#1e1e35] bg-[#0a0a14] text-gray-400 hover:border-[#c9a84c]'}`}>
+      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{label}{required && ' *'}</label>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '14px 16px', borderRadius: 12, border: `1px solid ${done ? '#10B98150' : '#1E293B'}`, background: done ? '#10B98108' : '#090A0F', cursor: 'pointer', fontSize: 14, color: done ? '#10B981' : '#64748b', transition: 'all 0.2s' }}>
         {uploading ? <Loader2 size={16} className="animate-spin" /> : done ? <CheckCircle size={16} /> : <Upload size={16} />}
         {uploading ? 'Uploading...' : done ? 'Uploaded ✓' : 'Choose file to upload'}
         <input type="file" accept="image/*" className="hidden" onChange={handle} disabled={uploading} />
@@ -77,24 +77,28 @@ export default function KycPage() {
     finally { setSubmitting(false) }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-10 h-10 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" /></div>
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-10 h-10 rounded-full border-2 border-[#EAB308] border-t-transparent animate-spin" /></div>
 
   const config = STATUS_CONFIG[kycStatus as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.NONE
   const StatusIcon = config.icon
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-black mb-1">{t(lang,'dashboard.kycTitle')}</h1>
-        <p className="text-gray-500 text-sm">{t(lang,'dashboard.kycSub')}</p>
+        <h1 className="text-2xl font-black mb-1">{t(lang, 'dashboard.kycTitle')}</h1>
+        <p className="text-gray-500 text-sm">{t(lang, 'dashboard.kycSub')}</p>
       </div>
-      <div className={`border rounded-2xl p-6 flex items-start gap-4 ${config.bg}`}>
-        <StatusIcon size={28} className={`${config.color} flex-shrink-0 mt-0.5`} />
+
+      {/* Status card */}
+      <div style={{ background: config.bg, border: `1px solid ${config.border}`, borderRadius: 16, padding: '24px', display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, background: `${config.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <StatusIcon size={24} style={{ color: config.color }} />
+        </div>
         <div className="flex-1">
-          <div className={`font-bold text-lg mb-1 ${config.color}`}>{config.label}</div>
+          <div className="font-bold text-lg mb-1" style={{ color: config.color }}>{config.label}</div>
           <p className="text-gray-400 text-sm leading-relaxed">{config.message}</p>
           {kycStatus === 'REJECTED' && rejectedNote && (
-            <div className="mt-3 bg-red-400/10 border border-red-400/20 rounded-xl p-3">
+            <div style={{ marginTop: 12, background: '#f8717115', border: '1px solid #f8717130', borderRadius: 10, padding: '12px 14px' }}>
               <div className="text-red-400 text-xs font-semibold uppercase tracking-wider mb-1">Rejection Reason</div>
               <p className="text-gray-300 text-sm">{rejectedNote}</p>
             </div>
@@ -104,40 +108,49 @@ export default function KycPage() {
 
       {(kycStatus === 'NONE' || kycStatus === 'REJECTED') && (
         <>
-          <div className="card-dark p-6">
-            <h2 className="font-bold mb-4 flex items-center gap-2"><Shield size={18} className="text-[#c9a84c]" /> Why verify your identity?</h2>
+          {/* Benefits */}
+          <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
+            <h2 className="font-bold mb-4 flex items-center gap-2">
+              <Shield size={18} style={{ color: '#EAB308' }} /> Why verify your identity?
+            </h2>
             <div className="grid sm:grid-cols-2 gap-3">
               {['Unlock higher withdrawal limits','Access all investment plans','Protect your account from fraud','Required by financial regulations','Faster withdrawal processing','Enhanced account security'].map(b => (
-                <div key={b} className="flex items-center gap-2 text-sm text-gray-400"><CheckCircle size={14} className="text-[#c9a84c] flex-shrink-0" />{b}</div>
+                <div key={b} className="flex items-center gap-2 text-sm text-gray-400">
+                  <CheckCircle size={14} style={{ color: '#10B981', flexShrink: 0 }} />{b}
+                </div>
               ))}
             </div>
           </div>
-          <div className="card-dark p-6">
-            <h2 className="font-bold mb-1">{t(lang,'dashboard.submitDocuments')}</h2>
-            <p className="text-gray-500 text-sm mb-6">{t(lang,'dashboard.submitDocumentsSub')}</p>
+
+          {/* Form */}
+          <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
+            <h2 className="font-bold mb-1">{t(lang, 'dashboard.submitDocuments')}</h2>
+            <p className="text-gray-500 text-sm mb-6">{t(lang, 'dashboard.submitDocumentsSub')}</p>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.documentType')} *</label>
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t(lang, 'dashboard.documentType')} *</label>
                 <select value={form.documentType} onChange={e => setForm(f => ({ ...f, documentType: e.target.value }))}
-                  className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#c9a84c]">
+                  style={{ width: '100%', background: '#090A0F', border: '1px solid #1E293B', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#fff', outline: 'none' }}>
                   {DOC_TYPES.map(tp => <option key={tp.value} value={tp.value}>{tp.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.documentNumber')} *</label>
-                <input type="text" required value={form.documentNumber} onChange={e => setForm(f => ({ ...f, documentNumber: e.target.value }))}
-                  placeholder="e.g. A12345678"
-                  className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]" />
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t(lang, 'dashboard.documentNumber')} *</label>
+                <input type="text" required value={form.documentNumber} onChange={e => setForm(f => ({ ...f, documentNumber: e.target.value }))} placeholder="e.g. A12345678"
+                  style={{ width: '100%', background: '#090A0F', border: '1px solid #1E293B', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#fff', outline: 'none' }}
+                  onFocus={e => e.target.style.borderColor = '#EAB308'}
+                  onBlur={e => e.target.style.borderColor = '#1E293B'} />
               </div>
-              <FileInput label={t(lang,'dashboard.frontDocument')} required onChange={url => setForm(f => ({ ...f, frontImageUrl: url }))} />
-              <FileInput label={t(lang,'dashboard.backDocument')} onChange={url => setForm(f => ({ ...f, backImageUrl: url }))} />
-              <FileInput label={t(lang,'dashboard.selfieDocument')} required onChange={url => setForm(f => ({ ...f, selfieUrl: url }))} />
-              <div className="flex items-start gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
-                <AlertTriangle size={16} className="text-yellow-400 flex-shrink-0 mt-0.5" />
-                <p className="text-yellow-400 text-xs">By submitting, you confirm these are genuine documents and your real identity. False submissions will result in permanent account suspension.</p>
+              <FileInput label={t(lang, 'dashboard.frontDocument')} required onChange={url => setForm(f => ({ ...f, frontImageUrl: url }))} />
+              <FileInput label={t(lang, 'dashboard.backDocument')} onChange={url => setForm(f => ({ ...f, backImageUrl: url }))} />
+              <FileInput label={t(lang, 'dashboard.selfieDocument')} required onChange={url => setForm(f => ({ ...f, selfieUrl: url }))} />
+              <div style={{ background: '#EAB30810', border: '1px solid #EAB30825', borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <AlertTriangle size={14} style={{ color: '#EAB308', flexShrink: 0, marginTop: 1 }} />
+                <p className="text-xs" style={{ color: '#EAB308' }}>By submitting, you confirm these are genuine documents and your real identity. False submissions will result in permanent account suspension.</p>
               </div>
-              <button type="submit" disabled={submitting} className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
-                {submitting ? <><Loader2 size={16} className="animate-spin" />{t(lang,'dashboard.submitting')}</> : <><Upload size={16} />{t(lang,'dashboard.submitVerification')}</>}
+              <button type="submit" disabled={submitting}
+                style={{ width: '100%', padding: '16px', borderRadius: 12, background: 'linear-gradient(135deg,#EAB308,#FDE047)', color: '#090A0F', fontWeight: 900, fontSize: 14, border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: submitting ? 0.6 : 1 }}>
+                {submitting ? <><Loader2 size={16} className="animate-spin" />{t(lang, 'dashboard.submitting')}</> : <><Upload size={16} />{t(lang, 'dashboard.submitVerification')}</>}
               </button>
             </form>
           </div>
@@ -145,20 +158,29 @@ export default function KycPage() {
       )}
 
       {kycStatus === 'PENDING' && submission && (
-        <div className="card-dark p-6">
+        <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
           <h2 className="font-bold mb-4">Submitted Documents</h2>
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between py-3 border-b border-[#1e1e35]"><span className="text-gray-500">Document Type</span><span className="font-medium capitalize">{submission.documentType.replace(/_/g,' ')}</span></div>
-            <div className="flex justify-between py-3 border-b border-[#1e1e35]"><span className="text-gray-500">Document Number</span><span className="font-medium font-mono">{submission.documentNumber}</span></div>
-            <div className="flex justify-between py-3 border-b border-[#1e1e35]"><span className="text-gray-500">Submitted On</span><span className="font-medium">{new Date(submission.submittedAt).toLocaleDateString()}</span></div>
-            <div className="flex justify-between py-3"><span className="text-gray-500">Status</span><span className="text-yellow-400 font-semibold">Under Review</span></div>
+            {[
+              { label: 'Document Type',   value: submission.documentType.replace(/_/g,' ') },
+              { label: 'Document Number', value: submission.documentNumber },
+              { label: 'Submitted On',    value: new Date(submission.submittedAt).toLocaleDateString() },
+              { label: 'Status',          value: 'Under Review', highlight: true },
+            ].map(({ label, value, highlight }) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #1E293B' }}>
+                <span className="text-gray-500">{label}</span>
+                <span className="font-medium capitalize" style={{ color: highlight ? '#EAB308' : '#fff' }}>{value}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
       {kycStatus === 'APPROVED' && (
-        <div className="card-dark p-6 text-center py-10">
-          <CheckCircle size={48} className="text-green-400 mx-auto mb-4" />
+        <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '64px 24px', textAlign: 'center' }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#10B98115', border: '1px solid #10B98130', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <CheckCircle size={32} style={{ color: '#10B981' }} />
+          </div>
           <h2 className="text-xl font-bold mb-2">Identity Verified</h2>
           <p className="text-gray-500 text-sm">You have full access to all APXFund features.</p>
         </div>

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { formatCurrency } from '@/lib/utils'
-import { ArrowUpCircle, Loader2, Lock, TrendingUp } from 'lucide-react'
+import { ArrowUpCircle, Loader2, Lock, TrendingUp, Shield } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { useLang } from '@/lib/useLang'
@@ -42,71 +42,88 @@ export default function WithdrawPage() {
     finally { setSubmitting(false) }
   }
 
-  const inputClass = "w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c] transition-colors"
+  const inputStyle = { width: '100%', background: '#090A0F', border: '1px solid #1E293B', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#fff', outline: 'none' }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-10 h-10 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" /></div>
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-10 h-10 rounded-full border-2 border-[#EAB308] border-t-transparent animate-spin" /></div>
 
   return (
     <div className="max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-black mb-1">{t(lang,'dashboard.withdrawTitle')}</h1>
-        <p className="text-gray-500 text-sm">{t(lang,'dashboard.withdrawPageSub')}</p>
+        <h1 className="text-2xl font-black mb-1">{t(lang, 'dashboard.withdrawTitle')}</h1>
+        <p className="text-gray-500 text-sm">{t(lang, 'dashboard.withdrawPageSub')}</p>
       </div>
-      <div className="card-dark p-5 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-green-400/10 flex items-center justify-center"><ArrowUpCircle size={22} className="text-green-400" /></div>
+
+      {/* Balance card */}
+      <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px', display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: '#10B98118', border: '1px solid #10B98130', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <ArrowUpCircle size={24} style={{ color: '#10B981' }} />
+        </div>
         <div>
-          <div className="text-gray-500 text-xs uppercase tracking-wider">{t(lang,'dashboard.availableBalance')}</div>
-          <div className="text-2xl font-black gold-text">{formatCurrency(balance)}</div>
+          <div className="text-gray-500 text-xs uppercase tracking-wider mb-1">{t(lang, 'dashboard.availableBalance')}</div>
+          <div className="text-3xl font-black" style={{ color: '#EAB308' }}>{formatCurrency(balance)}</div>
         </div>
       </div>
+
       {!hasCompletedInvestment ? (
-        <div className="card-dark p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-yellow-400/10 flex items-center justify-center flex-shrink-0"><Lock size={22} className="text-yellow-400" /></div>
+        <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px', space: '16px' }}>
+          <div className="flex items-center gap-4 mb-5">
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: '#EAB30810', border: '1px solid #EAB30830', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Lock size={24} style={{ color: '#EAB308' }} />
+            </div>
             <div>
-              <h2 className="font-bold text-yellow-400">{t(lang,'dashboard.withdrawalsLocked')}</h2>
-              <p className="text-gray-500 text-xs mt-0.5">{t(lang,'dashboard.withdrawalsLockedSub')}</p>
+              <h2 className="font-bold" style={{ color: '#EAB308' }}>{t(lang, 'dashboard.withdrawalsLocked')}</h2>
+              <p className="text-gray-500 text-xs mt-0.5">{t(lang, 'dashboard.withdrawalsLockedSub')}</p>
             </div>
           </div>
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-yellow-400 text-sm space-y-2">
-            <p className="font-semibold">{t(lang,'dashboard.withdrawHow')}</p>
-            <ul className="text-xs space-y-1.5 text-yellow-300">
-              <li>{t(lang,'dashboard.withdrawStep1')}</li>
-              <li>{t(lang,'dashboard.withdrawStep2')}</li>
-              <li>{t(lang,'dashboard.withdrawStep3')}</li>
-              <li>{t(lang,'dashboard.withdrawStep4')}</li>
+          <div style={{ background: '#EAB30810', border: '1px solid #EAB30820', borderRadius: 12, padding: '16px', marginBottom: 16 }}>
+            <p className="font-semibold text-sm mb-3" style={{ color: '#EAB308' }}>{t(lang, 'dashboard.withdrawHow')}</p>
+            <ul className="space-y-2">
+              {['withdrawStep1','withdrawStep2','withdrawStep3','withdrawStep4'].map((key, i) => (
+                <li key={key} className="flex items-start gap-2 text-xs" style={{ color: '#FDE047' }}>
+                  <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#EAB30830', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>{i+1}</span>
+                  {t(lang, `dashboard.${key}`)}
+                </li>
+              ))}
             </ul>
           </div>
-          <p className="text-gray-500 text-xs leading-relaxed">{t(lang,'dashboard.withdrawNote')}</p>
-          <Link href="/dashboard/plans" className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm">
-            <TrendingUp size={16} /> {t(lang,'dashboard.browseInvestmentPlans')}
+          <Link href="/dashboard/plans" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px', borderRadius: 12, background: 'linear-gradient(135deg,#EAB308,#FDE047)', color: '#090A0F', fontWeight: 900, fontSize: 14, textDecoration: 'none' }}>
+            <TrendingUp size={16} /> {t(lang, 'dashboard.browseInvestmentPlans')}
           </Link>
         </div>
       ) : (
-        <div className="card-dark p-6">
+        <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.currency')}</label>
-              <select value={form.currency} onChange={set('currency')} className={inputClass}>
-                <option value="BTC">Bitcoin (BTC)</option>
-                <option value="ETH">Ethereum (ETH)</option>
-                <option value="USDT">Tether (USDT)</option>
-              </select>
+            {[
+              { field: 'currency', label: t(lang,'dashboard.currency'), type: 'select', options: [['BTC','Bitcoin (BTC)'],['ETH','Ethereum (ETH)'],['USDT','Tether (USDT)']] },
+              { field: 'walletAddress', label: t(lang,'dashboard.walletAddress'), type: 'text', placeholder: t(lang,'dashboard.walletPlaceholder') },
+              { field: 'amount', label: t(lang,'dashboard.amountUsd'), type: 'number', placeholder: 'Min: $10' },
+            ].map(({ field, label, type, options, placeholder }) => (
+              <div key={field}>
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{label}</label>
+                {type === 'select' ? (
+                  <select value={(form as any)[field]} onChange={set(field)} style={inputStyle}>
+                    {(options as string[][]).map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                ) : (
+                  <input type={type} required min={type === 'number' ? 10 : undefined} max={type === 'number' ? balance : undefined}
+                    value={(form as any)[field]} onChange={set(field)} placeholder={placeholder} style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = '#EAB308'}
+                    onBlur={e => e.target.style.borderColor = '#1E293B'} />
+                )}
+                {field === 'amount' && form.amount && parseFloat(form.amount) > balance && (
+                  <p className="text-red-400 text-xs mt-1">Insufficient balance</p>
+                )}
+              </div>
+            ))}
+
+            <div style={{ background: '#60a5fa10', border: '1px solid #60a5fa20', borderRadius: 10, padding: '12px 14px' }}
+              className="flex items-center gap-2 text-xs text-blue-400">
+              <Shield size={13} style={{ flexShrink: 0 }} />
+              Withdrawals are processed within 24 hours to your specified wallet address.
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.walletAddress')}</label>
-              <input type="text" required value={form.walletAddress} onChange={set('walletAddress')} placeholder={t(lang,'dashboard.walletPlaceholder')} className={inputClass} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.amountUsd')}</label>
-              <input type="number" required min="10" max={balance} value={form.amount} onChange={set('amount')} placeholder="Min: $10" className={inputClass} />
-              {form.amount && parseFloat(form.amount) > balance && <p className="text-red-400 text-xs mt-1">Insufficient balance</p>}
-            </div>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-blue-400 text-xs">
-              ℹ️ {t(lang,'dashboard.minDeposit')}: $10. {t(lang,'dashboard.depositNote')}
-            </div>
+
             <button type="submit" disabled={submitting || !form.amount || parseFloat(form.amount) > balance}
-              className="btn-gold w-full py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
+              style={{ width: '100%', padding: '16px', borderRadius: 12, fontWeight: 900, fontSize: 14, background: 'linear-gradient(135deg,#EAB308,#FDE047)', color: '#090A0F', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: submitting ? 0.6 : 1 }}>
               {submitting ? <><Loader2 size={16} className="animate-spin" />{t(lang,'dashboard.processing')}</> : <><ArrowUpCircle size={16} />{t(lang,'dashboard.requestWithdrawal')}</>}
             </button>
           </form>

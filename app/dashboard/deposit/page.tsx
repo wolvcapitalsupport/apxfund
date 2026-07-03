@@ -1,11 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Copy, CheckCircle, Upload, Loader2 } from 'lucide-react'
+import { Copy, CheckCircle, Upload, Loader2, Shield, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLang } from '@/lib/useLang'
 import { t } from '@/lib/i18n'
 
 const COIN_ICONS: Record<string, string> = { BTC: '₿', ETH: 'Ξ', USDT: '₮', USDC: '$', XRP: '✕' }
+const COIN_COLORS: Record<string, string> = { BTC: '#F7931A', ETH: '#627EEA', USDT: '#26A17B', USDC: '#2775CA', XRP: '#346AA9' }
+
 type Wallet = { id: string; currency: string; label: string; address: string; network: string }
 
 async function uploadFile(file: File): Promise<string> {
@@ -64,71 +66,118 @@ export default function DepositPage() {
     setSubmitting(false)
   }
 
-  if (loadingWallets) return <div className="flex items-center justify-center h-40"><div className="w-8 h-8 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" /></div>
+  if (loadingWallets) return (
+    <div className="flex items-center justify-center h-40">
+      <div className="w-8 h-8 rounded-full border-2 border-[#EAB308] border-t-transparent animate-spin" />
+    </div>
+  )
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-black mb-1">{t(lang,'dashboard.depositTitle')}</h1>
-        <p className="text-gray-500 text-sm">{t(lang,'dashboard.depositSub')}</p>
+        <h1 className="text-2xl font-black mb-1">{t(lang, 'dashboard.depositTitle')}</h1>
+        <p className="text-gray-500 text-sm">{t(lang, 'dashboard.depositSub')}</p>
       </div>
-      <div className="card-dark p-6">
-        <h2 className="font-bold mb-4">{t(lang,'dashboard.selectPayment')}</h2>
+
+      {/* Security badge */}
+      <div style={{ background: '#10B98110', border: '1px solid #10B98130', borderRadius: 12, padding: '12px 16px' }}
+        className="flex items-center gap-3">
+        <Shield size={16} style={{ color: '#10B981', flexShrink: 0 }} />
+        <p className="text-xs" style={{ color: '#10B981' }}>All deposits are secured with 256-bit encryption. Funds credited within 30 minutes of verification.</p>
+      </div>
+
+      {/* Select currency */}
+      <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
+        <h2 className="font-bold mb-5">{t(lang, 'dashboard.selectPayment')}</h2>
         <div className={`grid gap-3 ${wallets.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
-          {wallets.map(w => (
-            <button key={w.id} onClick={() => setSelected(w)}
-              className={`p-4 rounded-xl border text-center transition-all ${selected?.id === w.id ? 'border-[#c9a84c] bg-[#c9a84c]/10' : 'border-[#1e1e35] hover:border-[#c9a84c]/40'}`}>
-              <div className="text-2xl mb-1">{COIN_ICONS[w.currency] || '●'}</div>
-              <div className="text-xs font-bold">{w.currency}</div>
-              <div className="text-gray-500 text-xs">{w.network}</div>
-            </button>
-          ))}
+          {wallets.map(w => {
+            const coinColor = COIN_COLORS[w.currency] || '#EAB308'
+            const isSelected = selected?.id === w.id
+            return (
+              <button key={w.id} onClick={() => setSelected(w)}
+                style={{
+                  padding: '16px 8px', borderRadius: 12, border: `1px solid ${isSelected ? coinColor : '#1E293B'}`,
+                  background: isSelected ? `${coinColor}12` : '#090A0F', textAlign: 'center', transition: 'all 0.2s',
+                }}>
+                <div className="text-2xl mb-2" style={{ color: isSelected ? coinColor : '#64748b' }}>{COIN_ICONS[w.currency] || '●'}</div>
+                <div className="text-xs font-bold text-white">{w.currency}</div>
+                <div className="text-gray-600 text-xs mt-0.5">{w.network}</div>
+              </button>
+            )
+          })}
         </div>
       </div>
+
+      {/* Wallet address */}
       {selected && (
-        <div className="card-dark p-6">
-          <h2 className="font-bold mb-1">Send {selected.label} to this address</h2>
-          <p className="text-gray-500 text-xs mb-4">Only send <strong className="text-white">{selected.currency}</strong> on the <strong className="text-white">{selected.network}</strong> network.</p>
-          <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl p-4 flex items-center gap-3 mb-4">
-            <code className="flex-1 text-[#c9a84c] text-sm font-mono break-all">{selected.address}</code>
-            <button onClick={copy} className="flex-shrink-0 text-gray-400 hover:text-[#c9a84c] transition-colors">
-              {copied ? <CheckCircle size={18} className="text-green-400" /> : <Copy size={18} />}
+        <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
+          <h2 className="font-bold mb-1">Send {selected.label}</h2>
+          <p className="text-gray-500 text-xs mb-5">
+            Only send <strong className="text-white">{selected.currency}</strong> on <strong className="text-white">{selected.network}</strong>. Wrong network = permanent loss.
+          </p>
+          <div style={{ background: '#090A0F', border: `1px solid ${COIN_COLORS[selected.currency] || '#EAB308'}40`, borderRadius: 12, padding: '16px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <code className="flex-1 text-sm font-mono break-all" style={{ color: COIN_COLORS[selected.currency] || '#EAB308' }}>{selected.address}</code>
+            <button onClick={copy} className="flex-shrink-0 transition-colors">
+              {copied ? <CheckCircle size={20} style={{ color: '#10B981' }} /> : <Copy size={20} className="text-gray-400 hover:text-white" />}
             </button>
           </div>
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-yellow-400 text-xs">
-            ⚠️ {t(lang,'dashboard.minDeposit')}: <strong>$50</strong>. {t(lang,'dashboard.depositNote')}
+          <div style={{ background: '#EAB30810', border: '1px solid #EAB30830', borderRadius: 10, padding: '12px 16px' }}
+            className="flex items-center gap-2 text-xs" style={{ color: '#EAB308' } as any}>
+            <AlertTriangle size={14} style={{ flexShrink: 0 }} />
+            {t(lang, 'dashboard.minDeposit')}: <strong>$50</strong>. {t(lang, 'dashboard.depositNote')}
           </div>
         </div>
       )}
-      <div className="card-dark p-6">
-        <h2 className="font-bold mb-4">{t(lang,'dashboard.confirmDeposit')}</h2>
+
+      {/* Confirm deposit */}
+      <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px' }}>
+        <h2 className="font-bold mb-5">{t(lang, 'dashboard.confirmDeposit')}</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.amountUsd')} *</label>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t(lang, 'dashboard.amountUsd')} *</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
               <input type="number" min="50" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00"
-                className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl pl-8 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]" />
+                style={{ width: '100%', background: '#090A0F', border: '1px solid #1E293B', borderRadius: 12, padding: '14px 16px 14px 32px', fontSize: 14, color: '#fff', outline: 'none' }}
+                onFocus={e => e.target.style.borderColor = '#EAB308'}
+                onBlur={e => e.target.style.borderColor = '#1E293B'} />
             </div>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.txHash')} *</label>
-            <input type="text" value={txHash} onChange={e => setTxHash(e.target.value)} placeholder="Paste your TX hash here"
-              className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]" />
-            <p className="text-gray-600 text-xs mt-1">{t(lang,'dashboard.txHashSub')}</p>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t(lang, 'dashboard.txHash')} *</label>
+            <input type="text" value={txHash} onChange={e => setTxHash(e.target.value)} placeholder="Paste your transaction hash here"
+              style={{ width: '100%', background: '#090A0F', border: '1px solid #1E293B', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#fff', outline: 'none', fontFamily: 'monospace' }}
+              onFocus={e => e.target.style.borderColor = '#EAB308'}
+              onBlur={e => e.target.style.borderColor = '#1E293B'} />
+            <p className="text-gray-600 text-xs mt-1.5">{t(lang, 'dashboard.txHashSub')}</p>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">{t(lang,'dashboard.proofScreenshot')} <span className="text-gray-500">({t(lang,'dashboard.optional')})</span></label>
-            <label className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl border cursor-pointer text-sm transition-colors ${proofDone ? 'border-green-500/50 bg-green-500/10 text-green-400' : 'border-[#1e1e35] bg-[#0a0a14] text-gray-400 hover:border-[#c9a84c]'}`}>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              {t(lang, 'dashboard.proofScreenshot')} <span className="text-gray-600 normal-case">({t(lang, 'dashboard.optional')})</span>
+            </label>
+            <label style={{
+              display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '14px 16px',
+              borderRadius: 12, border: `1px solid ${proofDone ? '#10B98150' : '#1E293B'}`,
+              background: proofDone ? '#10B98108' : '#090A0F', cursor: 'pointer', fontSize: 14,
+              color: proofDone ? '#10B981' : '#64748b', transition: 'all 0.2s',
+            }}>
               {proofUploading ? <Loader2 size={16} className="animate-spin" /> : proofDone ? <CheckCircle size={16} /> : <Upload size={16} />}
               {proofUploading ? 'Uploading...' : proofDone ? 'Screenshot uploaded ✓' : 'Choose screenshot to upload'}
               <input type="file" accept="image/*" className="hidden" onChange={handleProofUpload} disabled={proofUploading} />
             </label>
           </div>
+
           <button onClick={handleSubmit} disabled={submitting || !amount || !txHash || !selected}
-            className="w-full btn-gold py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50">
-            {submitting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-            {submitting ? t(lang,'dashboard.processing') : t(lang,'dashboard.submitDeposit')}
+            style={{
+              width: '100%', padding: '16px', borderRadius: 12, fontWeight: 900, fontSize: 14,
+              background: submitting || !amount || !txHash ? '#1E293B' : 'linear-gradient(135deg, #EAB308, #FDE047)',
+              color: submitting || !amount || !txHash ? '#475569' : '#090A0F',
+              border: 'none', cursor: submitting || !amount || !txHash ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
+            }}>
+            {submitting ? <><Loader2 size={16} className="animate-spin" />{t(lang, 'dashboard.processing')}</> : <><Upload size={16} />{t(lang, 'dashboard.submitDeposit')}</>}
           </button>
         </div>
       </div>

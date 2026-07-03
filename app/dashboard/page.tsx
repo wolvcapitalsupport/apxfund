@@ -107,7 +107,7 @@ export default function DashboardPage() {
   const activeInvestments = data?.investments?.filter((i: any) => i.status === 'ACTIVE') || []
   const totalLocked = activeInvestments.reduce((sum: number, inv: any) => sum + inv.amount, 0)
   const chartData = buildChartData(data?.transactions || [], data?.balance || 0)
-  const chartMin = 0
+  const chartMin = chartData.length > 0 ? Math.min(...chartData.map(d => d.balance)) * 0.95 : 0
 
   return (
     <div className="space-y-6" style={{ background: '#090A0F', minHeight: '100vh', padding: '0' }}>
