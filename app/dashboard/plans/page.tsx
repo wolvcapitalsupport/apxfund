@@ -210,7 +210,7 @@ export default function PlansPage() {
                 <div className="bg-purple-500/10 border border-purple-500/25 rounded-xl p-3.5 text-xs text-gray-300 leading-relaxed">
                   <span className="font-bold text-purple-300">Starter Portfolio is limited to 2 cycles per account.</span>{' '}
                   Profit is credited to your balance after each cycle, but capital stays locked after your 2nd cycle
-                  until you migrate it to a higher plan — it isn't released to your balance automatically.{' '}
+                  until you migrate it to a higher plan — it isn&apos;t released to your balance automatically.{' '}
                   <a href="/policies" target="_blank" rel="noopener noreferrer" className="text-purple-300 underline hover:text-purple-200">
                     Full terms
                   </a>
