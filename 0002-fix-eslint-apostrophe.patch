@@ -1,0 +1,26 @@
+From 2e6ee45cda5a29df2c8207674018cf070e2e953a Mon Sep 17 00:00:00 2001
+From: Claude <assistant@wolvcapital.local>
+Date: Sat, 4 Jul 2026 00:33:17 +0000
+Subject: [PATCH] fix: escape apostrophe in Starter Portfolio disclosure text
+ (ESLint)
+
+---
+ app/dashboard/plans/page.tsx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/app/dashboard/plans/page.tsx b/app/dashboard/plans/page.tsx
+index 6c8fb4b..8fbe04f 100644
+--- a/app/dashboard/plans/page.tsx
++++ b/app/dashboard/plans/page.tsx
+@@ -210,7 +210,7 @@ export default function PlansPage() {
+                 <div className="bg-purple-500/10 border border-purple-500/25 rounded-xl p-3.5 text-xs text-gray-300 leading-relaxed">
+                   <span className="font-bold text-purple-300">Starter Portfolio is limited to 2 cycles per account.</span>{' '}
+                   Profit is credited to your balance after each cycle, but capital stays locked after your 2nd cycle
+-                  until you migrate it to a higher plan — it isn't released to your balance automatically.{' '}
++                  until you migrate it to a higher plan — it isn&apos;t released to your balance automatically.{' '}
+                   <a href="/policies" target="_blank" rel="noopener noreferrer" className="text-purple-300 underline hover:text-purple-200">
+                     Full terms
+                   </a>
+-- 
+2.43.0
+

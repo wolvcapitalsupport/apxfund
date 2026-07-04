@@ -1,0 +1,26 @@
+From babf87faa6cdd50947f87a5f2e7c14ef369f3d0b Mon Sep 17 00:00:00 2001
+From: Claude <assistant@wolvcapital.local>
+Date: Sat, 4 Jul 2026 02:07:02 +0000
+Subject: [PATCH] fix: correct Growth Fund minimum display to $2,000 on public
+ plans page
+
+---
+ app/investment-plans/page.tsx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/app/investment-plans/page.tsx b/app/investment-plans/page.tsx
+index f0f03d6..f6552c2 100644
+--- a/app/investment-plans/page.tsx
++++ b/app/investment-plans/page.tsx
+@@ -14,7 +14,7 @@ const PLANS = [
+   {
+     name: 'Growth Fund', roi: '12%', min: 2000, max: 4999, duration: '3 Days', durationDays: 3,
+     referral: '7%', color: '#e2e8f0', glow: 'rgba(226,232,240,0.08)', popular: true,
+-    features: ['12% ROI in 3 days', 'Minimum $1,000 — Maximum $4,999', 'Profit returned in 3 days', '7% referral bonus', 'Capital insured', 'Priority support'],
++    features: ['12% ROI in 3 days', 'Minimum $2,000 — Maximum $4,999', 'Profit returned in 3 days', '7% referral bonus', 'Capital insured', 'Priority support'],
+     desc: 'Our most popular plan. Higher returns over 3 days, ideal for committed investors seeking growth.',
+   },
+   {
+-- 
+2.43.0
+

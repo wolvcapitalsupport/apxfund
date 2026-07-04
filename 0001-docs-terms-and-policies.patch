@@ -1,0 +1,128 @@
+From 4b8f3116c093e53f176eff41258fad6e6a7acef8 Mon Sep 17 00:00:00 2001
+From: Claude <assistant@wolvcapital.local>
+Date: Sat, 4 Jul 2026 00:13:12 +0000
+Subject: [PATCH] docs: fix stale plan names in Terms & surface Starter
+ Portfolio terms in-app
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Corrected /policies Section 3 and 7: replaced outdated Gold/Platinum/
+  Diamond/VIP plan names and rates with the real live plans (Starter
+  Portfolio, Growth Fund, Apex Fund, Sovereign Tier), which is a real
+  conflict between the legal terms and the actual product.
+- Rewrote 3a and added 3b to spell out the Starter Portfolio cycle cap,
+  capital-locking, migration flow, and auto-rollover default/opt-out
+  in plain language.
+- Added a Starter Portfolio disclosure box (with link to /policies) in
+  the investment review panel, shown only when Starter Portfolio is
+  selected, so the cycle limit is disclosed at the point of investment.
+- Added a 'Full terms' link to the MigrationBanner, shown at the exact
+  moment a user's capital gets locked.
+- Added a persistent 'Terms & Policies' link in the dashboard sidebar
+  footer — previously there was no way to reach /policies from inside
+  the logged-in dashboard at all.
+---
+ app/dashboard/layout.tsx       |  7 ++++++-
+ app/dashboard/plans/page.tsx   | 11 +++++++++++
+ app/policies/page.tsx          | 12 ++++++++----
+ components/MigrationBanner.tsx |  3 +++
+ 4 files changed, 28 insertions(+), 5 deletions(-)
+
+diff --git a/app/dashboard/layout.tsx b/app/dashboard/layout.tsx
+index b2d1eee..4b54af9 100644
+--- a/app/dashboard/layout.tsx
++++ b/app/dashboard/layout.tsx
+@@ -144,7 +144,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
+         )}
+       </nav>
+ 
+-      <div className="p-3 border-t border-[#1e1e35]">
++      <div className="p-3 border-t border-[#1e1e35] space-y-0.5">
++        <Link href="/policies" target="_blank" rel="noopener noreferrer"
++          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all w-full">
++          <FileCheck size={15} />
++          Terms &amp; Policies
++        </Link>
+         <button onClick={() => signOut({ callbackUrl: '/' })}
+           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-400/5 transition-all w-full">
+           <LogOut size={17} />
+diff --git a/app/dashboard/plans/page.tsx b/app/dashboard/plans/page.tsx
+index bd252a4..6c8fb4b 100644
+--- a/app/dashboard/plans/page.tsx
++++ b/app/dashboard/plans/page.tsx
+@@ -206,6 +206,17 @@ export default function PlansPage() {
+                 <p className="text-red-400 text-xs">{t(lang,'dashboard.insufficientBalance')}</p>
+               )}
+ 
++              {selectedPlan.name === STARTER_PLAN_NAME && (
++                <div className="bg-purple-500/10 border border-purple-500/25 rounded-xl p-3.5 text-xs text-gray-300 leading-relaxed">
++                  <span className="font-bold text-purple-300">Starter Portfolio is limited to 2 cycles per account.</span>{' '}
++                  Profit is credited to your balance after each cycle, but capital stays locked after your 2nd cycle
++                  until you migrate it to a higher plan — it isn't released to your balance automatically.{' '}
++                  <a href="/policies" target="_blank" rel="noopener noreferrer" className="text-purple-300 underline hover:text-purple-200">
++                    Full terms
++                  </a>
++                </div>
++              )}
++
+               <div className="flex gap-3">
+                 <button onClick={() => { setSelectedPlan(null); setAutoReinvest(true); setAmount('') }}
+                   className="flex-1 py-3 rounded-xl border border-[#1e1e35] text-gray-400 text-sm hover:text-white transition-colors">
+diff --git a/app/policies/page.tsx b/app/policies/page.tsx
+index 9a5479e..1f0b76a 100644
+--- a/app/policies/page.tsx
++++ b/app/policies/page.tsx
+@@ -13,11 +13,15 @@ const SECTIONS = [
+   },
+   {
+     title: '3. Investment Plans & Returns',
+-    content: `APXFund offers four investment plans: Gold (8% ROI/24h), Platinum (15% ROI/3 days), Diamond (25% ROI/7 days), and VIP (50% ROI/14 days). Returns are credited automatically upon maturity. All plans include capital insurance covering the principal invested. Past performance does not guarantee future results. Investment activities carry inherent risk.`,
++    content: `APXFund offers four investment plans: Starter Portfolio (3.5% ROI / 7 days), Growth Fund (12% ROI / 14 days), Apex Fund (22% ROI / 30 days), and Sovereign Tier (38% ROI / 30 days). Returns are credited automatically upon maturity. All plans include capital insurance covering the principal invested. Past performance does not guarantee future results. Investment activities carry inherent risk. Exact rates and minimum/maximum amounts for each plan are displayed on the Investment Plans page at the time of investment and take precedence over this summary if they differ.`,
+   },
+   {
+     title: '3a. Starter Portfolio Cycle Limit & Migration',
+-    content: `Starter Portfolio is limited to 2 cycles per account lifetime. Profits from each Starter Portfolio cycle are always withdrawable at completion. Capital, however, remains locked in the platform between the completion of the second cycle and migration to a higher plan — it is not released to your balance automatically. Migrating your locked capital to Growth Fund, Apex Fund, or Sovereign Tier releases it into a new, larger contract. There is no time limit to migrate; locked capital is held safely until you choose to do so. Auto-rollover (automatic reinvestment of capital into a new cycle at maturity) applies by default to all plans above Starter Portfolio, and can be disabled per-investment from the dashboard.`,
++    content: `Starter Portfolio is limited to 2 investment cycles per account, for the lifetime of that account. Once both cycles are complete, no further Starter Portfolio investments can be opened on that account. Profit from each Starter Portfolio cycle is credited to your withdrawable balance immediately at that cycle's completion — this is never delayed or affected by the points below. Capital, however, is not released to your balance when the second cycle completes. Instead, it remains locked on the platform until you migrate it into a higher-tier plan (Growth Fund, Apex Fund, or Sovereign Tier), at which point your locked capital plus any required top-up becomes the principal of your new investment. There is no deadline to migrate — locked capital is held safely on your account indefinitely until you choose to act. Your dashboard will display the exact top-up required for each eligible plan once your capital is locked.`,
++  },
++  {
++    title: '3b. Auto-Rollover (Growth Fund, Apex Fund, Sovereign Tier)',
++    content: `Unlike Starter Portfolio, investments in Growth Fund, Apex Fund, and Sovereign Tier automatically roll over into a new cycle of the same plan when they mature, by default: profit is credited to your balance and your capital immediately begins a new cycle without any action from you. You may disable this behavior for an individual investment at any time from its investment card on the dashboard ("Stop Renewing"). When disabled, both capital and profit are credited to your balance at that investment's next maturity, and no further cycle is started automatically.`,
+   },
+   {
+     title: '4. Deposits',
+@@ -33,7 +37,7 @@ const SECTIONS = [
+   },
+   {
+     title: '7. Referral Program',
+-    content: `The referral program rewards users for introducing new investors. Referral bonuses range from 5% (Gold) to 15% (VIP) of the referred investor's first investment amount. Bonuses are credited automatically upon the referred user's first completed investment. Referral fraud, including self-referral or fabricated accounts, will result in immediate account termination and forfeiture of all bonuses.`,
++    content: `The referral program rewards users for introducing new investors. Referral bonuses vary by the referred investor's plan and are shown on the Investment Plans page. Bonuses are credited automatically upon the referred user's first completed investment cycle. Referral fraud, including self-referral or fabricated accounts, will result in immediate account termination and forfeiture of all bonuses.`,
+   },
+   {
+     title: '8. Capital Insurance Policy',
+@@ -75,7 +79,7 @@ export default function PoliciesPage() {
+         <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">Legal</div>
+         <h1 className="text-5xl font-black mb-4">Company <span className="gold-text">Policies</span></h1>
+         <p className="text-gray-400">
+-          Last updated: January 2025 · Please read these terms carefully before using APXFund.
++          Last updated: July 2026 · Please read these terms carefully before using APXFund.
+         </p>
+       </section>
+ 
+diff --git a/components/MigrationBanner.tsx b/components/MigrationBanner.tsx
+index 98568dd..a3a17eb 100644
+--- a/components/MigrationBanner.tsx
++++ b/components/MigrationBanner.tsx
+@@ -88,6 +88,9 @@ export default function MigrationBanner({
+             >
+               Migrate Now <ArrowRight size={13} />
+             </Link>
++            <a href="/policies" target="_blank" rel="noopener noreferrer" className="text-xs text-purple-300 underline hover:text-purple-200">
++              Full terms
++            </a>
+             <span className="text-xs text-gray-600">This notice reappears on each login</span>
+           </div>
+         </div>
+-- 
+2.43.0
+

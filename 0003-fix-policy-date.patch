@@ -1,0 +1,25 @@
+From 426978b4045df35d5f59b5b3b02cbbeec34fac4b Mon Sep 17 00:00:00 2001
+From: Claude <assistant@wolvcapital.local>
+Date: Sat, 4 Jul 2026 01:59:47 +0000
+Subject: [PATCH] fix: set policies last updated date to March 2025
+
+---
+ app/policies/page.tsx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/app/policies/page.tsx b/app/policies/page.tsx
+index 1f0b76a..a7e135d 100644
+--- a/app/policies/page.tsx
++++ b/app/policies/page.tsx
+@@ -79,7 +79,7 @@ export default function PoliciesPage() {
+         <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">Legal</div>
+         <h1 className="text-5xl font-black mb-4">Company <span className="gold-text">Policies</span></h1>
+         <p className="text-gray-400">
+-          Last updated: July 2026 · Please read these terms carefully before using APXFund.
++          Last updated: March 2025 · Please read these terms carefully before using APXFund.
+         </p>
+       </section>
+ 
+-- 
+2.43.0
+
