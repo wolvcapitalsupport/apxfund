@@ -79,7 +79,7 @@ export default function PoliciesPage() {
         <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">Legal</div>
         <h1 className="text-5xl font-black mb-4">Company <span className="gold-text">Policies</span></h1>
         <p className="text-gray-400">
-          Last updated: July 2026 · Please read these terms carefully before using APXFund.
+          Last updated: March 2025 · Please read these terms carefully before using APXFund.
         </p>
       </section>
 
