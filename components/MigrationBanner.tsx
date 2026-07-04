@@ -88,6 +88,9 @@ export default function MigrationBanner({
             >
               Migrate Now <ArrowRight size={13} />
             </Link>
+            <a href="/policies" target="_blank" rel="noopener noreferrer" className="text-xs text-purple-300 underline hover:text-purple-200">
+              Full terms
+            </a>
             <span className="text-xs text-gray-600">This notice reappears on each login</span>
           </div>
         </div>

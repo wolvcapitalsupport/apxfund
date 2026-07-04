@@ -144,7 +144,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </nav>
 
-      <div className="p-3 border-t border-[#1e1e35]">
+      <div className="p-3 border-t border-[#1e1e35] space-y-0.5">
+        <Link href="/policies" target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all w-full">
+          <FileCheck size={15} />
+          Terms &amp; Policies
+        </Link>
         <button onClick={() => signOut({ callbackUrl: '/' })}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-400/5 transition-all w-full">
           <LogOut size={17} />

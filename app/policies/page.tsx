@@ -13,11 +13,15 @@ const SECTIONS = [
   },
   {
     title: '3. Investment Plans & Returns',
-    content: `APXFund offers four investment plans: Gold (8% ROI/24h), Platinum (15% ROI/3 days), Diamond (25% ROI/7 days), and VIP (50% ROI/14 days). Returns are credited automatically upon maturity. All plans include capital insurance covering the principal invested. Past performance does not guarantee future results. Investment activities carry inherent risk.`,
+    content: `APXFund offers four investment plans: Starter Portfolio (3.5% ROI / 7 days), Growth Fund (12% ROI / 14 days), Apex Fund (22% ROI / 30 days), and Sovereign Tier (38% ROI / 30 days). Returns are credited automatically upon maturity. All plans include capital insurance covering the principal invested. Past performance does not guarantee future results. Investment activities carry inherent risk. Exact rates and minimum/maximum amounts for each plan are displayed on the Investment Plans page at the time of investment and take precedence over this summary if they differ.`,
   },
   {
     title: '3a. Starter Portfolio Cycle Limit & Migration',
-    content: `Starter Portfolio is limited to 2 cycles per account lifetime. Profits from each Starter Portfolio cycle are always withdrawable at completion. Capital, however, remains locked in the platform between the completion of the second cycle and migration to a higher plan — it is not released to your balance automatically. Migrating your locked capital to Growth Fund, Apex Fund, or Sovereign Tier releases it into a new, larger contract. There is no time limit to migrate; locked capital is held safely until you choose to do so. Auto-rollover (automatic reinvestment of capital into a new cycle at maturity) applies by default to all plans above Starter Portfolio, and can be disabled per-investment from the dashboard.`,
+    content: `Starter Portfolio is limited to 2 investment cycles per account, for the lifetime of that account. Once both cycles are complete, no further Starter Portfolio investments can be opened on that account. Profit from each Starter Portfolio cycle is credited to your withdrawable balance immediately at that cycle's completion — this is never delayed or affected by the points below. Capital, however, is not released to your balance when the second cycle completes. Instead, it remains locked on the platform until you migrate it into a higher-tier plan (Growth Fund, Apex Fund, or Sovereign Tier), at which point your locked capital plus any required top-up becomes the principal of your new investment. There is no deadline to migrate — locked capital is held safely on your account indefinitely until you choose to act. Your dashboard will display the exact top-up required for each eligible plan once your capital is locked.`,
+  },
+  {
+    title: '3b. Auto-Rollover (Growth Fund, Apex Fund, Sovereign Tier)',
+    content: `Unlike Starter Portfolio, investments in Growth Fund, Apex Fund, and Sovereign Tier automatically roll over into a new cycle of the same plan when they mature, by default: profit is credited to your balance and your capital immediately begins a new cycle without any action from you. You may disable this behavior for an individual investment at any time from its investment card on the dashboard ("Stop Renewing"). When disabled, both capital and profit are credited to your balance at that investment's next maturity, and no further cycle is started automatically.`,
   },
   {
     title: '4. Deposits',
@@ -33,7 +37,7 @@ const SECTIONS = [
   },
   {
     title: '7. Referral Program',
-    content: `The referral program rewards users for introducing new investors. Referral bonuses range from 5% (Gold) to 15% (VIP) of the referred investor's first investment amount. Bonuses are credited automatically upon the referred user's first completed investment. Referral fraud, including self-referral or fabricated accounts, will result in immediate account termination and forfeiture of all bonuses.`,
+    content: `The referral program rewards users for introducing new investors. Referral bonuses vary by the referred investor's plan and are shown on the Investment Plans page. Bonuses are credited automatically upon the referred user's first completed investment cycle. Referral fraud, including self-referral or fabricated accounts, will result in immediate account termination and forfeiture of all bonuses.`,
   },
   {
     title: '8. Capital Insurance Policy',
@@ -75,7 +79,7 @@ export default function PoliciesPage() {
         <div className="text-[#c9a84c] text-sm font-semibold uppercase tracking-widest mb-4">Legal</div>
         <h1 className="text-5xl font-black mb-4">Company <span className="gold-text">Policies</span></h1>
         <p className="text-gray-400">
-          Last updated: January 2025 · Please read these terms carefully before using APXFund.
+          Last updated: July 2026 · Please read these terms carefully before using APXFund.
         </p>
       </section>
 
