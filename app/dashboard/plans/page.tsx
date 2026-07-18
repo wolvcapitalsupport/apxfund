@@ -4,6 +4,7 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import { TrendingUp, X, ArrowRight, CheckCircle, Loader2, ChevronRight, Clock, BarChart3 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLang } from '@/lib/useLang'
+import GoalSetter from '@/components/GoalSetter'
 import { t } from '@/lib/i18n'
 
 type Plan = { isActive: boolean; id: string; name: string; roiPercent: number; minAmount: number; maxAmount: number; durationDays: number; referralBonus: number; description?: string; features: string[] }
@@ -22,6 +23,8 @@ export default function PlansPage() {
   const [amount, setAmount] = useState('')
   const [autoReinvest, setAutoReinvest] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [showGoalSetter, setShowGoalSetter] = useState(false)
+  const [lastInvestedPlan, setLastInvestedPlan] = useState<any>(null)
   const [tab, setTab] = useState<'buy' | 'mine'>('buy')
   const [migrateInv, setMigrateInv] = useState<Investment | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)

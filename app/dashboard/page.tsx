@@ -7,6 +7,7 @@ import AnimatedNumber from '@/components/AnimatedNumber'
 import UpgradeBanner from '@/components/UpgradeBanner'
 import MigrationBanner from '@/components/MigrationBanner'
 import TickingBalance from '@/components/TickingBalance'
+import CompoundingProjector from '@/components/CompoundingProjector'
 import toast from 'react-hot-toast'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -228,6 +229,7 @@ export default function DashboardPage() {
 
       {/* ── Upgrade banner ── */}
       <UpgradeBanner balance={data?.balance || 0} investments={data?.investments || []} />
+      <CompoundingProjector investments={data?.investments || []} />
 
       {/* ── Admin banner ── */}
       {data?.adminBanner && !bannerDismissed && (
