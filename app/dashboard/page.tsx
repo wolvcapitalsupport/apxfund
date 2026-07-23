@@ -190,7 +190,26 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p className="text-gray-600 text-sm">Chart will appear after your first transactions</p>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={[
+                { date: 'Start', balance: data?.totalDeposited || 0 },
+                { date: 'Now', balance: (data?.totalDeposited || 0) + (data?.totalProfit || 0) },
+              ]} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="goldGrad2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#EAB308" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#EAB308" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+                <XAxis dataKey="date" tick={{ fill: '#475569', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#475569', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => '$' + v} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="balance" stroke="#EAB308" strokeWidth={2.5} fill="url(#goldGrad2)"
+                  dot={{ fill: '#EAB308', r: 3, strokeWidth: 0 }}
+                  activeDot={{ fill: '#EAB308', r: 5, stroke: '#EAB30840', strokeWidth: 4 }} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         )}
       </div>

@@ -102,6 +102,16 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-8">
+      {showGoalSetter && lastInvestedPlan && (
+        <GoalSetter
+          planName={lastInvestedPlan.name}
+          capital={parseFloat(amount) || lastInvestedPlan.minAmount}
+          roiPercent={lastInvestedPlan.roiPercent}
+          durationDays={lastInvestedPlan.durationDays}
+          onClose={() => setShowGoalSetter(false)}
+          onSave={() => setShowGoalSetter(false)}
+        />
+      )}
       <div>
         <h1 className="text-2xl font-black mb-1">{t(lang,'dashboard.plansTitle')}</h1>
         <p className="text-gray-500 text-sm">{t(lang,'dashboard.plansSub')}</p>
