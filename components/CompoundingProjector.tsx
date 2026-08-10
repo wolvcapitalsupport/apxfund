@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { TrendingUp, Target, Edit2, X } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { TrendingUp, Target, Edit2, X, RefreshCw } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 interface Goal {
@@ -14,18 +14,15 @@ interface Goal {
 
 interface Props {
   investments: any[]
+  userData?: any   // passed from dashboard — balance, totalProfit, etc.
 }
 
 function buildProjection(capital: number, roiPercent: number, durationDays: number, cycles: number) {
-  const data = []
+  const data: any[] = []
   let amount = capital
   const today = new Date()
 
-  data.push({
-    label: 'Now',
-    amount: parseFloat(amount.toFixed(2)),
-    profit: 0,
-  })
+  data.push({ label: 'Now', amount: parseFloat(amount.toFixed(2)), profit: 0 })
 
   for (let i = 1; i <= cycles; i++) {
     const cycleProfit = parseFloat(((amount * roiPercent) / 100).toFixed(2))
@@ -55,7 +52,90 @@ function CustomTooltip({ active, payload, label }: any) {
   )
 }
 
-export default function CompoundingProjector({ investments }: Props) {
+// ── Typewriter effect ─────────────────────────────────────────────────
+function useTypewriter(text: string, speed = 18) {
+  const [displayed, setDisplayed] = useState('')
+  useEffect(() => {
+    setDisplayed('')
+    if (!text) return
+    let i = 0
+    const iv = setInterval(() => {
+      i++
+      setDisplayed(text.slice(0, i))
+      if (i >= text.length) clearInterval(iv)
+    }, speed)
+    return () => clearInterval(iv)
+  }, [text])
+  return displayed
+}
+
+// ── Inline AI coach insight ───────────────────────────────────────────
+function CoachInsight({ userData }: { userData: any }) {
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const displayed = useTypewriter(message, 14)
+
+  const fetch_insight = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    setMessage('')
+    try {
+      const res = await fetch('/api/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          context: 'Look at this investor\'s compounding projection and history. Give them a specific, motivational insight about what compounding is building for them and what they\'d lose by withdrawing now. Use their exact numbers.',
+          userData,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setMessage(data.message)
+    } catch (e: any) {
+      setError(e.message)
+    }
+    setLoading(false)
+  }, [userData])
+
+  useEffect(() => { fetch_insight() }, [])
+
+  if (error) return null // fail silently in production
+
+  return (
+    <div style={{
+      background: '#0d1f2d',
+      border: '1px solid #1E293B',
+      borderLeft: '3px solid #EAB308',
+      borderRadius: 10,
+      padding: '12px 16px',
+      marginBottom: 16,
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 10,
+    }}>
+      <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 10, letterSpacing: '0.1em', color: '#EAB308', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>
+          APX Coach
+        </div>
+        <div style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.6 }}>
+          {loading
+            ? <span style={{ color: '#334155' }}>Analyzing your portfolio…</span>
+            : displayed || <span style={{ color: '#334155' }}>●●●</span>
+          }
+        </div>
+      </div>
+      <button onClick={fetch_insight} disabled={loading}
+        style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: 2, flexShrink: 0 }}
+        title="Refresh insight">
+        <RefreshCw size={13} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+      </button>
+    </div>
+  )
+}
+
+export default function CompoundingProjector({ investments, userData }: Props) {
   const [goal, setGoal] = useState<Goal | null>(null)
   const [cycles, setCycles] = useState(6)
   const [dismissed, setDismissed] = useState(false)
@@ -85,6 +165,15 @@ export default function CompoundingProjector({ investments }: Props) {
   const targetAmount = goal?.targetAmount
   const targetReached = targetAmount ? data.find(d => d.amount >= targetAmount) : null
 
+  // Build userData for coach
+  const coachData = {
+    ...userData,
+    planName,
+    roiPercent,
+    durationDays,
+    capital,
+  }
+
   return (
     <div style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '24px', position: 'relative' }}>
 
@@ -95,7 +184,7 @@ export default function CompoundingProjector({ investments }: Props) {
       </button>
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex items-center gap-3 mb-4">
         <div style={{ width: 38, height: 38, borderRadius: 10, background: '#c9a84c18', border: '1px solid #c9a84c30', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <TrendingUp size={16} style={{ color: '#c9a84c' }} />
         </div>
@@ -110,6 +199,9 @@ export default function CompoundingProjector({ investments }: Props) {
           </button>
         )}
       </div>
+
+      {/* AI Coach Insight */}
+      {userData && <CoachInsight userData={coachData} />}
 
       {/* Goal target indicator */}
       {targetAmount && (
@@ -138,7 +230,7 @@ export default function CompoundingProjector({ investments }: Props) {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
             <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 9 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#475569', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v >= 1000 ? (v/1000).toFixed(1)+'k' : v}`} />
+            <YAxis tick={{ fill: '#475569', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v}`} />
             <Tooltip content={<CustomTooltip />} />
             <Area type="monotone" dataKey="amount" stroke="#EAB308" strokeWidth={2.5} fill="url(#compGrad)"
               dot={{ fill: '#EAB308', r: 3, strokeWidth: 0 }}
