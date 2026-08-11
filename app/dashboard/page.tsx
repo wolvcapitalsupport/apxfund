@@ -9,6 +9,7 @@ import MigrationBanner from '@/components/MigrationBanner'
 import TickingBalance from '@/components/TickingBalance'
 import CompoundingProjector from '@/components/CompoundingProjector'
 import PortfolioAnalytics from '@/components/PortfolioAnalytics'
+import PortfolioIntelligence from '@/components/PortfolioIntelligence'
 import toast from 'react-hot-toast'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -254,6 +255,7 @@ export default function DashboardPage() {
       </div>
 
       <PortfolioAnalytics investments={data?.investments || []} />
+      <PortfolioIntelligence />
 
       {/* ── Upgrade banner ── */}
       <UpgradeBanner balance={data?.balance || 0} investments={data?.investments || []} />
