@@ -64,7 +64,7 @@ export default async function TokenPage() {
             <Metric label="Total Supply" value={`${formatApx(stats.supply)} APX`} />
             <Metric label="Internal Buy Rate" value={`$${APX_BUY_RATE}`} />
             <Metric label="Internal Redemption" value={`$${APX_REDEMPTION_RATE}`} />
-            <Metric label="Market Price" value={stats.priceUsd ? `$${stats.priceUsd.toFixed(6)}` : 'Not listed yet'} />
+            <Metric label="Market Price" value="Coming Soon (Next Phase)" />
           </div>
 
           <div className="mt-8 p-4 rounded-xl border border-[#1e1e35] bg-[#0d0f18]">

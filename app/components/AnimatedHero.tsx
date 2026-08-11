@@ -6,9 +6,9 @@ export default function AnimatedHero() {
   const [currentSlide, setCurrentSlide] = useState(0)
   
   const slides = [
-    { url: '/hero-img/hero.jpg', alt: 'APXFund market analytics visual' },
-    { url: '/hero-img/hero2.jpg', alt: 'APXFund operating license visual' },
-    { url: 'https://images.unsplash.com/photo-1553729784-e91953dec042?q=80&w=2070', alt: 'Global market operations desk' }
+    { url: '/hero-img/hero.jpg', alt: 'APXFund hero image' },
+    { url: '/hero-img/hero2.jpg', alt: 'APXFund hero image two' },
+    { url: '/hero-img/hero.jpg', alt: 'APXFund hero image' }
   ]
 
   useEffect(() => {
