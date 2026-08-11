@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
   const txByDay: Record<string, number> = {}
   for (const tx of transactions) {
     const day = tx.createdAt.toISOString().split('T')[0]
-    const delta = ['DEPOSIT', 'PROFIT', 'REFERRAL', 'ADJUSTMENT'].includes(tx.type)
+    const delta = ['DEPOSIT', 'PROFIT', 'REFERRAL', 'ADJUSTMENT', 'APX_REWARD', 'APX_REDEEM'].includes(tx.type)
       ? tx.amount : -tx.amount
     txByDay[day] = (txByDay[day] || 0) + delta
   }
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
   // Find starting balance (before range)
   const beforeRange = transactions.filter(tx => new Date(tx.createdAt) < since)
   for (const tx of beforeRange) {
-    runningBalance += ['DEPOSIT', 'PROFIT', 'REFERRAL', 'ADJUSTMENT'].includes(tx.type) ? tx.amount : -tx.amount
+    runningBalance += ['DEPOSIT', 'PROFIT', 'REFERRAL', 'ADJUSTMENT', 'APX_REWARD', 'APX_REDEEM'].includes(tx.type) ? tx.amount : -tx.amount
   }
 
   for (let i = days; i >= 0; i--) {

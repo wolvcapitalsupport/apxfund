@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest) {
   const session = await requireAdmin()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { transactionId, action, adminNote } = await req.json()
+  const { transactionId, action, adminNote, txProofHash } = await req.json()
 
   if (!transactionId || !['approve', 'reject'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
@@ -91,17 +91,22 @@ export async function PATCH(req: NextRequest) {
       await createNotification(tx.userId, Notifs.depositApproved(tx.amount).title, Notifs.depositApproved(tx.amount).message, 'success', '/dashboard')
       await sendDepositApproved(tx.user.email, tx.user.fullName, tx.amount, tx.currency || 'Crypto')
     } else if (tx.type === 'WITHDRAWAL') {
+      if (!txProofHash || String(txProofHash).trim().length < 10) {
+        return NextResponse.json({ error: 'Withdrawal TX proof hash is required for approval' }, { status: 400 })
+      }
+
       // Mark as approved — funds already deducted on request
       await prisma.transaction.update({
         where: { id: tx.id },
         data: {
           status: 'APPROVED',
           adminNote: adminNote || null,
+          txProofHash: String(txProofHash).trim(),
         },
       })
 
       await createNotification(tx.userId, Notifs.withdrawalApproved(tx.amount).title, Notifs.withdrawalApproved(tx.amount).message, 'success', '/dashboard/transactions')
-      await sendWithdrawalApproved(tx.user.email, tx.user.fullName, tx.amount, tx.currency || 'Crypto')
+      await sendWithdrawalApproved(tx.user.email, tx.user.fullName, tx.amount, tx.currency || 'Crypto', String(txProofHash).trim())
     }
 
     return NextResponse.json({ message: 'Transaction approved' })

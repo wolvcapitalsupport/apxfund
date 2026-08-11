@@ -199,13 +199,14 @@ export async function sendWithdrawalPending(to: string, name: string, amount: nu
 // ═══════════════════════════════════════════════════════════════════════
 // 7. WITHDRAWAL — APPROVED
 // ═══════════════════════════════════════════════════════════════════════
-export async function sendWithdrawalApproved(to: string, name: string, amount: number, currency: string) {
+export async function sendWithdrawalApproved(to: string, name: string, amount: number, currency: string, txProofHash?: string) {
   const html = wrap(`
     ${heading('💸 Withdrawal Approved')}
     ${para(`Hi <strong style="color:#fff">${name}</strong>, your withdrawal has been approved and the funds are on their way to your wallet.`)}
     ${statusBox('Amount Sent', `$${amount.toFixed(2)}`, '#34d399')}
     ${statusBox('Currency', currency, '#60a5fa')}
     ${statusBox('Status', 'Approved', '#34d399')}
+    ${txProofHash ? statusBox('Transaction Proof', txProofHash, '#c9a84c') : ''}
     ${divider()}
     ${para('Please allow 1–3 network confirmations for the transfer to fully reflect in your wallet.')}
     ${btn('View Transactions', `${BASE}/dashboard/transactions`)}

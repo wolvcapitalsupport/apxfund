@@ -5,6 +5,7 @@ import { createNotification, Notifs } from '@/lib/notifications'
 import { sendInvestmentMatured, sendPlanUpgradeNudge, sendMigrationAvailable, sendCycleRenewed } from '@/lib/mailer'
 import { isStarterPlan, computeMigrationOptions, MAX_STARTER_CYCLES } from '@/lib/planRules'
 import { addDays } from 'date-fns'
+import { rewardApxFromProfit } from '@/lib/apx'
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -76,6 +77,26 @@ export async function GET(req: NextRequest) {
                 note: `Final daily ROI from ${inv.plan.name}${starter ? ' (capital remains locked)' : ''}`,
               },
             })
+
+            const apxReward = rewardApxFromProfit(inv.expectedProfit)
+            if (apxReward > 0) {
+              await tx.user.update({
+                where: { id: inv.userId },
+                data: {
+                  apxBalance: { increment: apxReward },
+                  apxRewards: { increment: apxReward },
+                },
+              })
+              await tx.transaction.create({
+                data: {
+                  userId: inv.userId,
+                  type: TransactionType.APX_REWARD,
+                  status: TransactionStatus.APPROVED,
+                  amount: apxReward,
+                  note: `APX reward from ${inv.plan.name} maturity`,
+                },
+              })
+            }
 
             await tx.investment.update({
               where: { id: inv.id },

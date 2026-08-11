@@ -557,6 +557,7 @@ function WithdrawalsTab() {
   const [filter, setFilter] = useState('PENDING')
   const [reviewing, setReviewing] = useState<any>(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [txProofHash, setTxProofHash] = useState('')
 
   const fetch_ = useCallback(async () => {
     setLoading(true)
@@ -573,10 +574,22 @@ function WithdrawalsTab() {
     const res = await fetch('/api/admin/transactions', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactionId: reviewing.id, action, adminNote: note }),
+      body: JSON.stringify({
+        transactionId: reviewing.id,
+        action,
+        adminNote: note,
+        txProofHash: action === 'approve' ? txProofHash.trim() || undefined : undefined,
+      }),
     })
     const data = await res.json()
-    if (res.ok) { toast.success(data.message); setReviewing(null); fetch_() } else toast.error(data.error)
+    if (res.ok) {
+      toast.success(data.message)
+      setReviewing(null)
+      setTxProofHash('')
+      fetch_()
+    } else {
+      toast.error(data.error)
+    }
     setActionLoading(false)
   }
 
@@ -599,7 +612,7 @@ function WithdrawalsTab() {
           withdrawals.length === 0 ? <div className="text-center py-16 text-gray-600"><ArrowUpCircle size={36} className="mx-auto mb-3 opacity-30" /><p>No withdrawals found</p></div> : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#0a0a14]"><tr>{['User', 'Amount', 'Currency', 'Wallet', 'Status', 'Date', 'Action'].map(h => (
+              <thead className="bg-[#0a0a14]"><tr>{['User', 'Amount', 'Currency', 'Wallet', 'TX Proof', 'Status', 'Date', 'Action'].map(h => (
                 <th key={h} className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
               ))}</tr></thead>
               <tbody className="divide-y divide-[#1e1e35]">
@@ -609,11 +622,12 @@ function WithdrawalsTab() {
                     <td className="px-5 py-4 font-bold text-orange-400 text-sm">{formatCurrency(w.amount)}</td>
                     <td className="px-5 py-4 text-sm text-gray-300">{w.currency}</td>
                     <td className="px-5 py-4"><code className="text-xs text-gray-400 max-w-[120px] block truncate">{w.walletAddress || '—'}</code></td>
+                    <td className="px-5 py-4"><code className="text-xs text-gray-400 max-w-[140px] block truncate">{w.txProofHash || '—'}</code></td>
                     <td className="px-5 py-4"><StatusBadge status={w.status} /></td>
                     <td className="px-5 py-4 text-xs text-gray-500">{formatDate(w.createdAt)}</td>
                     <td className="px-5 py-4">
                       {w.status === 'PENDING' ? (
-                        <button onClick={() => setReviewing(w)} className="flex items-center gap-1.5 text-xs bg-orange-400/10 text-orange-400 border border-orange-400/30 px-3 py-1.5 rounded-lg hover:bg-orange-400/20 transition-all">
+                        <button onClick={() => { setReviewing(w); setTxProofHash('') }} className="flex items-center gap-1.5 text-xs bg-orange-400/10 text-orange-400 border border-orange-400/30 px-3 py-1.5 rounded-lg hover:bg-orange-400/20 transition-all">
                           <Eye size={12} /> Review
                         </button>
                       ) : <span className="text-gray-600 text-xs">{w.adminNote || '—'}</span>}
@@ -627,11 +641,21 @@ function WithdrawalsTab() {
       </div>
       {reviewing && (
         <ReviewModal title={`Review Withdrawal — ${formatCurrency(reviewing.amount)}`} subtitle={`${reviewing.user?.fullName} · ${reviewing.currency}`}
-          onClose={() => setReviewing(null)} onApprove={n => handleReview('approve', n)} onReject={n => handleReview('reject', n)} loading={actionLoading}>
+          onClose={() => { setReviewing(null); setTxProofHash('') }} onApprove={n => handleReview('approve', n)} onReject={n => handleReview('reject', n)} loading={actionLoading}>
           <div className="bg-[#0a0a14] rounded-xl p-4 space-y-2.5 text-sm">
             {[['User', reviewing.user?.fullName], ['Amount', formatCurrency(reviewing.amount)], ['Currency', reviewing.currency], ['Wallet', reviewing.walletAddress], ['Requested', formatDate(reviewing.createdAt)]].map(([l, v]) => (
               <div key={l as string} className="flex justify-between items-start gap-2"><span className="text-gray-500 flex-shrink-0">{l}</span><span className="font-medium text-right break-all">{v}</span></div>
             ))}
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">Blockchain TX Proof Hash (required to prove payout)</label>
+            <input
+              type="text"
+              value={txProofHash}
+              onChange={e => setTxProofHash(e.target.value)}
+              placeholder="0x..."
+              className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]"
+            />
           </div>
         </ReviewModal>
       )}

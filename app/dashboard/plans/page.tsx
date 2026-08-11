@@ -368,6 +368,14 @@ export default function PlansPage() {
                           <div className="text-right">
                             <div className="font-bold text-sm">{formatCurrency(inv.amount)}</div>
                             <div className="text-green-400 text-xs">+{formatCurrency(inv.expectedProfit)} {t(lang,'dashboard.fromCompleted')}</div>
+                            <a
+                              href={`/api/certificates/${inv.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block mt-2 text-xs text-[#c9a84c] hover:underline"
+                            >
+                              Download Certificate
+                            </a>
                           </div>
                         </div>
                       </div>

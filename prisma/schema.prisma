@@ -17,6 +17,8 @@ model User {
   country              String?
   role                 Role            @default(USER)
   balance              Float           @default(0)
+  apxBalance           Float           @default(0)
+  apxRewards           Float           @default(0)
   totalDeposited       Float           @default(0)
   totalWithdrawn       Float           @default(0)
   totalProfit          Float           @default(0)
@@ -42,6 +44,7 @@ model User {
   updatedAt            DateTime        @updatedAt
   investments          Investment[]
   transactions         Transaction[]
+  apxRedemptions       ApxRedemption[]
   notifications        Notification[]
   kycSubmissions       KycSubmission[]
 
@@ -93,6 +96,7 @@ model Transaction {
   amount        Float
   currency      String?
   txHash        String?
+  txProofHash   String?
   proofImageUrl String?
   adminNote     String?
   walletAddress String?
@@ -103,6 +107,22 @@ model Transaction {
   user          User              @relation(fields: [userId], references: [id])
 
   @@map("transactions")
+}
+
+model ApxRedemption {
+  id          String              @id @default(cuid())
+  userId      String
+  amount      Float
+  rateUsd     Float
+  usdValue    Float
+  status      ApxRedemptionStatus @default(PENDING)
+  adminNote   String?
+  requestedAt DateTime            @default(now())
+  reviewedAt  DateTime?
+  settledAt   DateTime?
+  user        User                @relation(fields: [userId], references: [id])
+
+  @@map("apx_redemptions")
 }
 
 model KycSubmission {
@@ -200,10 +220,20 @@ enum TransactionType {
   PROFIT
   REFERRAL
   ADJUSTMENT
+  APX_BUY
+  APX_REWARD
+  APX_REDEEM
 }
 
 enum TransactionStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum ApxRedemptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SETTLED
 }

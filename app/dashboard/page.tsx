@@ -8,6 +8,7 @@ import UpgradeBanner from '@/components/UpgradeBanner'
 import MigrationBanner from '@/components/MigrationBanner'
 import TickingBalance from '@/components/TickingBalance'
 import CompoundingProjector from '@/components/CompoundingProjector'
+import PortfolioAnalytics from '@/components/PortfolioAnalytics'
 import toast from 'react-hot-toast'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -18,6 +19,8 @@ interface UserData {
   totalDeposited: number
   totalProfit: number
   totalWithdrawn: number
+  apxBalance?: number
+  apxRewards?: number
   referralCode: string
   investments: any[]
   transactions: any[]
@@ -53,7 +56,7 @@ function buildChartData(transactions: any[], currentBalance: number) {
   sorted.forEach(tx => {
     const day = new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     const delta =
-      tx.type === 'DEPOSIT' || tx.type === 'PROFIT' || tx.type === 'REFERRAL' || tx.type === 'ADJUSTMENT'
+      tx.type === 'DEPOSIT' || tx.type === 'PROFIT' || tx.type === 'REFERRAL' || tx.type === 'ADJUSTMENT' || tx.type === 'APX_REDEEM'
         ? tx.amount
         : -tx.amount
     running += delta
@@ -221,11 +224,12 @@ export default function DashboardPage() {
       />
 
       {/* ── Stat cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         {[
           { label: 'Available Balance', value: data?.balance || 0, icon: DollarSign, color: '#EAB308', isCount: false, sub: 'Ready to invest or withdraw' },
           { label: 'Active Investments', value: activeCount, icon: Zap, color: '#60a5fa', isCount: true, sub: 'Currently earning returns' },
           { label: 'Total Profit', value: data?.totalProfit || 0, icon: TrendingUp, color: '#10B981', isCount: false, sub: 'Lifetime earnings', isTicking: true },
+          { label: 'APX Balance', value: data?.apxBalance || 0, icon: Shield, color: '#22d3ee', isCount: true, sub: `APX earned: ${(data?.apxRewards || 0).toFixed(2)}` },
         ].map(({ label, value, icon: Icon, color, isCount, sub, isTicking }) => (
           <div key={label} style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '20px' }}>
             <div className="flex items-start justify-between mb-3">
@@ -238,13 +242,18 @@ export default function DashboardPage() {
             <p className="text-2xl font-black" style={{ color }}>
               {isTicking
                 ? <TickingBalance balance={value} investments={data?.investments || []} />
-                : <AnimatedNumber value={value} prefix={isCount ? '' : '$'} decimals={isCount ? 0 : 2} />
+                : <>
+                    <AnimatedNumber value={value} prefix={isCount ? '' : '$'} decimals={isCount ? 0 : 2} />
+                    {label === 'APX Balance' ? ' APX' : ''}
+                  </>
               }
             </p>
             <p className="text-gray-600 text-xs mt-1">{sub}</p>
           </div>
         ))}
       </div>
+
+      <PortfolioAnalytics investments={data?.investments || []} />
 
       {/* ── Upgrade banner ── */}
       <UpgradeBanner balance={data?.balance || 0} investments={data?.investments || []} />

@@ -18,6 +18,8 @@ export async function GET() {
         country: true,
         role: true,
         balance: true,
+        apxBalance: true,
+        apxRewards: true,
         totalDeposited: true,
         totalProfit: true,
         totalWithdrawn: true,
@@ -33,7 +35,7 @@ export async function GET() {
         investments: {
           include: { plan: true },
           orderBy: { createdAt: 'desc' },
-          take: 5,
+          take: 30,
         },
         transactions: {
           orderBy: { createdAt: 'desc' },

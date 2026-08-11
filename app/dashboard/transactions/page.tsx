@@ -8,6 +8,9 @@ const TYPE_META: Record<string, { icon: any; color: string; bg: string }> = {
   WITHDRAWAL:     { icon: ArrowUpCircle,   color: '#f87171', bg: '#f8717118' },
   PROFIT:         { icon: TrendingUp,      color: '#10B981', bg: '#10B98118' },
   REFERRAL:       { icon: Gift,            color: '#EAB308', bg: '#EAB30818' },
+  APX_BUY:        { icon: ArrowUpCircle,   color: '#f59e0b', bg: '#f59e0b18' },
+  APX_REWARD:     { icon: Gift,            color: '#22d3ee', bg: '#22d3ee18' },
+  APX_REDEEM:     { icon: ArrowDownCircle, color: '#34d399', bg: '#34d39918' },
   ADJUSTMENT:     { icon: Receipt,         color: '#a78bfa', bg: '#a78bfa18' },
   REFERRAL_BONUS: { icon: Gift,            color: '#EAB308', bg: '#EAB30818' },
 }
@@ -39,7 +42,7 @@ export default function TransactionsPage() {
       {/* Summary bar */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Total In',  value: transactions.filter(t => ['DEPOSIT','PROFIT','REFERRAL'].includes(t.type) && t.status === 'APPROVED').reduce((s,t) => s + t.amount, 0), color: '#10B981' },
+          { label: 'Total In',  value: transactions.filter(t => ['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(t.type) && t.status === 'APPROVED').reduce((s,t) => s + t.amount, 0), color: '#10B981' },
           { label: 'Total Out', value: transactions.filter(t => t.type === 'WITHDRAWAL' && t.status === 'APPROVED').reduce((s,t) => s + t.amount, 0), color: '#f87171' },
           { label: 'Count',     value: transactions.length, color: '#EAB308', isCount: true },
         ].map(({ label, value, color, isCount }) => (
@@ -54,7 +57,7 @@ export default function TransactionsPage() {
 
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
-        {['ALL','DEPOSIT','WITHDRAWAL','PROFIT','REFERRAL'].map(f => (
+        {['ALL','DEPOSIT','WITHDRAWAL','PROFIT','REFERRAL','APX_BUY','APX_REWARD','APX_REDEEM'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
             style={filter === f
               ? { background: '#EAB308', color: '#090A0F', border: '1px solid #EAB308', borderRadius: 10, padding: '6px 14px', fontSize: 12, fontWeight: 700 }
@@ -97,14 +100,26 @@ export default function TransactionsPage() {
                             <span className="text-sm font-semibold capitalize">{tx.type.replace(/_/g, ' ').toLowerCase()}</span>
                           </div>
                         </td>
-                        <td className="px-5 py-4 text-sm font-bold" style={{ color: ['DEPOSIT','PROFIT','REFERRAL'].includes(tx.type) ? '#10B981' : '#f87171' }}>
-                          {['DEPOSIT','PROFIT','REFERRAL'].includes(tx.type) ? '+' : '-'}{formatCurrency(tx.amount)}
+                        <td className="px-5 py-4 text-sm font-bold" style={{ color: ['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '#10B981' : '#f87171' }}>
+                          {['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '+' : '-'}{formatCurrency(tx.amount)}
                         </td>
                         <td className="px-5 py-4">
                           <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStatusColor(tx.status)}`}>{tx.status}</span>
                         </td>
                         <td className="px-5 py-4 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
-                        <td className="px-5 py-4 text-xs text-gray-500 max-w-[200px] truncate">{tx.note || '—'}</td>
+                        <td className="px-5 py-4 text-xs text-gray-500 max-w-[260px]">
+                          <div className="truncate">{tx.note || '—'}</div>
+                          {tx.type === 'WITHDRAWAL' && tx.txProofHash && (
+                            <a
+                              href={`https://bscscan.com/tx/${tx.txProofHash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#EAB308] hover:underline"
+                            >
+                              View on BscScan
+                            </a>
+                          )}
+                        </td>
                       </tr>
                     )
                   })}
@@ -127,10 +142,20 @@ export default function TransactionsPage() {
                       <div className="text-gray-500 text-xs mt-0.5">{formatDate(tx.createdAt)}</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-sm" style={{ color: ['DEPOSIT','PROFIT','REFERRAL'].includes(tx.type) ? '#10B981' : '#f87171' }}>
-                        {['DEPOSIT','PROFIT','REFERRAL'].includes(tx.type) ? '+' : '-'}{formatCurrency(tx.amount)}
+                      <div className="font-bold text-sm" style={{ color: ['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '#10B981' : '#f87171' }}>
+                        {['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '+' : '-'}{formatCurrency(tx.amount)}
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(tx.status)}`}>{tx.status}</span>
+                      {tx.type === 'WITHDRAWAL' && tx.txProofHash && (
+                        <a
+                          href={`https://bscscan.com/tx/${tx.txProofHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-[11px] text-[#EAB308] hover:underline mt-1"
+                        >
+                          BscScan proof
+                        </a>
+                      )}
                     </div>
                   </div>
                 )

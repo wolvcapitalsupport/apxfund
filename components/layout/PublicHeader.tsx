@@ -26,6 +26,9 @@ export default function PublicHeader() {
   const NAV_LINKS = [
     { label: nav.home,     href: '/' },
     { label: nav.plans,    href: '/investment-plans' },
+    { label: 'APX Token',  href: '/token' },
+    { label: 'Tokenomics', href: '/tokenomics' },
+    { label: 'Litepaper',  href: '/litepaper' },
     { label: nav.about,    href: '/about' },
     { label: nav.team,     href: '/our-team' },
     { label: nav.policies, href: '/policies' },
