@@ -6,12 +6,15 @@ import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { useLang } from '@/lib/useLang'
 import { t } from '@/lib/i18n'
+import WithdrawInterceptor from '@/components/WithdrawInterceptor'
 
 export default function WithdrawPage() {
   const { lang } = useLang()
   const [balance, setBalance] = useState(0)
   const [hasCompletedInvestment, setHasCompletedInvestment] = useState(false)
   const [form, setForm] = useState({ amount: '', walletAddress: '', currency: 'BTC' })
+  const [userData, setUserData] = useState<any>(null)
+  const [showInterceptor, setShowInterceptor] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
@@ -19,6 +22,7 @@ export default function WithdrawPage() {
     fetch('/api/user/me').then(r => r.json()).then(d => {
       setBalance(d.balance)
       setHasCompletedInvestment((d.investments || []).some((i: any) => i.status === 'COMPLETED'))
+      setUserData(d)
       setLoading(false)
     })
   }, [])
@@ -26,9 +30,8 @@ export default function WithdrawPage() {
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [field]: e.target.value }))
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (parseFloat(form.amount) > balance) return toast.error('Insufficient balance')
+  const executeWithdrawal = async () => {
+    if (!form.amount || parseFloat(form.amount) > balance) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/transactions', {
@@ -37,9 +40,24 @@ export default function WithdrawPage() {
       })
       const data = await res.json()
       if (!res.ok) toast.error(data.error)
-      else { toast.success('Withdrawal request submitted! Processing within 24 hours.'); setForm({ amount: '', walletAddress: '', currency: 'BTC' }); setBalance(b => b - parseFloat(form.amount)) }
+      else {
+        const amount = parseFloat(form.amount)
+        toast.success('Withdrawal request submitted! Processing within 24 hours.')
+        setForm({ amount: '', walletAddress: '', currency: 'BTC' })
+        setBalance(b => b - amount)
+      }
     } catch { toast.error('Request failed') }
-    finally { setSubmitting(false) }
+    finally {
+      setSubmitting(false)
+      setShowInterceptor(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (parseFloat(form.amount) > balance) return toast.error('Insufficient balance')
+    if (!form.walletAddress || form.walletAddress.length < 10) return toast.error('Invalid wallet address')
+    setShowInterceptor(true)
   }
 
   const inputStyle = { width: '100%', background: '#090A0F', border: '1px solid #1E293B', borderRadius: 12, padding: '14px 16px', fontSize: 14, color: '#fff', outline: 'none' }
@@ -48,6 +66,17 @@ export default function WithdrawPage() {
 
   return (
     <div className="max-w-lg space-y-6">
+      {showInterceptor && (
+        <WithdrawInterceptor
+          userData={{
+            ...(userData || {}),
+            pendingWithdrawalAmount: parseFloat(form.amount || '0'),
+            pendingWithdrawalCurrency: form.currency,
+          }}
+          onCancel={() => setShowInterceptor(false)}
+          onConfirm={executeWithdrawal}
+        />
+      )}
       <div>
         <h1 className="text-2xl font-black mb-1">{t(lang, 'dashboard.withdrawTitle')}</h1>
         <p className="text-gray-500 text-sm">{t(lang, 'dashboard.withdrawPageSub')}</p>

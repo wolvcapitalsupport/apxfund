@@ -1,95 +1,112 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 
-// ==========================================
-// APY CALCULATION ENDPOINT
-// POST /api/apy
-// Calculates daily yield from an annual APY
-// Formula: (balance * apy) / 52 / 7
-// ==========================================
-
-type APYRequestBody = {
-  balance: number;
-  apy: number; // as a percentage e.g. 5.2 for 5.2%
-};
-
-type APYResponseBody = {
-  balance: number;
-  apy_percentage: number;
-  weekly_yield: number;
-  daily_yield: number;
-  projected_annual: number;
-};
-
-export async function POST(req: NextRequest) {
-  try {
-    const body: APYRequestBody = await req.json();
-    const { balance, apy } = body;
-
-    // --- Input validation ---
-    if (balance === undefined || apy === undefined) {
-      return NextResponse.json(
-        { error: "Missing required fields: balance and apy." },
-        { status: 400 }
-      );
-    }
-
-    if (typeof balance !== "number" || typeof apy !== "number") {
-      return NextResponse.json(
-        { error: "Fields balance and apy must be numbers." },
-        { status: 400 }
-      );
-    }
-
-    if (balance < 0) {
-      return NextResponse.json(
-        { error: "Balance cannot be negative." },
-        { status: 400 }
-      );
-    }
-
-    if (apy < 0 || apy > 100) {
-      return NextResponse.json(
-        { error: "APY must be between 0 and 100." },
-        { status: 400 }
-      );
-    }
-
-    // --- APY math ---
-    // Convert percentage to decimal: 5.2% -> 0.052
-    const apyDecimal = apy / 100;
-
-    // Weekly yield: (balance * APY) / 52
-    const weekly_yield = (balance * apyDecimal) / 52;
-
-    // Daily yield: weekly / 7
-    const daily_yield = weekly_yield / 7;
-
-    // Projected annual (simple, not compounded)
-    const projected_annual = balance * apyDecimal;
-
-    const response: APYResponseBody = {
-      balance: parseFloat(balance.toFixed(2)),
-      apy_percentage: apy,
-      weekly_yield: parseFloat(weekly_yield.toFixed(6)),
-      daily_yield: parseFloat(daily_yield.toFixed(6)),
-      projected_annual: parseFloat(projected_annual.toFixed(2)),
-    };
-
-    return NextResponse.json(response, { status: 200 });
-
-  } catch (error) {
-    console.error("[APY Route Error]", error);
-    return NextResponse.json(
-      { error: "Internal server error." },
-      { status: 500 }
-    );
+type CoachRequestBody = {
+  context?: string
+  userData?: {
+    balance?: number
+    totalProfit?: number
+    investments?: Array<{ expectedProfit?: number; status?: string }>
+    [k: string]: any
   }
 }
 
-// Optional: block non-POST methods clearly
+function fallbackMessage(userData?: CoachRequestBody['userData']) {
+  const balance = Number(userData?.balance || 0)
+  const activeExpected = Array.isArray(userData?.investments)
+    ? userData!.investments
+        .filter(i => i?.status === 'ACTIVE')
+        .reduce((sum, i) => sum + Number(i?.expectedProfit || 0), 0)
+    : 0
+
+  if (balance > 0 && activeExpected > 0) {
+    return `You currently hold $${balance.toFixed(2)} and your active cycles are positioned to generate about $${activeExpected.toFixed(2)} in expected profit. Withdrawing now breaks compounding momentum; one more cycle may materially improve your outcome.`
+  }
+
+  if (balance > 0) {
+    return `You currently hold $${balance.toFixed(2)}. Before withdrawing, compare this to the upside of keeping funds compounding for one additional cycle.`
+  }
+
+  return 'Withdrawing now pauses your compounding momentum. If you can sustain one more cycle, your long-term growth curve stays stronger.'
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = (await req.json()) as CoachRequestBody
+    const context = body.context || 'Give a short, direct investor coaching insight.'
+    const userData = body.userData || {}
+    const groqApiKey = process.env.GROQ_API_KEY
+    const xaiApiKey = process.env.XAI_API_KEY
+    const model = process.env.COACH_MODEL || process.env.GROQ_MODEL || process.env.XAI_MODEL || 'llama-3.1-8b-instant'
+
+    if (!groqApiKey && !xaiApiKey) {
+      return NextResponse.json({ message: fallbackMessage(userData), source: 'fallback-no-key' })
+    }
+
+    const prompt = [
+      'You are an institutional-grade investment coach for APXFund.',
+      'Tone: concise, sober, motivating, never manipulative.',
+      'Response length: 2-4 sentences only.',
+      'If numbers are provided, reference them clearly.',
+      'Context:',
+      context,
+      'User data (JSON):',
+      JSON.stringify(userData),
+    ].join('\n')
+
+    const payload = {
+      model,
+      temperature: 0.4,
+      messages: [
+        { role: 'system', content: 'You provide short investment coaching insights.' },
+        { role: 'user', content: prompt },
+      ],
+    }
+
+    // Prefer Groq when available (OpenAI-compatible API).
+    const response = groqApiKey
+      ? await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${groqApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
+      : await fetch('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${xaiApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
+
+    if (!response.ok) {
+      const text = await response.text()
+      console.error('[coach] provider error:', response.status, text)
+      return NextResponse.json({ message: fallbackMessage(userData), source: 'fallback-provider-error' })
+    }
+
+    const data = await response.json()
+    const message = data?.choices?.[0]?.message?.content?.trim()
+
+    if (!message) {
+      return NextResponse.json({ message: fallbackMessage(userData), source: 'fallback-empty' })
+    }
+
+    return NextResponse.json({ message, source: groqApiKey ? 'groq' : 'xai' })
+  } catch (error) {
+    console.error('[coach] route error:', error)
+    return NextResponse.json({ message: fallbackMessage(), source: 'fallback-exception' })
+  }
+}
+
 export async function GET() {
-  return NextResponse.json(
-    { error: "Method not allowed. Use POST." },
-    { status: 405 }
-  );
+  const provider = process.env.GROQ_API_KEY ? 'groq' : process.env.XAI_API_KEY ? 'xai' : 'none'
+  return NextResponse.json({
+    ok: true,
+    provider,
+    providerReady: provider !== 'none',
+    model: process.env.COACH_MODEL || process.env.GROQ_MODEL || process.env.XAI_MODEL || 'llama-3.1-8b-instant',
+  })
 }

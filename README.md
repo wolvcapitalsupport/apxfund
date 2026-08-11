@@ -102,6 +102,10 @@ NEXTAUTH_URL="http://localhost:3000"
 
 NEXT_PUBLIC_APP_NAME="AurexConnect"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Optional AI coach provider (used by /api/coach and withdrawal interceptor)
+XAI_API_KEY=""
+XAI_MODEL="grok-3-mini"
 ```
 
 **Generate NEXTAUTH_SECRET:**
