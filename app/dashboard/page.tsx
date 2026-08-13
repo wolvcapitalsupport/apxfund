@@ -230,7 +230,7 @@ export default function DashboardPage() {
           { label: 'Available Balance', value: data?.balance || 0, icon: DollarSign, color: '#EAB308', isCount: false, sub: 'Ready to invest or withdraw' },
           { label: 'Active Investments', value: activeCount, icon: Zap, color: '#60a5fa', isCount: true, sub: 'Currently earning returns' },
           { label: 'Total Profit', value: data?.totalProfit || 0, icon: TrendingUp, color: '#10B981', isCount: false, sub: 'Lifetime earnings', isTicking: true },
-          { label: 'APX Balance', value: data?.apxBalance || 0, icon: Shield, color: '#22d3ee', isCount: true, sub: `APX earned: ${(data?.apxRewards || 0).toFixed(2)}` },
+          { label: 'APX Balance', value: data?.apxBalance || 0, icon: Shield, color: '#22d3ee', isCount: true, sub: `≈ $${((data?.apxBalance || 0) * 0.00072).toFixed(2)} USD at current rate` },
         ].map(({ label, value, icon: Icon, color, isCount, sub, isTicking }) => (
           <div key={label} style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '20px' }}>
             <div className="flex items-start justify-between mb-3">
