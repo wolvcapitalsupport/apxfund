@@ -2,6 +2,7 @@ export const APX_SUPPLY = 5_000_000_000
 export const APX_BUY_RATE = 0.0008        // rate investors buy APX with balance
 export const APX_EARNINGS_RATE = 0.0008   // rate used to convert earnings → APX
 export const APX_REDEMPTION_RATE = 0.00072
+export const APX_REWARD_SHARE = 0.08      // kept for tokenomics display — not used in ROI engine
 
 export function usdToApx(usd: number, rate = APX_BUY_RATE) {
   if (!usd || usd <= 0) return 0
