@@ -53,24 +53,46 @@ export async function PATCH(req: NextRequest) {
   if (action === 'approve') {
     if (row.status !== 'PENDING') return NextResponse.json({ error: 'Only pending requests can be approved' }, { status: 400 })
 
-    await prisma.apxRedemption.update({
-      where: { id: row.id },
-      data: {
-        status: 'APPROVED',
-        reviewedAt: new Date(),
-        adminNote: adminNote || null,
-      },
-    })
+    // Auto-settle on approval — credits USD balance immediately.
+    // Admin approves once; no separate settle step required.
+    const now = new Date()
+    await prisma.$transaction([
+      prisma.apxRedemption.update({
+        where: { id: row.id },
+        data: {
+          status: 'SETTLED',
+          reviewedAt: now,
+          settledAt: now,
+          adminNote: adminNote || null,
+        },
+      }),
+      prisma.user.update({
+        where: { id: row.userId },
+        data: {
+          balance: { increment: row.usdValue },
+        },
+      }),
+      prisma.transaction.create({
+        data: {
+          userId: row.userId,
+          type: 'APX_REDEEM',
+          status: 'APPROVED',
+          amount: row.usdValue,
+          currency: 'USD',
+          note: `APX redeemed: ${row.amount.toFixed(2)} APX → $${row.usdValue.toFixed(2)} USD @ $${row.rateUsd}/APX`,
+        },
+      }),
+    ])
 
     await createNotification(
       row.userId,
-      'APX Redemption Approved',
-      `Your APX redemption request for $${row.usdValue.toFixed(2)} has been approved and queued for settlement.`,
+      'APX Redeemed — USD Credited',
+      `${row.amount.toFixed(2)} APX redeemed. $${row.usdValue.toFixed(2)} has been credited to your USD balance and is ready to withdraw.`,
       'success',
-      '/dashboard/apx'
+      '/dashboard'
     )
 
-    return NextResponse.json({ message: 'Redemption approved' })
+    return NextResponse.json({ message: 'Redemption approved and USD credited to balance' })
   }
 
   if (action === 'reject') {
