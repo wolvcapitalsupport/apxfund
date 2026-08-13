@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { APX_EARNINGS_RATE, profitToApxAllocation, formatApx } from '@/lib/apx'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -90,31 +91,54 @@ export async function PATCH(req: NextRequest) {
   }
 
   if (action === 'complete') {
-    // Force-complete — admin manually matures an investment early
-    const profit = inv.expectedProfit
+    // Force-complete — admin manually matures an investment early.
+    // Capital (principal) returned as USD. Profit converted to APX at current earnings rate.
+    const profitUsd = inv.expectedProfit
+    const alloc = profitToApxAllocation(profitUsd, APX_EARNINGS_RATE)
+
     await prisma.$transaction([
       prisma.investment.update({
         where: { id },
         data: { status: 'COMPLETED', completedAt: new Date(), autoReinvest: false },
       }),
+      // Principal returned to USD balance — this is NOT earnings
       prisma.user.update({
         where: { id: inv.userId },
         data: {
-          balance: { increment: inv.amount + profit },
-          totalProfit: { increment: profit },
+          balance: { increment: inv.amount },
+          apxBalance: { increment: alloc.apxAmount },
+          apxRewards: { increment: alloc.apxAmount },
+          totalProfit: { increment: alloc.usdAmount },
         },
       }),
+      // Capital return transaction (USD)
       prisma.transaction.create({
         data: {
           userId: inv.userId,
           type: 'PROFIT',
           status: 'APPROVED',
-          amount: profit,
-          note: `Investment manually completed by admin`,
+          amount: inv.amount,
+          currency: 'USD',
+          note: `Capital returned — investment manually completed by admin`,
+        },
+      }),
+      // Profit as APX with full accounting fields
+      prisma.transaction.create({
+        data: {
+          userId: inv.userId,
+          type: 'APX_REWARD',
+          status: 'APPROVED',
+          amount: alloc.apxAmount,
+          currency: 'APX',
+          usdEquivalent: alloc.usdAmount,
+          conversionRate: alloc.conversionRate,
+          note: `ROI from admin force-complete: $${alloc.usdAmount.toFixed(2)} → ${formatApx(alloc.apxAmount)} APX @ $${alloc.conversionRate}/APX`,
         },
       }),
     ])
-    return NextResponse.json({ message: 'Investment force-completed and funds credited' })
+    return NextResponse.json({
+      message: 'Investment force-completed — capital returned as USD, profit credited as APX',
+    })
   }
 
   return NextResponse.json({ error: 'Invalid action' }, { status: 400 })

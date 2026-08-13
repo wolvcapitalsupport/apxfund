@@ -102,6 +102,11 @@ model Transaction {
   walletAddress String?
   network       String?
   note          String?
+  // APX earnings accounting — populated for APX_REWARD and REFERRAL (APX) transactions.
+  // Preserves original USD amount, locked rate, and resulting APX so historical
+  // allocations are immutable even if APX_EARNINGS_RATE changes in future.
+  usdEquivalent   Float?
+  conversionRate  Float?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   user          User              @relation(fields: [userId], references: [id])
