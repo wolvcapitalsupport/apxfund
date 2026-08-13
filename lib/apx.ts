@@ -4,6 +4,11 @@ export const APX_EARNINGS_RATE = 0.0008   // rate used to convert earnings → A
 export const APX_REDEMPTION_RATE = 0.00072
 export const APX_REWARD_SHARE = 0.08      // kept for tokenomics display — not used in ROI engine
 
+// Minimum redemption enforced at $1,000 USD equivalent
+// $1,000 / $0.00072 = 1,388,889 APX (rounded up)
+export const APX_MIN_REDEMPTION_USD = 1_000
+export const APX_MIN_REDEMPTION_APX = Math.ceil(APX_MIN_REDEMPTION_USD / APX_REDEMPTION_RATE) // 1,388,889
+
 export function usdToApx(usd: number, rate = APX_BUY_RATE) {
   if (!usd || usd <= 0) return 0
   return usd / rate
@@ -34,3 +39,4 @@ export function formatApx(amount: number) {
     maximumFractionDigits: 2,
   }).format(amount)
 }
+

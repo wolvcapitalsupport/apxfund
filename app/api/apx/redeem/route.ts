@@ -3,11 +3,13 @@ import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { APX_REDEMPTION_RATE, apxToUsd, formatApx } from '@/lib/apx'
+import { APX_REDEMPTION_RATE, APX_MIN_REDEMPTION_APX, APX_MIN_REDEMPTION_USD, apxToUsd, formatApx } from '@/lib/apx'
 import { createNotification } from '@/lib/notifications'
 
 const redeemSchema = z.object({
-  apxAmount: z.number().positive('APX amount must be greater than zero'),
+  apxAmount: z.number()
+    .positive('APX amount must be greater than zero')
+    .min(APX_MIN_REDEMPTION_APX, `Minimum redemption is ${APX_MIN_REDEMPTION_APX.toLocaleString()} APX ($${APX_MIN_REDEMPTION_USD.toLocaleString()} USD)`),
 })
 
 export async function GET() {
@@ -77,3 +79,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to submit APX redemption' }, { status: 500 })
   }
 }
+
