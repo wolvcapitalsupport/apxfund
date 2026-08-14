@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import { ArrowDownUp, Coins, ArrowLeftRight } from 'lucide-react'
+import { ArrowDownUp, Coins, ArrowLeftRight, Wallet, ExternalLink, Copy, Check, SmartphoneNfc } from 'lucide-react'
 import { APX_BUY_RATE, APX_REDEMPTION_RATE, APX_MIN_REDEMPTION_APX, APX_MIN_REDEMPTION_USD, formatApx } from '@/lib/apx'
 
 interface MeData {
@@ -17,6 +17,38 @@ export default function ApxWalletPage() {
   const [buyUsd, setBuyUsd] = useState('')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const CONTRACT = '0x8d6032443cb7b23c134094c8921f1f37824ea3a2'
+  const TOKEN_SYMBOL = 'APX'
+  const TOKEN_DECIMALS = 18
+
+  const addToWallet = async () => {
+    try {
+      const win = window as any
+      if (!win.ethereum) return toast.error('No Web3 wallet detected. Install MetaMask or Trust Wallet.')
+      await win.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: CONTRACT,
+            symbol: TOKEN_SYMBOL,
+            decimals: TOKEN_DECIMALS,
+          },
+        },
+      })
+      toast.success('APX token added to your wallet!')
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to add token')
+    }
+  }
+
+  const copyContract = async () => {
+    await navigator.clipboard.writeText(CONTRACT)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   // Redemption — bidirectional
   const [redeemMode, setRedeemMode] = useState<'apx' | 'usd'>('usd')
@@ -146,6 +178,57 @@ export default function ApxWalletPage() {
         />
       </div>
 
+      {/* Import token to wallet */}
+      <div className="card-dark p-5 space-y-4">
+        <h2 className="font-bold flex items-center gap-2">
+          <Wallet size={16} className="text-[#EAB308]" /> Add APX to Your Wallet
+        </h2>
+        <p className="text-xs text-gray-500">
+          Follow these steps to import APX into MetaMask or Trust Wallet.
+          You will see an &quot;unverified token&quot; warning — this is normal for new tokens and can be safely dismissed.
+        </p>
+
+        {/* Contract copy row */}
+        <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 space-y-1">
+          <p className="text-xs text-gray-500">Contract Address (BNB Smart Chain)</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-mono text-gray-200 break-all flex-1">0x8d6032443cb7b23c134094c8921f1f37824ea3a2</p>
+            <button onClick={copyContract} title="Copy address" className="text-gray-400 hover:text-white transition-colors shrink-0">
+              {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+            </button>
+          </div>
+          <p className="text-xs text-gray-600">Symbol: APX &nbsp;·&nbsp; Decimals: 18 &nbsp;·&nbsp; Network: BNB Smart Chain</p>
+        </div>
+
+        {/* Step by step */}
+        <ol className="space-y-2">
+          {[
+            'Open MetaMask or Trust Wallet on your device.',
+            'Switch the network to BNB Smart Chain (BSC).',
+            'Tap "Import Token" or "Add Custom Token".',
+            'Paste the contract address above — symbol and decimals will fill automatically.',
+            'You will see an unverified token warning. This is expected. Tap "Import" or "Confirm" to proceed.',
+            'APX will now appear in your wallet and you can receive distributions.',
+          ].map((step, i) => (
+            <li key={i} className="flex gap-3 text-xs text-gray-400">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-[#EAB308]/10 border border-[#EAB308]/30 text-[#EAB308] flex items-center justify-center font-bold text-[10px]">
+                {i + 1}
+              </span>
+              <span className="pt-0.5">{step}</span>
+            </li>
+          ))}
+        </ol>
+
+        <a
+          href="https://bscscan.com/token/0x8d6032443cb7b23c134094c8921f1f37824ea3a2"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs text-[#c9a84c] hover:underline"
+        >
+          <ExternalLink size={12} /> Verify contract on BscScan
+        </a>
+      </div>
+
       <div className="grid lg:grid-cols-2 gap-5">
         {/* Buy APX */}
         <div className="card-dark p-5 space-y-4">
@@ -253,6 +336,8 @@ export default function ApxWalletPage() {
         </div>
       </div>
 
+      </div>
+
       {/* Redemption history */}
       <div className="card-dark p-5">
         <h3 className="font-bold mb-3">Redemption History</h3>
@@ -319,3 +404,4 @@ function BalanceCard({
     </div>
   )
 }
+
