@@ -10,11 +10,11 @@ import {
   TrendingUp, Shield, BarChart3, AlertTriangle, X,
   MinusCircle, Wallet, ListOrdered, ChevronRight,
   Receipt, ToggleLeft, ToggleRight, Mail, Edit2, Save,
-  Send, Inbox, UserPlus, Globe
+  Send, Inbox, UserPlus, Globe, Coins, ArrowLeftRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email' | 'investments'
+type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email' | 'investments' | 'apx'
 
 // ─────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -964,6 +964,7 @@ export default function AdminPage() {
     { id: 'wallets',     label: 'Wallets',     icon: Wallet },
     { id: 'email',       label: 'Email',       icon: Mail },
     { id: 'roi',         label: 'ROI Engine',  icon: TrendingUp },
+    { id: 'apx',         label: 'APX Redemptions', icon: Coins },
   ] as const
 
   return (
@@ -997,6 +998,7 @@ export default function AdminPage() {
         {activeTab === 'investments' && <InvestmentsTab />}
         {activeTab === 'wallets' && <WalletsTab />}
         {activeTab === 'email' && <EmailTab />}
+        {activeTab === 'apx' && <ApxRedemptionsTab />}
       </div>
     </div>
   )
@@ -1685,6 +1687,119 @@ function InvestmentsTab() {
               </tbody>
             </table>
           </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── APX Redemptions Tab ──────────────────────────────────────────────────────
+function ApxRedemptionsTab() {
+  const [rows, setRows] = useState<any[]>([])
+  const [filter, setFilter] = useState('PENDING')
+  const [note, setNote] = useState('')
+  const [workingId, setWorkingId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const load = async () => {
+    setLoading(true)
+    const res = await fetch(`/api/admin/apx-redemptions?status=${filter}`)
+    const data = await res.json()
+    setRows(data.requests || [])
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [filter])
+
+  const runAction = async (id: string, action: 'approve' | 'reject') => {
+    setWorkingId(id)
+    const res = await fetch('/api/admin/apx-redemptions', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ redemptionId: id, action, adminNote: note || undefined }),
+    })
+    const data = await res.json()
+    if (!res.ok) toast.error(data.error || 'Action failed')
+    else { toast.success(data.message); setNote(''); await load() }
+    setWorkingId(null)
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-black flex items-center gap-2"><Coins size={18} className="text-[#c9a84c]" /> APX Redemption Queue</h2>
+        <p className="text-xs text-gray-500 mt-1">Approve → USD auto-credited to investor balance. Reject → APX refunded.</p>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        {['PENDING', 'SETTLED', 'REJECTED', 'ALL'].map(s => (
+          <button key={s} onClick={() => setFilter(s)}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${filter === s ? 'bg-[#c9a84c] text-[#0a0a14]' : 'bg-[#12121f] border border-[#1e1e35] text-gray-400 hover:text-white'}`}>
+            {s}
+          </button>
+        ))}
+      </div>
+
+      <div className="card-dark p-4">
+        <label className="text-xs text-gray-500 block mb-2">Admin Note (optional — shown to investor on rejection)</label>
+        <input value={note} onChange={e => setNote(e.target.value)}
+          className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]"
+          placeholder="Reason for rejection or settlement note" />
+      </div>
+
+      <div className="card-dark overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-[#0a0a14]">
+            <tr>
+              {['Investor', 'APX Amount', 'USD Value', 'Rate', 'Status', 'Requested', 'Actions'].map(h => (
+                <th key={h} className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#1e1e35]">
+            {rows.map(r => (
+              <tr key={r.id} className="hover:bg-[#12121f]/50">
+                <td className="px-4 py-3">
+                  <div className="font-semibold">{r.user?.fullName}</div>
+                  <div className="text-xs text-gray-500">{r.user?.email}</div>
+                </td>
+                <td className="px-4 py-3 font-mono">{r.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })} APX</td>
+                <td className="px-4 py-3 text-green-400 font-semibold">${r.usdValue.toFixed(2)}</td>
+                <td className="px-4 py-3 text-xs text-gray-500">${r.rateUsd}/APX</td>
+                <td className="px-4 py-3">
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    r.status === 'SETTLED'  ? 'bg-green-500/10 text-green-400' :
+                    r.status === 'REJECTED' ? 'bg-red-500/10 text-red-400' :
+                    'bg-yellow-500/10 text-yellow-400'
+                  }`}>{r.status}</span>
+                </td>
+                <td className="px-4 py-3 text-xs text-gray-500">{new Date(r.requestedAt).toLocaleString()}</td>
+                <td className="px-4 py-3">
+                  {r.status === 'PENDING' && (
+                    <div className="flex gap-2">
+                      <button disabled={workingId === r.id} onClick={() => runAction(r.id, 'approve')}
+                        className="px-3 py-1.5 rounded-lg text-xs border border-green-500/30 text-green-400 hover:bg-green-500/10 disabled:opacity-60 font-semibold">
+                        Approve + Credit USD
+                      </button>
+                      <button disabled={workingId === r.id} onClick={() => runAction(r.id, 'reject')}
+                        className="px-3 py-1.5 rounded-lg text-xs border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-60">
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                  {(r.status === 'SETTLED' || r.status === 'REJECTED') && (
+                    <span className="text-xs text-gray-600">{r.adminNote || '—'}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {rows.length === 0 && !loading && (
+          <div className="p-8 text-center text-sm text-gray-500">No redemption requests for this filter.</div>
+        )}
+        {loading && (
+          <div className="p-8 flex justify-center"><Loader2 size={20} className="animate-spin text-gray-500" /></div>
         )}
       </div>
     </div>
