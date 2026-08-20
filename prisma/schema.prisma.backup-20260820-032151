@@ -17,36 +17,36 @@ model User {
   country              String?
   role                 Role            @default(USER)
   balance              Float           @default(0)
+  apxBalance           Float           @default(0)
+  apxRewards           Float           @default(0)
   totalDeposited       Float           @default(0)
-  totalProfit          Float           @default(0)
   totalWithdrawn       Float           @default(0)
+  totalProfit          Float           @default(0)
   referralCode         String          @unique @default(cuid())
   referredBy           String?
-  kycStatus            KycStatus       @default(NONE)
-  kycRejectedNote      String?
-  isActive             Boolean         @default(true)
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
   utmSource            String?
   utmMedium            String?
   utmCampaign          String?
-  isEmailVerified      Boolean?        @default(false)
+  kycStatus            KycStatus       @default(NONE)
+  kycRejectedNote      String?
+  isActive             Boolean         @default(true)
+  isEmailVerified      Boolean         @default(false)
   emailVerifyOtp       String?
-  emailVerifyOtpExpiry DateTime?       @db.Timestamp(6)
+  emailVerifyOtpExpiry DateTime?
   lastNudgedPlanId     String?
-  lastNudgedAt         DateTime?       @db.Timestamp(6)
+  lastNudgedAt         DateTime?
   adminBanner          String?
-  adminBannerType      String?         @default("warning")
-  starterCyclesUsed    Int?            @default(0)
-  awaitingMigration    Boolean?        @default(false)
-  lockedCapital        Float?          @default(0)
-  apxBalance           Float           @default(0)
-  apxRewards           Float           @default(0)
-  apxRedemptions       ApxRedemption[]
+  adminBannerType      String?
+  starterCyclesUsed    Int             @default(0)
+  awaitingMigration    Boolean         @default(false)
+  lockedCapital        Float           @default(0)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
   investments          Investment[]
-  kycSubmissions       KycSubmission[]
-  notifications        Notification[]
   transactions         Transaction[]
+  apxRedemptions       ApxRedemption[]
+  notifications        Notification[]
+  kycSubmissions       KycSubmission[]
 
   @@map("users")
 }
@@ -58,10 +58,10 @@ model Plan {
   minAmount     Float
   maxAmount     Float
   durationDays  Int
-  referralBonus Float        @default(5)
-  isActive      Boolean      @default(true)
+  referralBonus Float        @default(0)
   description   String?
-  features      String[]     @default([])
+  features      String[]
+  isActive      Boolean      @default(true)
   createdAt     DateTime     @default(now())
   investments   Investment[]
 
@@ -69,50 +69,48 @@ model Plan {
 }
 
 model Investment {
-  id                 String           @id @default(cuid())
-  userId             String
-  planId             String
-  amount             Float
-  expectedProfit     Float
-  status             InvestmentStatus @default(ACTIVE)
-  startDate          DateTime         @default(now())
-  endDate            DateTime
-  completedAt        DateTime?
-  createdAt          DateTime         @default(now())
-  autoReinvest       Boolean          @default(true)
-  isPaused           Boolean          @default(false)
-  cycleNumber        Int?             @default(1)
-  rolloverOptOut     Boolean?         @default(false)
-  lastRoiProcessedAt DateTime?
-  plan               Plan             @relation(fields: [planId], references: [id])
-  user               User             @relation(fields: [userId], references: [id])
+  id             String           @id @default(cuid())
+  userId         String
+  planId         String
+  amount         Float
+  expectedProfit Float
+  status         InvestmentStatus @default(ACTIVE)
+  autoReinvest   Boolean          @default(true)
+  cycleNumber    Int              @default(1)
+  isPaused       Boolean          @default(false)
+  startDate      DateTime         @default(now())
+  endDate        DateTime
+  completedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id])
+  plan           Plan             @relation(fields: [planId], references: [id])
 
   @@map("investments")
 }
 
 model Transaction {
-  id             String            @id @default(cuid())
-  userId         String
-  type           TransactionType
-  status         TransactionStatus @default(PENDING)
-  amount         Float
-  currency       String            @default("USD")
-  txHash         String?
-  proofImageUrl  String?
-  walletAddress  String?
-  adminNote      String?
-  reviewedBy     String?
-  reviewedAt     DateTime?
-  note           String?
-  createdAt      DateTime          @default(now())
-  network        String?
-  updatedAt      DateTime          @default(now()) @updatedAt
-  txProofHash    String?
-  usdEquivalent  Float?
-  conversionRate Float?
-  user           User              @relation(fields: [userId], references: [id])
+  id            String            @id @default(cuid())
+  userId        String
+  type          TransactionType
+  status        TransactionStatus @default(PENDING)
+  amount        Float
+  currency      String?
+  txHash        String?
+  txProofHash   String?
+  proofImageUrl String?
+  adminNote     String?
+  walletAddress String?
+  network       String?
+  note          String?
+  // APX earnings accounting — populated for APX_REWARD and REFERRAL (APX) transactions.
+  // Preserves original USD amount, locked rate, and resulting APX so historical
+  // allocations are immutable even if APX_EARNINGS_RATE changes in future.
+  usdEquivalent   Float?
+  conversionRate  Float?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  user          User              @relation(fields: [userId], references: [id])
 
-  @@index([type, currency])
   @@map("transactions")
 }
 
@@ -129,9 +127,6 @@ model ApxRedemption {
   settledAt   DateTime?
   user        User                @relation(fields: [userId], references: [id])
 
-  @@index([requestedAt])
-  @@index([status])
-  @@index([userId])
   @@map("apx_redemptions")
 }
 
@@ -139,17 +134,15 @@ model KycSubmission {
   id             String    @id @default(cuid())
   userId         String
   documentType   String
-  documentNumber String
+  documentNumber String?
   frontImageUrl  String
   backImageUrl   String?
-  selfieUrl      String
+  selfieUrl      String?
   status         KycStatus @default(PENDING)
   adminNote      String?
-  reviewedBy     String?
-  reviewedAt     DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
   submittedAt    DateTime  @default(now())
+  reviewedAt     DateTime?
+  updatedAt      DateTime  @updatedAt
   user           User      @relation(fields: [userId], references: [id])
 
   @@map("kyc_submissions")
@@ -161,8 +154,8 @@ model Notification {
   title     String
   message   String
   type      String   @default("info")
-  isRead    Boolean  @default(false)
   link      String?
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
@@ -176,19 +169,19 @@ model WalletAddress {
   address   String
   network   String   @default("mainnet")
   isActive  Boolean  @default(true)
-  updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("wallet_addresses")
 }
 
 model RoiProcessingLog {
-  id               String   @id @default(cuid())
-  processedAt      DateTime @default(now())
-  investmentsFound Int
-  investmentsDone  Int
-  totalProfitPaid  Float
-  errors           String?
+  id              String   @id @default(cuid())
+  processedAt     DateTime @default(now())
+  investmentsFound Int      @default(0)
+  investmentsDone Int      @default(0)
+  totalProfitPaid Float    @default(0)
+  errors          String?
 
   @@map("roi_processing_logs")
 }
@@ -230,19 +223,17 @@ enum TransactionType {
   DEPOSIT
   WITHDRAWAL
   PROFIT
-  REFERRAL_BONUS
+  REFERRAL
+  ADJUSTMENT
   APX_BUY
   APX_REWARD
   APX_REDEEM
-  REFERRAL
-  ADJUSTMENT
 }
 
 enum TransactionStatus {
   PENDING
   APPROVED
   REJECTED
-  COMPLETED
 }
 
 enum ApxRedemptionStatus {

@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
     if (!plan.isActive) return NextResponse.json({ error: 'This plan is no longer available' }, { status: 400 })
 
-    if (isStarterPlan(plan.name) && user.starterCyclesUsed >= MAX_STARTER_CYCLES) {
+    if (isStarterPlan(plan.name) && (user.starterCyclesUsed ?? 0) >= MAX_STARTER_CYCLES) {
       return NextResponse.json(
         { error: 'Starter Portfolio is limited to 2 cycles per account. Please migrate your locked capital to a higher plan to continue investing.' },
         { status: 400 }

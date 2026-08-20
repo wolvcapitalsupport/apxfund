@@ -336,7 +336,6 @@ export default function ApxWalletPage() {
         </div>
       </div>
 
-      </div>
 
       {/* Redemption history */}
       <div className="card-dark p-5">

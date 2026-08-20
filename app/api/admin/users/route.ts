@@ -184,7 +184,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Plan not found or inactive' }, { status: 404 })
     }
 
-    if (isStarterPlan(plan.name) && user.starterCyclesUsed >= MAX_STARTER_CYCLES) {
+    if (isStarterPlan(plan.name) && (user.starterCyclesUsed ?? 0) >= MAX_STARTER_CYCLES) {
       return NextResponse.json(
         { error: 'This user has used both Starter Portfolio cycles. Migrate their locked capital to a higher plan instead.' },
         { status: 400 }

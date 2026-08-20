@@ -47,7 +47,6 @@ async function buildMigrationPlan(): Promise<UserMigration[]> {
     where: {
       type: { in: ['PROFIT', 'REFERRAL'] },
       OR: [
-        { currency: null },
         { currency: 'USD' },
       ],
       NOT: {
@@ -154,7 +153,7 @@ export async function POST(req: NextRequest) {
         where: {
           userId: user.userId,
           type: { in: ['PROFIT', 'REFERRAL'] },
-          OR: [{ currency: null }, { currency: 'USD' }],
+          OR: [{ currency: 'USD' }],
           NOT: { note: { contains: 'Capital returned' } },
         },
         select: { id: true, note: true },

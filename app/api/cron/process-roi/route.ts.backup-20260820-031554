@@ -40,18 +40,6 @@ export async function GET(req: NextRequest) {
           continue
         }
 
-        // Prevent the same investment from receiving daily ROI more than once
-        // during the same calendar day.
-        if (
-          inv.lastRoiProcessedAt &&
-          inv.lastRoiProcessedAt.toDateString() === now.toDateString()
-        ) {
-          console.log(
-            `[ROI Engine] ⏭ Already processed today ${inv.id} — ${inv.user.email}`
-          )
-          continue
-        }
-
         const isMature = now >= new Date(inv.endDate)
         const dailyProfit = parseFloat(
           ((inv.amount * inv.plan.roiPercent) / 100 / inv.plan.durationDays).toFixed(2)
@@ -107,11 +95,7 @@ export async function GET(req: NextRequest) {
 
               await tx.investment.update({
                 where: { id: inv.id },
-                data: {
-                  status: 'COMPLETED',
-                  completedAt: now,
-                  lastRoiProcessedAt: now,
-                },
+                data: { status: 'COMPLETED', completedAt: now },
               })
 
               if (starter) {
@@ -259,15 +243,6 @@ export async function GET(req: NextRequest) {
 
             } else {
               // ── Daily ROI — investment stays ACTIVE ────────────────────
-
-              // Mark this investment as processed before crediting today's ROI.
-              // This prevents repeated cron executions from paying the same
-              // day's ROI more than once.
-              await tx.investment.update({
-                where: { id: inv.id },
-                data: { lastRoiProcessedAt: now },
-              })
-
               await tx.user.update({
                 where: { id: inv.userId },
                 data: {
@@ -363,7 +338,6 @@ export async function GET(req: NextRequest) {
     console.error('[ROI Engine] Fatal error:', error)
     await prisma.roiProcessingLog.create({
       data: {
-        investmentsFound: 0,
         investmentsDone,
         totalProfitPaid,
         errors: `Fatal: ${error.message}`,
