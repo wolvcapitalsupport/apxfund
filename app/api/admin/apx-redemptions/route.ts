@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest) {
 
   const { redemptionId, action, adminNote } = await req.json()
 
-  if (!redemptionId || !['approve', 'reject', 'settle'].includes(action)) {
+  if (!redemptionId || !['approve', 'reject'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
@@ -96,8 +96,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   if (action === 'reject') {
-    if (row.status !== 'PENDING' && row.status !== 'APPROVED') {
-      return NextResponse.json({ error: 'Only pending/approved requests can be rejected' }, { status: 400 })
+    if (row.status !== 'PENDING') {
+      return NextResponse.json({ error: 'Only pending requests can be rejected' }, { status: 400 })
     }
 
     await prisma.$transaction([
@@ -128,44 +128,5 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ message: 'Redemption rejected and APX refunded' })
   }
 
-  if (row.status !== 'APPROVED') {
-    return NextResponse.json({ error: 'Only approved requests can be settled' }, { status: 400 })
-  }
-
-  await prisma.$transaction([
-    prisma.apxRedemption.update({
-      where: { id: row.id },
-      data: {
-        status: 'SETTLED',
-        settledAt: new Date(),
-        adminNote: adminNote || null,
-      },
-    }),
-    prisma.user.update({
-      where: { id: row.userId },
-      data: {
-        balance: { increment: row.usdValue },
-      },
-    }),
-    prisma.transaction.create({
-      data: {
-        userId: row.userId,
-        type: 'APX_REDEEM',
-        status: 'APPROVED',
-        amount: row.usdValue,
-        currency: 'USD',
-        note: `APX redemption settled: ${row.amount.toFixed(2)} APX`,
-      },
-    }),
-  ])
-
-  await createNotification(
-    row.userId,
-    'APX Redemption Settled',
-    `Your APX redemption has been settled and $${row.usdValue.toFixed(2)} was credited to your USD balance.`,
-    'success',
-    '/dashboard'
-  )
-
-  return NextResponse.json({ message: 'Redemption settled and USD credited' })
+  return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 }
