@@ -1846,8 +1846,7 @@ function ApxRedemptionsTab() {
           </h3>
           <p className="text-xs text-gray-500 mt-1">
             Use only when APX has already been sent externally from the platform wallet.
-            This permanently debits the selected user's APX balance and creates an audit transaction.
-          </p>
+This permanently debits the selected user&apos;s APX balance and creates an audit transaction.          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
