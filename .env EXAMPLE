@@ -1,0 +1,60 @@
+# ==============================================
+# APXFund Environment Variables
+# Copy this file to .env.local and fill in your values
+# ==============================================
+
+# --- DATABASE ---
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE"
+
+# Supabase (get from supabase.com → Project Settings → API)
+NEXT_PUBLIC_SUPABASE_URL="https://your-project-id.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# --- AUTH (NextAuth) ---
+NEXTAUTH_SECRET="generate-with: openssl rand -base64 32"
+NEXTAUTH_URL="https://yourdomain.com"
+
+# --- EMAIL (Resend) ---
+# Get from resend.com → API Keys
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxxxx"
+EMAIL_FROM="noreply@yourdomain.com"
+
+# --- BLOCKCHAIN (BNB Smart Chain) ---
+# APX Token Contract Address on BSC
+NEXT_PUBLIC_APX_CONTRACT_ADDRESS="0x8d6032443cb7b23c134094c8921f1f37824ea3a2"
+
+# BSC RPC Endpoint (free options below)
+BSC_RPC_URL="https://bsc-dataseed1.binance.org"
+# Alternatives:
+# https://bsc-dataseed2.binance.org
+# https://bsc-dataseed3.binance.org
+# https://rpc.ankr.com/bsc (more reliable)
+
+# Distribution wallet private key (for airdrop/payouts)
+# NEVER commit this to git — keep it secret!
+DISTRIBUTION_WALLET_PRIVATE_KEY="your-bsc-wallet-private-key"
+
+# Chain ID (56 = BSC Mainnet, 97 = BSC Testnet)
+NEXT_PUBLIC_CHAIN_ID="56"
+
+# APX Token Details
+NEXT_PUBLIC_APX_SYMBOL="APX"
+NEXT_PUBLIC_APX_DECIMALS="18"
+NEXT_PUBLIC_APX_BUY_RATE="0.0008"
+NEXT_PUBLIC_APX_REDEMPTION_RATE="0.00072"
+
+# --- APP CONFIG ---
+NEXT_PUBLIC_APP_URL="https://yourdomain.com"
+NEXT_PUBLIC_APP_NAME="APXFund"
+
+# Cron job security secret (generate random string)
+CRON_SECRET="generate-random-string-here"
+
+# Admin email (receives system notifications)
+ADMIN_EMAIL="admin@yourdomain.com"
+
+# --- OPTIONAL: WEBHOOK ---
+# If using Supabase auth webhook for welcome emails
+SUPABASE_WEBHOOK_SECRET="your-webhook-secret"
