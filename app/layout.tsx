@@ -14,6 +14,9 @@ const inter = localFont({
 export const metadata: Metadata = {
   title: 'APXFUND',
   description: 'Investment Platform',
+  icons: {
+    icon: '/logo.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
