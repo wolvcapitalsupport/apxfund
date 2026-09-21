@@ -3,7 +3,7 @@ import PublicFooter from '@/components/layout/PublicFooter'
 import Link from 'next/link'
 import { APX_SUPPLY, APX_BUY_RATE, APX_REDEMPTION_RATE, APX_REWARD_SHARE } from '@/lib/apx'
 
-const CONTRACT = '0x8d6032443cb7b23c134094c8921f1f37824ea3a2'
+const CONTRACT = '0x8d6032443cb7B23c134094c8921F1F37824EA3a2'
 
 export default function TokenomicsPage() {
   return (
@@ -44,7 +44,13 @@ export default function TokenomicsPage() {
               <li>APX accounting is active inside platform wallet.</li>
               <li>Redemption follows Option B (queue + scheduled settlement).</li>
               <li>External exchange price discovery is not guaranteed pre-listing.</li>
-              <li>Contract: <span className="font-mono text-xs break-all text-gray-200">{CONTRACT}</span></li>
+              <li>
+                Contract: <span className="font-mono text-xs break-all text-gray-200">{CONTRACT}</span>
+                <div className="text-xs text-gray-600 mt-1">Network: BNB Smart Chain (BSC)</div>
+                <a href="https://pancakeswap.finance/swap?chain=bsc&inputCurrency=BNB&outputCurrency=0x8d6032443cb7B23c134094c8921F1F37824EA3a2" className="inline-block mt-2 text-[#c9a84c] hover:underline text-sm" target="_self" rel="noopener noreferrer">
+                  Buy on PancakeSwap
+                </a>
+              </li>
             </ul>
           </div>
         </div>

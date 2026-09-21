@@ -3,7 +3,7 @@ import PublicFooter from '@/components/layout/PublicFooter'
 import { APX_BUY_RATE, APX_REDEMPTION_RATE, APX_SUPPLY, formatApx } from '@/lib/apx'
 import Link from 'next/link'
 
-const CONTRACT = '0x8d6032443cb7b23c134094c8921f1f37824ea3a2'
+const CONTRACT = '0x8d6032443cb7B23c134094c8921F1F37824EA3a2'
 
 async function getTokenStats() {
   const bscKey = process.env.BSCSCAN_API_KEY
@@ -70,6 +70,7 @@ export default async function TokenPage() {
           <div className="mt-8 p-4 rounded-xl border border-[#1e1e35] bg-[#0d0f18]">
             <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Live Contract</div>
             <div className="text-sm break-all font-mono text-gray-200">{CONTRACT}</div>
+<div className="text-xs text-gray-600">Network: BNB Smart Chain (BSC)</div>
             <a
               className="inline-block mt-3 text-[#c9a84c] hover:underline text-sm"
               href={`https://bscscan.com/token/${CONTRACT}`}
@@ -77,6 +78,9 @@ export default async function TokenPage() {
               rel="noopener noreferrer"
             >
               View on BscScan
+            </a>
+            <a href="https://pancakeswap.finance/swap?chain=bsc&inputCurrency=BNB&outputCurrency=0x8d6032443cb7B23c134094c8921F1F37824EA3a2" className="inline-block mt-3 ml-3 text-[#c9a84c] hover:underline text-sm" target="_self" rel="noopener noreferrer">
+              Buy on PancakeSwap
             </a>
           </div>
 
