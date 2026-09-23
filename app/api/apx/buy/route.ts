@@ -24,50 +24,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Insufficient USD balance' }, { status: 400 })
     }
 
+    // For decentralized version, we don't update internal balances
+    // Instead, we provide information for the user to swap on PancakeSwap
     const apxAmount = usdToApx(usdAmount, APX_BUY_RATE)
 
-    const [updatedUser] = await prisma.$transaction([
-      prisma.user.update({
-        where: { id: user.id },
-        data: {
-          balance: { decrement: usdAmount },
-          apxBalance: { increment: apxAmount },
-        },
-      }),
-      prisma.transaction.create({
-        data: {
-          userId: user.id,
-          type: 'APX_BUY',
-          status: 'APPROVED',
-          amount: usdAmount,
-          currency: 'USD',
-          note: `Bought ${formatApx(apxAmount)} APX at $${APX_BUY_RATE} per APX`,
-        },
-      }),
-    ])
+    // In a real implementation, we would:
+    // 1. Calculate the required input amount (BNB/USDT) for the swap
+    // 2. Provide swap transaction data for the user to execute
+    // 3. Or facilitate the swap via our interface
 
-    await createNotification(
-      user.id,
-      'APX Purchase Completed',
-      `You bought ${formatApx(apxAmount)} APX for $${usdAmount.toFixed(2)}.`,
-      'success',
-      '/dashboard/apx'
-    )
-
+    // For now, we'll return the calculated amounts and instructions
     return NextResponse.json({
-      message: 'APX purchased successfully',
-      apxAmount,
+      message: 'Ready to swap for APX on PancakeSwap',
       usdAmount,
-      rate: APX_BUY_RATE,
-      balances: {
-        usd: updatedUser.balance,
-        apx: updatedUser.apxBalance,
-      },
+      apxAmount: formatApx(apxAmount),
+      buyRate: APX_BUY_RATE,
+      instructions: 'Connect your wallet and use the swap feature to exchange BNB/USDT for APX on PancakeSwap',
+      // In future: provide swap transaction data
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 })
     }
-    return NextResponse.json({ error: 'Failed to buy APX' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to process APX purchase' }, { status: 500 })
   }
 }

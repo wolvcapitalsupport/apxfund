@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk git *)",
+      "Bash(rtk grep *)",
+      "Bash(git am *)",
+      "Bash(rtk read *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk curl *)",
+      "Bash(curl -s https://apxfund.xyz)",
+      "Bash(rtk find *)",
+      "Bash(npm install *)",
+      "Bash(npm list *)"
+    ]
+  }
+}

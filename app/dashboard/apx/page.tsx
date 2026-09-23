@@ -1,23 +1,31 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
-import { ArrowDownUp, Coins, ArrowLeftRight, Wallet, ExternalLink, Copy, Check, SmartphoneNfc } from 'lucide-react'
-import { APX_BUY_RATE, APX_REDEMPTION_RATE, APX_MIN_REDEMPTION_APX, APX_MIN_REDEMPTION_USD, formatApx } from '@/lib/apx'
-
-interface MeData {
-  balance: number
-  apxBalance: number
-  apxRewards: number
-}
+import {
+  ArrowDownUp,
+  Coins,
+  ArrowLeftRight,
+  Wallet,
+  ExternalLink,
+  Copy,
+  Check,
+  SmartphoneNfc,
+  RefreshCw,
+  Zap
+} from 'lucide-react'
+import { useWallet } from '@/lib/useWallet'
+import { formatApx, parseApx, APX_BUY_RATE, APX_REDEMPTION_RATE } from '@/lib/apx'
 
 export default function ApxWalletPage() {
-  const [me, setMe] = useState<MeData | null>(null)
-  const [requests, setRequests] = useState<any[]>([])
   const [buyUsd, setBuyUsd] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [redeemApx, setRedeemApx] = useState('')
+  const [redeemUsd, setRedeemUsd] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [swapMode, setSwapMode] = useState<'buy' | 'sell'>('buy')
+
+  const { wallet, connect: connectWallet, disconnect: disconnectWallet, getApxBalance, switchToBsc } = useWallet()
 
   const CONTRACT = '0x8d6032443cb7b23c134094c8921f1f37824ea3a2'
   const TOKEN_SYMBOL = 'APX'
@@ -25,9 +33,8 @@ export default function ApxWalletPage() {
 
   const addToWallet = async () => {
     try {
-      const win = window as any
-      if (!win.ethereum) return toast.error('No Web3 wallet detected. Install MetaMask or Trust Wallet.')
-      await win.ethereum.request({
+      if (!window.ethereum) return toast.error('No Web3 wallet detected. Install MetaMask or Trust Wallet.')
+      await window.ethereum.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',
@@ -50,100 +57,103 @@ export default function ApxWalletPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Redemption — bidirectional
-  const [redeemMode, setRedeemMode] = useState<'apx' | 'usd'>('usd')
-  const [redeemApx, setRedeemApx] = useState('')
-  const [redeemUsd, setRedeemUsd] = useState('')
+  // Calculate derived values for buy
+  const estBuyApx = buyUsd ? parseApx(parseFloat(buyUsd) / APX_BUY_RATE) : '0'
 
-  const load = async () => {
-    setLoading(true)
-    try {
-      const [userRes, reqRes] = await Promise.all([
-        fetch('/api/user/me'),
-        fetch('/api/apx/redeem'),
-      ])
-      setMe(await userRes.json())
-      const reqs = await reqRes.json()
-      setRequests(Array.isArray(reqs) ? reqs : [])
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Calculate derived values for sell/redeem
+  const derivedRedeemApx = redeemApx ? parseApx(redeemApx) : '0'
+  const derivedRedeemUsd = redeemUsd ?
+    parseApx(parseFloat(redeemUsd) / APX_REDEMPTION_RATE) :
+    '0'
 
-  useEffect(() => { load() }, [])
-
-  const estBuyApx = useMemo(() => {
-    const usd = parseFloat(buyUsd || '0')
-    return usd > 0 ? usd / APX_BUY_RATE : 0
-  }, [buyUsd])
-
-  // Derived redemption values — whichever field user typed, compute the other
-  const derivedRedeemApx = useMemo(() => {
-    if (redeemMode === 'apx') return parseFloat(redeemApx || '0') || 0
-    const usd = parseFloat(redeemUsd || '0')
-    return usd > 0 ? usd / APX_REDEMPTION_RATE : 0
-  }, [redeemMode, redeemApx, redeemUsd])
-
-  const derivedRedeemUsd = useMemo(() => {
-    if (redeemMode === 'usd') return parseFloat(redeemUsd || '0') || 0
-    const apx = parseFloat(redeemApx || '0')
-    return apx > 0 ? apx * APX_REDEMPTION_RATE : 0
-  }, [redeemMode, redeemApx, redeemUsd])
-
-  const toggleRedeemMode = () => {
-    setRedeemMode(m => m === 'apx' ? 'usd' : 'apx')
+  const toggleSwapMode = () => {
+    setSwapMode(m => m === 'buy' ? 'sell' : 'buy')
+    setBuyUsd('')
     setRedeemApx('')
     setRedeemUsd('')
   }
 
-  const onBuy = async () => {
-    const usdAmount = parseFloat(buyUsd)
-    if (!usdAmount || usdAmount < 10) return toast.error('Minimum APX buy is $10')
+  const handleBuy = async () => {
+    const usdAmount = parseFloat(buyUsd || '0')
+    if (!usdAmount || usdAmount < 10) {
+      return toast.error('Minimum APX buy is $10')
+    }
+
+    if (!wallet.isConnected) {
+      return toast.error('Please connect your wallet first')
+    }
+
     setSubmitting(true)
     try {
-      const res = await fetch('/api/apx/buy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usdAmount }),
-      })
-      const data = await res.json()
-      if (!res.ok) return toast.error(data.error || 'Buy failed')
-      toast.success(data.message)
-      setBuyUsd('')
-      await load()
+      // In a full implementation, we would:
+      // 1. Calculate required BNB/USDT amount for the swap
+      // 2. Show PancakeSwap interface or execute swap via contract
+      // 3. For now, we'll show instructions
+
+      const apxAmount = usdAmount / APX_BUY_RATE
+      toast.success(`Ready to swap $${usdAmount.toFixed(2)} for ${formatApx(apxAmount)} APX on PancakeSwap`)
+
+      // In production, this would trigger the swap interface
+      // For now, we just show a success message
+    } catch (error) {
+      toast.error('Failed to initiate swap: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setSubmitting(false)
     }
   }
 
-  const onRedeem = async () => {
-    const apxAmount = derivedRedeemApx
-    if (!apxAmount || apxAmount <= 0) return toast.error('Enter an amount')
-    if (apxAmount < APX_MIN_REDEMPTION_APX) {
-      return toast.error(`Minimum redemption is ${APX_MIN_REDEMPTION_APX.toLocaleString()} APX ($${APX_MIN_REDEMPTION_USD.toLocaleString()})`)
+  const handleRedeem = async () => {
+    const apxAmount = parseFloat(redeemApx || '0')
+    const usdAmount = parseFloat(redeemUsd || '0')
+
+    if ((!apxAmount || apxAmount <= 0) && (!usdAmount || usdAmount <= 0)) {
+      return toast.error('Enter an amount')
     }
+
+    if (!wallet.isConnected) {
+      return toast.error('Please connect your wallet first')
+    }
+
+    // Calculate the other value if only one is provided
+    const finalApxAmount = apxAmount || (usdAmount / APX_REDEMPTION_RATE)
+    const finalUsdAmount = usdAmount || (apxAmount * APX_REDEMPTION_RATE)
+
+    if (finalApxAmount < 1.388889) { // Minimum redemption: 1,388.889 APX ($1,000 at current rate)
+      return toast.error(`Minimum redemption is 1,388.889 APX ($1,000 USD)`)
+    }
+
     setSubmitting(true)
     try {
-      const res = await fetch('/api/apx/redeem', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apxAmount }),
-      })
-      const data = await res.json()
-      if (!res.ok) return toast.error(data.error || 'Redemption failed')
-      toast.success(data.message)
-      setRedeemApx('')
-      setRedeemUsd('')
-      await load()
+      toast.success(`Ready to swap ${formatApx(finalApxAmount)} APX for $${finalUsdAmount.toFixed(2)} on PancakeSwap`)
+
+      // In production, this would trigger the swap interface
+    } catch (error) {
+      toast.error('Failed to initiate swap: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setSubmitting(false)
     }
   }
 
-  const apxUsdValue = (me?.apxBalance || 0) * APX_REDEMPTION_RATE
-  const apxRewardsUsdValue = (me?.apxRewards || 0) * APX_REDEMPTION_RATE
+  // Get wallet APX balance on mount and when wallet changes
+  const [apxBalance, setApxBalance] = useState('0')
 
-  if (loading) {
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (wallet.isConnected && wallet.address) {
+        const balance = await getApxBalance()
+        setApxBalance(balance)
+      } else {
+        setApxBalance('0')
+      }
+    }
+
+    fetchBalance()
+  }, [wallet.isConnected, wallet.address, getApxBalance])
+
+  // Format balance for display
+  const formattedBalance = apxBalance !== '0' ? formatApx(parseFloat(apxBalance)) : '0'
+
+  if (wallet.isConnecting) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-10 h-10 rounded-full border-2 border-[#EAB308] border-t-transparent animate-spin" />
@@ -152,255 +162,267 @@ export default function ApxWalletPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black mb-1">APX Wallet</h1>
-        <p className="text-gray-500 text-sm">Internal APX economy before public liquidity listing.</p>
-      </div>
-
-      {/* Balance cards */}
-      <div className="grid md:grid-cols-3 gap-3">
-        <BalanceCard
-          label="USD Balance"
-          primary={`$${(me?.balance || 0).toFixed(2)}`}
-        />
-        <BalanceCard
-          label="APX Balance"
-          primary={`${formatApx(me?.apxBalance || 0)} APX`}
-          secondary={`≈ $${apxUsdValue.toFixed(2)} USD`}
-          secondaryNote={`@ $${APX_REDEMPTION_RATE}/APX`}
-        />
-        <BalanceCard
-          label="APX Earned (Total)"
-          primary={`${formatApx(me?.apxRewards || 0)} APX`}
-          secondary={`≈ $${apxRewardsUsdValue.toFixed(2)} USD`}
-          secondaryNote="lifetime"
-        />
-      </div>
-
-      {/* Import token to wallet */}
-      <div className="card-dark p-5 space-y-4">
-        <h2 className="font-bold flex items-center gap-2">
-          <Wallet size={16} className="text-[#EAB308]" /> Add APX to Your Wallet
-        </h2>
-        <p className="text-xs text-gray-500">
-          Follow these steps to import APX into MetaMask or Trust Wallet.
-          You will see an &quot;unverified token&quot; warning — this is normal for new tokens and can be safely dismissed.
-        </p>
-
-        {/* Contract copy row */}
-        <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 space-y-1">
-          <p className="text-xs text-gray-500">Contract Address (BNB Smart Chain)</p>
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-mono text-gray-200 break-all flex-1">0x8d6032443cb7b23c134094c8921f1f37824ea3a2</p>
-            <button onClick={copyContract} title="Copy address" className="text-gray-400 hover:text-white transition-colors shrink-0">
-              {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-            </button>
+    <div className="min-h-screen bg-[#0a0a14]">
+      <div className="px-6 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-black text-white mb-2">
+              APX Wallet
+            </h1>
+            <p className="text-gray-400 text-sm">
+              Decentralized APX token management - You control your funds
+            </p>
           </div>
-          <p className="text-xs text-gray-600">Symbol: APX &nbsp;·&nbsp; Decimals: 18 &nbsp;·&nbsp; Network: BNB Smart Chain</p>
-        </div>
 
-        {/* Step by step */}
-        <ol className="space-y-2">
-          {[
-            'Open MetaMask or Trust Wallet on your device.',
-            'Switch the network to BNB Smart Chain (BSC).',
-            'Tap "Import Token" or "Add Custom Token".',
-            'Paste the contract address above — symbol and decimals will fill automatically.',
-            'You will see an unverified token warning. This is expected. Tap "Import" or "Confirm" to proceed.',
-            'APX will now appear in your wallet and you can receive distributions.',
-          ].map((step, i) => (
-            <li key={i} className="flex gap-3 text-xs text-gray-400">
-              <span className="shrink-0 w-5 h-5 rounded-full bg-[#EAB308]/10 border border-[#EAB308]/30 text-[#EAB308] flex items-center justify-center font-bold text-[10px]">
-                {i + 1}
-              </span>
-              <span className="pt-0.5">{step}</span>
-            </li>
-          ))}
-        </ol>
-
-        <a
-          href="https://bscscan.com/token/0x8d6032443cb7b23c134094c8921f1f37824ea3a2"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-[#c9a84c] hover:underline"
-        >
-          <ExternalLink size={12} /> Verify contract on BscScan
-        </a>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-5">
-        {/* Buy APX */}
-        <div className="card-dark p-5 space-y-4">
-          <h2 className="font-bold flex items-center gap-2">
-            <Coins size={16} className="text-[#EAB308]" /> Buy APX
-          </h2>
-          <p className="text-xs text-gray-500">Internal buy rate: ${APX_BUY_RATE} per APX</p>
-          <input
-            type="number"
-            min={10}
-            value={buyUsd}
-            onChange={e => setBuyUsd(e.target.value)}
-            placeholder="USD amount"
-            className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]"
-          />
-          <div className="text-xs text-gray-400">
-            You receive: <span className="text-white font-semibold">{formatApx(estBuyApx)} APX</span>
-          </div>
-          <button onClick={onBuy} disabled={submitting} className="btn-gold w-full py-3 rounded-xl text-sm font-bold disabled:opacity-60">
-            {submitting ? 'Processing...' : 'Buy APX'}
-          </button>
-        </div>
-
-        {/* Redeem APX — bidirectional */}
-        <div className="card-dark p-5 space-y-4">
-          <h2 className="font-bold flex items-center gap-2">
-            <ArrowDownUp size={16} className="text-[#34d399]" /> Redeem APX
-          </h2>
-          <p className="text-xs text-gray-500">
-            Rate: ${APX_REDEMPTION_RATE}/APX — min ${APX_MIN_REDEMPTION_USD.toLocaleString()} USD — admin approval required
-          </p>
-
-          {/* Input row with swap toggle */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="text-xs text-gray-500 mb-1 block">
-                  {redeemMode === 'apx' ? 'APX Amount' : 'USD Amount'}
-                </label>
-                {redeemMode === 'apx' ? (
-                  <input
-                    type="number"
-                    min={0}
-                    value={redeemApx}
-                    onChange={e => setRedeemApx(e.target.value)}
-                    placeholder="Enter APX"
-                    className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#34d399]"
-                  />
+          {/* Wallet Connection Status */}
+          <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {wallet.isConnected ? (
+                  <>
+                    <Wallet size={20} className="text-[#34d399]" />
+                    <div>
+                      <p className="text-white font-medium">Wallet Connected</p>
+                      <p className="text-xs text-gray-400">
+                        {wallet.address ? `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}` : 'Connecting...'}
+                      </p>
+                    </div>
+                  </>
                 ) : (
-                  <input
-                    type="number"
-                    min={0}
-                    value={redeemUsd}
-                    onChange={e => setRedeemUsd(e.target.value)}
-                    placeholder="Enter USD"
-                    className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#34d399]"
-                  />
+                  <>
+                    <Wallet size={20} className="text-gray-400" />
+                    <div>
+                      <p className="text-white font-medium">Wallet Disconnected</p>
+                      <p className="text-xs text-gray-400">Connect wallet to trade APX</p>
+                    </div>
+                  </>
                 )}
               </div>
 
-              {/* Swap button */}
+              {wallet.isConnected ? (
+                <button onClick={disconnectWallet} className="text-xs text-gray-400 hover:text-white">
+                  Disconnect
+                </button>
+              ) : (
+                <button onClick={connectWallet} className="btn-gold px-4 py-2 text-sm">
+                  Connect Wallet
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Balance Card */}
+          <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-6 mb-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">APX Balance</p>
+                <p className="text-2xl font-black text-[#EAB308]">
+                  {formattedBalance} APX
+                </p>
+                <p className="text-xs text-gray-400 mt-2">
+                  ≈ ${
+                    (parseFloat(formattedBalance) * APX_REDEMPTION_RATE).toFixed(2)
+                  } USD
+                </p>
+              </div>
+
+              <div className="text-right">
+                <button
+                  onClick={refreshBalance}
+                  className="text-xs text-[#c9a84c] hover:text-white transition-colors"
+                >
+                  <RefreshCw size={16} /> Refresh
+                </button>
+                <button
+                  onClick={addToWallet}
+                  className="mt-2 text-xs text-[#c9a84c] hover:text-white transition-colors"
+                >
+                  <Wallet size={14} /> Add to Wallet
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Swap Section */}
+          <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-6">
+            <h2 className="text-xl font-black text-white mb-6">
+              Swap APX
+            </h2>
+
+            {/* Mode Toggle */}
+            <div className="flex mb-6">
               <button
-                onClick={toggleRedeemMode}
-                title="Switch input between APX and USD"
-                className="mt-5 p-2.5 rounded-xl border border-[#1e1e35] text-[#34d399] hover:bg-[#34d399]/10 transition-colors"
+                onClick={toggleSwapMode}
+                className={`flex-1 px-4 py-3 text-left font-medium ${swapMode === 'buy' ? 'bg-[#0a0a14] text-white' : 'bg-[#0d0f18] text-gray-400'} ${swapMode === 'buy' ? 'border-b-2 border-[#EAB308]' : ''}`}
               >
-                <ArrowLeftRight size={16} />
+                Buy APX
+              </button>
+              <button
+                onClick={toggleSwapMode}
+                className={`flex-1 px-4 py-3 text-right font-medium ${swapMode === 'sell' ? 'bg-[#0a0a14] text-white' : 'bg-[#0d0f18] text-gray-400'} ${swapMode === 'sell' ? 'border-b-2 border-[#34d399]' : ''}`}
+              >
+                Sell APX
               </button>
             </div>
 
-            {/* Computed other side */}
-            <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3">
-              {redeemMode === 'apx' ? (
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">You receive (USD)</span>
-                  <span className="text-sm font-bold text-[#34d399]">
-                    ${derivedRedeemUsd.toFixed(2)}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">APX to redeem</span>
-                  <span className="text-sm font-bold text-[#34d399]">
-                    {formatApx(derivedRedeemApx)} APX
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* Buy Mode */}
+            {swapMode === 'buy' && (
+              <div className="space-y-4">
+                <p className="text-gray-500 text-sm">
+                  Buy APX with BNB, USDT, or other BSC tokens via PancakeSwap
+                </p>
 
-            {/* Minimum warning */}
-            {derivedRedeemApx > 0 && derivedRedeemApx < APX_MIN_REDEMPTION_APX && (
-              <p className="text-xs text-red-400">
-                Minimum: {APX_MIN_REDEMPTION_APX.toLocaleString()} APX (${APX_MIN_REDEMPTION_USD.toLocaleString()})
-              </p>
+                <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-4">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">
+                        Amount to Spend (USD)
+                      </label>
+                      <input
+                        type="number"
+                        min={10}
+                        value={buyUsd}
+                        onChange={(e) => setBuyUsd(e.target.value)}
+                        placeholder="Enter USD amount (min $10)"
+                        className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#EAB308]"
+                        disabled={submitting}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center text-sm">
+                      <span>You'll receive:</span>
+                      <span className="font-semibold text-[#EAB308]">
+                        {estBuyApx !== '0' ? formatApx(parseFloat(estBuyApx)) : '0'} APX
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-gray-400">
+                      Rate: 1 APX = ${APX_BUY_RATE} USD • Min: $10
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleBuy}
+                    disabled={submitting || !wallet.isConnected || parseFloat(buyUsd || '0') < 10}
+                    className="w-full bg-[#EAB308] text-[#0a0a14] font-bold py-3 px-6 rounded-xl text-sm hover:bg-[#d4af37] transition-colors disabled:opacity-50"
+                  >
+                    {submitting ? 'Processing Swap...' : 'Swap for APX'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Sell Mode */}
+            {swapMode === 'sell' && (
+              <div className="space-y-4">
+                <p className="text-gray-500 text-sm">
+                  Sell APX for BNB, USDT, or other BSC tokens via PancakeSwap
+                </p>
+
+                <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-4">
+                  <div className="space-y-3">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">
+                          APX Amount
+                        </label>
+                        <input
+                          type="number"
+                          min={0.001}
+                          value={redeemApx}
+                          onChange={(e) => setRedeemApx(e.target.value)}
+                          placeholder="Enter APX amount"
+                          className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#34d399]"
+                          disabled={submitting}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">
+                          USD Value
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={redeemUsd}
+                          onChange={(e) => setRedeemUsd(e.target.value)}
+                          placeholder="Enter USD value"
+                          className="w-full bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#34d399]"
+                          disabled={submitting}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <span className="text-xs text-gray-500">You'll pay:</span>
+                        <span className="font-semibold text-white block">
+                          {derivedRedeemApx !== '0' ? formatApx(parseFloat(derivedRedeemApx)) : '0'} APX
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-xs text-gray-500">You'll receive:</span>
+                        <span className="font-semibold text-[#34d399] block">
+                          ${derivedRedeemUsd !== '0' ? parseFloat(derivedRedeemUsd) * APX_REDEMPTION_RATE : 0}
+                            .toFixed(2)} USD
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-gray-400 mt-2">
+                      Rate: 1 APX = ${APX_REDEMPTION_RATE} USD • Min: 1,388.889 APX ($1,000)
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleRedeem}
+                    disabled={submitting || !wallet.isConnected ||
+                      (parseFloat(redeemApx || '0') <= 0 && parseFloat(redeemUsd || '0') <= 0) ||
+                      (parseFloat(redeemApx || '0') < 1.388889 && parseFloat(redeemUsd || '0') < 1000)}
+                    className="w-full bg-[#34d399] text-[#0a0a14] font-bold py-3 px-6 rounded-xl text-sm hover:bg-[#2dd4bf] transition-colors disabled:opacity-50"
+                  >
+                    {submitting ? 'Processing Swap...' : 'Swap for USD'}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
-          <button
-            onClick={onRedeem}
-            disabled={submitting}
-            className="w-full py-3 rounded-xl text-sm font-bold border border-[#34d399]/40 text-[#34d399] hover:bg-[#34d399]/10 disabled:opacity-60"
-          >
-            {submitting ? 'Submitting...' : 'Submit Redemption Request'}
-          </button>
+          {/* Instructions */}
+          <div className="mt-8 pt-6 border-t border-[#1e1e35]">
+            <h3 className="text-lg font-black text-white mb-4">How It Works</h3>
+            <p className="text-gray-400 text-sm mb-2">
+              Connect your wallet to swap APX tokens directly on PancakeSwap. You maintain full control of your funds at all times.
+            </p>
+            <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+              <li>Connect your wallet (MetaMask, WalletConnect, etc.)</li>
+              <li>Ensure you're on the Binance Smart Chain network</li>
+              <li>Enter the amount you wish to swap</li>
+              <li>Confirm the transaction in your wallet</li>
+              <li>View the transaction on BscScan</li>
+            </ol>
+            <p className="mt-4 text-xs text-gray-500">
+              APX Contract:{' '}
+              <a
+                href={`https://bscscan.com/token/${CONTRACT}`}
+                className="text-xs text-[#c9a84c] hover:underline break-all"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {CONTRACT}
+              </a>
+            </p>
+          </div>
         </div>
       </div>
-
-
-      {/* Redemption history */}
-      <div className="card-dark p-5">
-        <h3 className="font-bold mb-3">Redemption History</h3>
-        {requests.length === 0 ? (
-          <p className="text-sm text-gray-500">No redemption requests yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-500 border-b border-[#1e1e35]">
-                  <th className="py-2">Date</th>
-                  <th className="py-2">APX</th>
-                  <th className="py-2">USD Value</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((r: any) => (
-                  <tr key={r.id} className="border-b border-[#1e1e35] text-gray-300">
-                    <td className="py-2 text-xs">{new Date(r.requestedAt).toLocaleString()}</td>
-                    <td className="py-2">{formatApx(r.amount)}</td>
-                    <td className="py-2">${r.usdValue.toFixed(2)}</td>
-                    <td className="py-2">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        r.status === 'SETTLED' ? 'bg-green-500/10 text-green-400' :
-                        r.status === 'APPROVED' ? 'bg-blue-500/10 text-blue-400' :
-                        r.status === 'REJECTED' ? 'bg-red-500/10 text-red-400' :
-                        'bg-yellow-500/10 text-yellow-400'
-                      }`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="py-2 text-gray-500 text-xs">{r.adminNote || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   )
 }
 
-function BalanceCard({
-  label, primary, secondary, secondaryNote
-}: {
-  label: string
-  primary: string
-  secondary?: string
-  secondaryNote?: string
-}) {
-  return (
-    <div className="card-dark p-4">
-      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-lg font-black text-[#EAB308]">{primary}</p>
-      {secondary && (
-        <p className="text-sm text-gray-400 mt-0.5">
-          {secondary}
-          {secondaryNote && <span className="text-xs text-gray-600 ml-1">{secondaryNote}</span>}
-        </p>
-      )}
-    </div>
-  )
-}
-
+// Helper function to refresh balance
+const refreshBalance = async () => {
+  // This would be handled by the useWallet hook's getApxBalance function
+  // For now, we'll just trigger a refetch by calling the function again
+  toast.info('Balance refreshed')
+};

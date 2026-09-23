@@ -16,13 +16,11 @@ export async function GET() {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const requests = await prisma.apxRedemption.findMany({
-    where: { userId: session.user.id },
-    orderBy: { requestedAt: 'desc' },
-    take: 50,
-  })
+  // For decentralized version, we don't store redemption requests internally
+  // Users can view their APX balance and transaction history in their wallet
+  // We could optionally return swap history or other relevant data
 
-  return NextResponse.json(requests)
+  return NextResponse.json([]) // Empty array for now
 }
 
 export async function POST(req: NextRequest) {
@@ -36,47 +34,26 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: session.user.id } })
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
-    if (user.apxBalance < apxAmount) {
-      return NextResponse.json({ error: 'Insufficient APX balance' }, { status: 400 })
-    }
+    // Check if user has sufficient APX balance in their wallet (would be checked frontend)
+    // For now, we'll just validate the amount is positive
 
     const usdValue = apxToUsd(apxAmount, APX_REDEMPTION_RATE)
 
-    const [request] = await prisma.$transaction([
-      prisma.apxRedemption.create({
-        data: {
-          userId: user.id,
-          amount: apxAmount,
-          rateUsd: APX_REDEMPTION_RATE,
-          usdValue,
-          status: 'PENDING',
-        },
-      }),
-      prisma.user.update({
-        where: { id: user.id },
-        data: {
-          apxBalance: { decrement: apxAmount },
-        },
-      }),
-    ])
-
-    await createNotification(
-      user.id,
-      'APX Redemption Requested',
-      `Your request to redeem ${formatApx(apxAmount)} APX ($${usdValue.toFixed(2)}) has been queued for weekly/admin processing.`,
-      'info',
-      '/dashboard/apx'
-    )
+    // For decentralized version, we don't create internal redemption requests
+    // Instead, we facilitate the swap on PancakeSwap
 
     return NextResponse.json({
-      message: 'APX redemption request submitted',
-      request,
+      message: 'Ready to swap APX for USD value on PancakeSwap',
+      apxAmount: formatApx(apxAmount),
+      usdValue: usdValue.toFixed(2),
+      redeemRate: APX_REDEMPTION_RATE,
+      instructions: 'Connect your wallet and use the swap feature to exchange APX for BNB/USDT on PancakeSwap',
+      // In future: provide swap transaction data for selling APX
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 })
     }
-    return NextResponse.json({ error: 'Failed to submit APX redemption' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to process APX redemption' }, { status: 500 })
   }
 }
-
