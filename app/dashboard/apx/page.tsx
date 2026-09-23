@@ -364,8 +364,7 @@ export default function ApxWalletPage() {
                       <div>
                         <span className="text-xs text-gray-500">You'll receive:</span>
                         <span className="font-semibold text-[#34d399] block">
-                          ${derivedRedeemUsd !== '0' ? parseFloat(derivedRedeemUsd) * APX_REDEMPTION_RATE : 0}
-                            .toFixed(2)} USD
+                          ${derivedRedeemUsd !== '0' ? parseFloat(derivedRedeemUsd) * APX_REDEMPTION_RATE : 0}.toFixed(2)} USD
                         </span>
                       </div>
                     </div>

@@ -84,7 +84,7 @@ export const useWallet = (): UseWalletReturn => {
     try {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x38" }), // 56 in hex
+        params: [{ chainId: "0x38" }],
       });
     } catch (switchError: any) {
       // If the chain hasn't been added, add it
