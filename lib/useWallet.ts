@@ -113,7 +113,8 @@ export const useWallet = (): UseWalletReturn => {
 
   // Listen for account changes
   useEffect(() => {
-    if (window.ethereum) {
+    const ethereum = window.ethereum
+    if (ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length === 0) {
           // User disconnected wallet
@@ -132,12 +133,12 @@ export const useWallet = (): UseWalletReturn => {
         window.location.reload();
       };
 
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
-      window.ethereum.on("chainChanged", handleChainChanged);
+      ethereum.on("accountsChanged", handleAccountsChanged);
+      ethereum.on("chainChanged", handleChainChanged);
 
       return () => {
-        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-        window.ethereum.removeListener("chainChanged", handleChainChanged);
+        ethereum.removeListener("accountsChanged", handleAccountsChanged);
+        ethereum.removeListener("chainChanged", handleChainChanged);
       };
     }
   }, [disconnect, wallet.address]);

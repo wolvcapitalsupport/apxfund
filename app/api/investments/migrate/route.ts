@@ -12,7 +12,7 @@ const migrateSchema = z.object({
   topUpAmount: z.number().min(0).default(0),
 })
 
-// POST — migrate a matured (or about-to-mature) contract's capital into a new plan,
+// POST — migrate a completed contract's returned capital into a new plan,
 // optionally topping up from balance to meet the new plan's minimum.
 // Capital + topUp form the new contract. Profit from the OLD contract (if already
 // matured) is credited to balance separately, never migrated.
@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
     if (oldInvestment.userId !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     if (!targetPlan || !targetPlan.isActive) return NextResponse.json({ error: 'Target plan unavailable' }, { status: 400 })
 
-    // Only allow migration on contracts that are ACTIVE (about to mature) or already COMPLETED
-    if (!['ACTIVE', 'COMPLETED'].includes(oldInvestment.status)) {
-      return NextResponse.json({ error: 'This investment cannot be migrated' }, { status: 400 })
+    // The old contract must already have gone through maturity settlement.
+    // Never move active principal around before the USD return/APX credit.
+    if (oldInvestment.status !== 'COMPLETED') {
+      return NextResponse.json({ error: 'Only completed investments can be migrated after maturity settlement' }, { status: 400 })
     }
 
     const newCapital = oldInvestment.amount + topUpAmount
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
           amount: newCapital,
           expectedProfit,
           endDate,
-          autoReinvest: true,
+          autoReinvest: false,
         },
       }),
       prisma.transaction.create({

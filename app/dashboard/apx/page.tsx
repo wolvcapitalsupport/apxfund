@@ -291,9 +291,9 @@ export default function ApxWalletPage() {
                     </div>
 
                     <div className="flex justify-between items-center text-sm">
-                      <span>You'll receive:</span>
+                      <span>You&apos;ll receive:</span>
                       <span className="font-semibold text-[#EAB308]">
-                        {estBuyApx !== '0' ? formatApx(parseFloat(estBuyApx)) : '0'} APX
+                        {estBuyApx !== '0' ? formatApx(Number(estBuyApx)) : '0'} APX
                       </span>
                     </div>
 
@@ -356,15 +356,15 @@ export default function ApxWalletPage() {
 
                     <div className="grid md:grid-cols-2 gap-4 mt-4">
                       <div>
-                        <span className="text-xs text-gray-500">You'll pay:</span>
+                        <span className="text-xs text-gray-500">You&apos;ll pay:</span>
                         <span className="font-semibold text-white block">
-                          {derivedRedeemApx !== '0' ? formatApx(parseFloat(derivedRedeemApx)) : '0'} APX
+                          {derivedRedeemApx !== '0' ? formatApx(Number(derivedRedeemApx)) : '0'} APX
                         </span>
                       </div>
                       <div>
-                        <span className="text-xs text-gray-500">You'll receive:</span>
+                        <span className="text-xs text-gray-500">You&apos;ll receive:</span>
                         <span className="font-semibold text-[#34d399] block">
-                          ${derivedRedeemUsd !== '0' ? parseFloat(derivedRedeemUsd) * APX_REDEMPTION_RATE : 0}.toFixed(2)} USD
+                          ${(derivedRedeemUsd !== '0' ? Number(derivedRedeemUsd) * APX_REDEMPTION_RATE : 0).toFixed(2)} USD
                         </span>
                       </div>
                     </div>
@@ -396,7 +396,7 @@ export default function ApxWalletPage() {
             </p>
             <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
               <li>Connect your wallet (MetaMask, WalletConnect, etc.)</li>
-              <li>Ensure you're on the Binance Smart Chain network</li>
+              <li>Ensure you&apos;re on the Binance Smart Chain network</li>
               <li>Enter the amount you wish to swap</li>
               <li>Confirm the transaction in your wallet</li>
               <li>View the transaction on BscScan</li>
@@ -423,5 +423,5 @@ export default function ApxWalletPage() {
 const refreshBalance = async () => {
   // This would be handled by the useWallet hook's getApxBalance function
   // For now, we'll just trigger a refetch by calling the function again
-  toast.info('Balance refreshed')
+      toast.success('Balance refreshed')
 };

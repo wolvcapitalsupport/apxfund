@@ -445,7 +445,7 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
                         {tx.note && <div className="text-gray-600 text-xs mt-0.5 max-w-[160px] truncate">{tx.note}</div>}
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold">{formatCurrency(tx.amount)}</div>
+                        <div className="text-sm font-bold">{tx.currency === 'APX' ? `${Number(tx.amount).toLocaleString('en-US', { maximumFractionDigits: 8 })} APX` : formatCurrency(tx.amount)}</div>
                         <StatusBadge status={tx.status} />
                       </div>
                     </div>
@@ -853,7 +853,7 @@ function RoiTab() {
     try {
       const res = await fetch('/api/admin/trigger-roi', { method: 'POST' })
       const data = await res.json()
-      if (res.ok) toast.success(`ROI run: ${data.investmentsDone} processed · $${data.totalProfitPaid?.toFixed(2)} paid`)
+      if (res.ok) toast.success(`Maturity run: ${data.investmentsDone} processed · ${data.totalApxPaid?.toFixed(2)} APX credited · $${data.totalUsdPrincipalReturned?.toFixed(2)} principal returned`)
       else toast.error('ROI trigger failed — check server logs')
     } catch { toast.error('Failed to trigger ROI engine') }
     setTriggering(false)
@@ -872,7 +872,7 @@ function RoiTab() {
           logs.length === 0 ? <div className="text-center py-16 text-gray-600"><BarChart3 size={36} className="mx-auto mb-3 opacity-30" /><p>No ROI runs yet</p></div> : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#0a0a14]"><tr>{['Run Time', 'Found', 'Processed', 'Total Paid', 'Errors'].map(h => (
+              <thead className="bg-[#0a0a14]"><tr>{['Run Time', 'Found', 'Processed', 'ROI Basis (USD)', 'APX Credited', 'Principal Returned (USD)', 'Errors'].map(h => (
                 <th key={h} className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
               ))}</tr></thead>
               <tbody className="divide-y divide-[#1e1e35]">
@@ -882,6 +882,8 @@ function RoiTab() {
                     <td className="px-5 py-4 text-sm font-medium">{log.investmentsFound}</td>
                     <td className="px-5 py-4 text-sm font-medium text-green-400">{log.investmentsDone}</td>
                     <td className="px-5 py-4 font-bold text-[#c9a84c] text-sm">{formatCurrency(log.totalProfitPaid)}</td>
+                    <td className="px-5 py-4 font-bold text-cyan-300 text-sm">{Number(log.totalApxPaid || 0).toLocaleString('en-US', { maximumFractionDigits: 8 })} APX</td>
+                    <td className="px-5 py-4 font-bold text-blue-300 text-sm">{formatCurrency(log.totalUsdPrincipalReturned || 0)}</td>
                     <td className="px-5 py-4">{log.errors ? <span className="text-red-400 text-xs">{log.errors.slice(0, 60)}…</span> : <span className="text-green-400 text-xs">None</span>}</td>
                   </tr>
                 ))}

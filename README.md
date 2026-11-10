@@ -446,20 +446,18 @@ Can withdraw or reinvest
 
 ## 🔄 Automated ROI Processing
 
-The system includes a background job to automatically process investments and credit profits:
+The system includes a background job to automatically settle matured investments:
 
-**Endpoint:** `/api/cron/process-investments`  
+**Endpoint:** `/api/cron/process-roi`
 **Requires:** `Authorization: Bearer {CRON_SECRET}`
 
 **Logic:**
-1. Find all ACTIVE investments with `endDate ≤ now()`
-2. For each investment:
-   - Calculate expected profit
-   - Update status to COMPLETED
-   - Credit profit to user balance
-   - Create PROFIT transaction
-   - Optionally auto-reinvest if enabled
-3. Log processing results
+1. Find ACTIVE investments with `endDate ≤ now()`; no daily installment is paid.
+2. Atomically claim each investment so overlapping cron/admin runs cannot settle it twice.
+3. Return the USD principal to the user's USD balance and create a USD principal audit row.
+4. Convert only the outstanding ROI basis to APX at the fixed internal rate of `$0.00072/APX`, crediting the separate internal APX ledger and an APX-denominated audit row.
+5. Preserve legacy USD rows and require explicit reconciliation for investments that were previously processed; no historical ROI is silently converted a second time.
+6. No on-chain APX transfer is initiated by maturity processing.
 
 **Enable on Vercel:**
 Add to `vercel.json`:

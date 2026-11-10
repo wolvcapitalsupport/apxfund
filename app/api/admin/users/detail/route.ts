@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
       country: true,
       role: true,
       balance: true,
+      apxBalance: true,
+      apxRewards: true,
       totalDeposited: true,
       totalProfit: true,
       totalWithdrawn: true,

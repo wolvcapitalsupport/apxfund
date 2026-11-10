@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { isStarterPlan } from '@/lib/planRules'
 
 // PATCH — user toggles "Stop Renewing" on their own ACTIVE investment.
 // Not available on Starter Portfolio — its 2-cycle-then-migrate flow is
@@ -27,8 +26,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (investment.status !== 'ACTIVE') {
       return NextResponse.json({ error: 'Only active investments can be updated' }, { status: 400 })
     }
-    if (isStarterPlan(investment.plan.name)) {
-      return NextResponse.json({ error: 'Starter Portfolio auto-renews automatically and cannot be changed here' }, { status: 400 })
+    if (body.autoReinvest) {
+      return NextResponse.json({ error: 'Automatic rollover is disabled. Investments settle once at maturity: USD principal returns to the USD balance and ROI is credited as internal APX.' }, { status: 400 })
     }
 
     const updated = await prisma.investment.update({
@@ -37,9 +36,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     })
 
     return NextResponse.json({
-      message: body.autoReinvest
-        ? 'Auto-renew enabled — capital will roll into a new cycle at maturity'
-        : 'Auto-renew stopped — capital and profit will be credited to your balance at maturity',
+      message: 'Automatic rollover disabled — USD principal returns at maturity and ROI is credited as internal APX.',
       investment: updated,
     })
   } catch (error) {

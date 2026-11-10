@@ -298,17 +298,16 @@ export async function sendInvestmentActivated(to: string, name: string, planName
 // ═══════════════════════════════════════════════════════════════════════
 // 13. INVESTMENT — MATURED (ROI credited)
 // ═══════════════════════════════════════════════════════════════════════
-export async function sendInvestmentMatured(to: string, name: string, planName: string, principal: number, profit: number) {
-  const total = principal + profit
+export async function sendInvestmentMatured(to: string, name: string, planName: string, principal: number, profit: number, apxAmount: number) {
   const html = wrap(`
-    ${heading('🎉 Investment Matured — Profit Credited')}
-    ${para(`Hi <strong style="color:#fff">${name}</strong>, your investment has reached maturity. Your principal and profit have been credited to your account balance.`)}
+    ${heading('🎉 Investment Matured — Settlement Complete')}
+    ${para(`Hi <strong style="color:#fff">${name}</strong>, your investment has reached maturity. Your USD principal has been returned and your ROI has been credited to your internal APX ledger.`)}
     ${statusBox('Plan', planName, '#c9a84c')}
-    ${statusBox('Principal Returned', `$${principal.toFixed(2)}`, '#60a5fa')}
-    ${statusBox('Profit Earned', `+$${profit.toFixed(2)}`, '#34d399')}
-    ${statusBox('Total Credited', `$${total.toFixed(2)}`, '#c9a84c')}
+    ${statusBox('Principal Returned to USD Balance', `$${principal.toFixed(2)}`, '#60a5fa')}
+    ${statusBox('ROI Basis', `$${profit.toFixed(2)}`, '#34d399')}
+    ${statusBox('APX Credited (Internal Ledger)', `${apxAmount.toLocaleString('en-US', { maximumFractionDigits: 8 })} APX`, '#22d3ee')}
     ${divider()}
-    ${para('Congratulations on your return! Your funds are now available in your balance. You can reinvest or withdraw at any time.')}
+    ${para('The APX credit is an internal accounting entry at the fixed rate of $0.00072 per APX. No on-chain token transfer was made. Your USD principal is available in your USD balance.')}
     ${btn('Reinvest Now', `${BASE}/dashboard/plans`)}
     ${btn('Withdraw Funds', `${BASE}/dashboard/withdraw`)}
   `)

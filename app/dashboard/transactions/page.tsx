@@ -25,6 +25,11 @@ export default function TransactionsPage() {
   }, [])
 
   const filtered = filter === 'ALL' ? transactions : transactions.filter(t => t.type === filter)
+  const isApx = (tx: any) => tx.currency === 'APX'
+  const isCredit = (tx: any) => ['DEPOSIT', 'PROFIT', 'REFERRAL', 'APX_REWARD'].includes(tx.type)
+  const formatAmount = (tx: any) => isApx(tx)
+    ? `${tx.amount.toLocaleString('en-US', { maximumFractionDigits: 8 })} APX`
+    : formatCurrency(tx.amount)
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -42,8 +47,8 @@ export default function TransactionsPage() {
       {/* Summary bar */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Total In',  value: transactions.filter(t => ['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(t.type) && t.status === 'APPROVED').reduce((s,t) => s + t.amount, 0), color: '#10B981' },
-          { label: 'Total Out', value: transactions.filter(t => t.type === 'WITHDRAWAL' && t.status === 'APPROVED').reduce((s,t) => s + t.amount, 0), color: '#f87171' },
+          { label: 'USD In',  value: transactions.filter(t => t.currency !== 'APX' && ['DEPOSIT','PROFIT','REFERRAL'].includes(t.type) && t.status === 'APPROVED').reduce((s,t) => s + t.amount, 0), color: '#10B981' },
+          { label: 'USD Out', value: transactions.filter(t => t.currency !== 'APX' && t.type === 'WITHDRAWAL' && t.status === 'APPROVED').reduce((s,t) => s + t.amount, 0), color: '#f87171' },
           { label: 'Count',     value: transactions.length, color: '#EAB308', isCount: true },
         ].map(({ label, value, color, isCount }) => (
           <div key={label} style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 14, padding: '16px', textAlign: 'center' }}>
@@ -100,8 +105,8 @@ export default function TransactionsPage() {
                             <span className="text-sm font-semibold capitalize">{tx.type.replace(/_/g, ' ').toLowerCase()}</span>
                           </div>
                         </td>
-                        <td className="px-5 py-4 text-sm font-bold" style={{ color: ['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '#10B981' : '#f87171' }}>
-                          {['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '+' : '-'}{formatCurrency(tx.amount)}
+                        <td className="px-5 py-4 text-sm font-bold" style={{ color: isCredit(tx) ? '#10B981' : '#f87171' }}>
+                          {isCredit(tx) ? '+' : '-'}{formatAmount(tx)}
                         </td>
                         <td className="px-5 py-4">
                           <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStatusColor(tx.status)}`}>{tx.status}</span>
@@ -142,8 +147,8 @@ export default function TransactionsPage() {
                       <div className="text-gray-500 text-xs mt-0.5">{formatDate(tx.createdAt)}</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-sm" style={{ color: ['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '#10B981' : '#f87171' }}>
-                        {['DEPOSIT','PROFIT','REFERRAL','APX_REDEEM'].includes(tx.type) ? '+' : '-'}{formatCurrency(tx.amount)}
+                      <div className="font-bold text-sm" style={{ color: isCredit(tx) ? '#10B981' : '#f87171' }}>
+                        {isCredit(tx) ? '+' : '-'}{formatAmount(tx)}
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(tx.status)}`}>{tx.status}</span>
                       {tx.type === 'WITHDRAWAL' && tx.txProofHash && (

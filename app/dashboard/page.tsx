@@ -11,6 +11,7 @@ import CompoundingProjector from '@/components/CompoundingProjector'
 import PortfolioAnalytics from '@/components/PortfolioAnalytics'
 import PortfolioIntelligence from '@/components/PortfolioIntelligence'
 import toast from 'react-hot-toast'
+import { APX_EARNINGS_RATE } from '@/lib/apx'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface UserData {
@@ -47,7 +48,7 @@ function buildChartData(transactions: any[], currentBalance: number) {
 
   // Build running balance from transaction history
   const sorted = [...transactions]
-    .filter(t => t.status === 'APPROVED')
+    .filter(t => t.status === 'APPROVED' && t.currency !== 'APX')
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 
   // Group by day
@@ -230,7 +231,7 @@ export default function DashboardPage() {
           { label: 'Available Balance', value: data?.balance || 0, icon: DollarSign, color: '#EAB308', isCount: false, sub: 'Ready to invest or withdraw' },
           { label: 'Active Investments', value: activeCount, icon: Zap, color: '#60a5fa', isCount: true, sub: 'Currently earning returns' },
           { label: 'Total Profit', value: data?.totalProfit || 0, icon: TrendingUp, color: '#10B981', isCount: false, sub: 'Lifetime earnings', isTicking: true },
-          { label: 'APX Balance', value: data?.apxBalance || 0, icon: Shield, color: '#22d3ee', isCount: true, sub: `≈ $${((data?.apxBalance || 0) * 0.00072).toFixed(2)} USD at current rate` },
+          { label: 'APX Balance', value: data?.apxBalance || 0, icon: Shield, color: '#22d3ee', isCount: true, sub: `≈ $${((data?.apxBalance || 0) * APX_EARNINGS_RATE).toFixed(2)} USD at internal rate` },
         ].map(({ label, value, icon: Icon, color, isCount, sub, isTicking }) => (
           <div key={label} style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '20px' }}>
             <div className="flex items-start justify-between mb-3">
@@ -403,7 +404,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-sm">{formatCurrency(tx.amount)}</div>
+                    <div className="font-bold text-sm">{tx.currency === 'APX' ? `${Number(tx.amount).toLocaleString('en-US', { maximumFractionDigits: 8 })} APX` : formatCurrency(tx.amount)}</div>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(tx.status)}`}>{tx.status}</span>
                   </div>
                 </div>

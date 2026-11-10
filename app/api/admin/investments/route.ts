@@ -51,12 +51,12 @@ export async function PATCH(req: NextRequest) {
 
   if (action === 'pause') {
     await prisma.investment.update({ where: { id }, data: { isPaused: true } })
-    return NextResponse.json({ message: 'ROI paused — daily profit will not run for this investment' })
+    return NextResponse.json({ message: 'Maturity settlement paused for this investment' })
   }
 
   if (action === 'resume') {
     await prisma.investment.update({ where: { id }, data: { isPaused: false } })
-    return NextResponse.json({ message: 'ROI resumed — daily profit will run normally' })
+    return NextResponse.json({ message: 'Maturity settlement resumed for this investment' })
   }
 
   if (action === 'cancel') {
@@ -91,53 +91,35 @@ export async function PATCH(req: NextRequest) {
   }
 
   if (action === 'complete') {
-    // Force-complete — admin manually matures an investment early.
-    // Capital (principal) returned as USD. Profit converted to APX at current earnings rate.
-    const profitUsd = inv.expectedProfit
+    // Manual processing may settle only an actually matured investment. It
+    // uses a conditional claim so cron/admin overlap cannot pay twice.
+    if (new Date(inv.endDate) > new Date()) {
+      return NextResponse.json({ error: 'Investment has not reached maturity yet' }, { status: 400 })
+    }
+    if (inv.legacyRoiReviewRequired) {
+      return NextResponse.json({ error: 'Legacy ROI requires reconciliation before payout' }, { status: 409 })
+    }
+    const profitUsd = parseFloat(Math.max(0, inv.expectedProfit - inv.legacyRoiPaidUsd - inv.roiPaidUsd).toFixed(2))
     const alloc = profitToApxAllocation(profitUsd, APX_EARNINGS_RATE)
 
-    await prisma.$transaction([
-      prisma.investment.update({
-        where: { id },
-        data: { status: 'COMPLETED', completedAt: new Date(), autoReinvest: false },
-      }),
-      // Principal returned to USD balance — this is NOT earnings
-      prisma.user.update({
+    const completed = await prisma.$transaction(async (tx) => {
+      const claimed = await tx.investment.updateMany({
+        where: { id, status: 'ACTIVE', endDate: { lte: new Date() }, legacyRoiReviewRequired: false },
+        data: { status: 'COMPLETED', completedAt: new Date(), maturityProcessedAt: new Date(), lastRoiProcessedAt: new Date(), autoReinvest: false },
+      })
+      if (claimed.count !== 1) return false
+      await tx.user.update({
         where: { id: inv.userId },
-        data: {
-          balance: { increment: inv.amount },
-          apxBalance: { increment: alloc.apxAmount },
-          apxRewards: { increment: alloc.apxAmount },
-          totalProfit: { increment: alloc.usdAmount },
-        },
-      }),
-      // Capital return transaction (USD)
-      prisma.transaction.create({
-        data: {
-          userId: inv.userId,
-          type: 'PROFIT',
-          status: 'APPROVED',
-          amount: inv.amount,
-          currency: 'USD',
-          note: `Capital returned — investment manually completed by admin`,
-        },
-      }),
-      // Profit as APX with full accounting fields
-      prisma.transaction.create({
-        data: {
-          userId: inv.userId,
-          type: 'APX_REWARD',
-          status: 'APPROVED',
-          amount: alloc.apxAmount,
-          currency: 'APX',
-          usdEquivalent: alloc.usdAmount,
-          conversionRate: alloc.conversionRate,
-          note: `ROI from admin force-complete: $${alloc.usdAmount.toFixed(2)} → ${formatApx(alloc.apxAmount)} APX @ $${alloc.conversionRate}/APX`,
-        },
-      }),
-    ])
+        data: { balance: { increment: inv.amount }, apxBalance: { increment: alloc.apxAmount }, apxRewards: { increment: alloc.apxAmount }, totalProfit: { increment: alloc.usdAmount } },
+      })
+      await tx.transaction.create({ data: { userId: inv.userId, investmentId: id, type: 'PROFIT', status: 'APPROVED', amount: inv.amount, currency: 'USD', note: 'Investment maturity principal returned to USD balance — admin processing' } })
+      await tx.transaction.create({ data: { userId: inv.userId, investmentId: id, type: 'APX_REWARD', status: 'APPROVED', amount: alloc.apxAmount, currency: 'APX', usdEquivalent: alloc.usdAmount, conversionRate: alloc.conversionRate, note: `Maturity ROI credited to internal APX ledger only: $${alloc.usdAmount.toFixed(2)} → ${formatApx(alloc.apxAmount)} APX; no on-chain transfer` } })
+      await tx.investment.update({ where: { id }, data: { roiPaidUsd: { increment: alloc.usdAmount }, roiPaidApx: { increment: alloc.apxAmount }, principalReturnedUsd: { increment: inv.amount } } })
+      return true
+    })
+    if (!completed) return NextResponse.json({ error: 'Investment was already processed by another worker' }, { status: 409 })
     return NextResponse.json({
-      message: 'Investment force-completed — capital returned as USD, profit credited as APX',
+      message: 'Matured investment processed — capital returned as USD, profit credited to the internal APX ledger only',
     })
   }
 

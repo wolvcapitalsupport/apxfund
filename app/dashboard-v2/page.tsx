@@ -38,7 +38,7 @@ function buildChartData(transactions: any[], currentBalance: number) {
 
   // Build running balance from transaction history
   const sorted = [...transactions]
-    .filter(t => t.status === 'APPROVED')
+    .filter(t => t.status === 'APPROVED' && t.currency !== 'APX')
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 
   // Group by day
@@ -361,7 +361,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-sm">{formatCurrency(tx.amount)}</div>
+                    <div className="font-bold text-sm">{tx.currency === 'APX' ? `${Number(tx.amount).toLocaleString('en-US', { maximumFractionDigits: 8 })} APX` : formatCurrency(tx.amount)}</div>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(tx.status)}`}>{tx.status}</span>
                   </div>
                 </div>
