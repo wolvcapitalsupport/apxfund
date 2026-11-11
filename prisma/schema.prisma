@@ -15,6 +15,7 @@ model User {
   fullName             String
   phone                String?
   country              String?
+  preferredLanguage    String?
   role                 Role            @default(USER)
   balance              Float           @default(0)
   totalDeposited       Float           @default(0)

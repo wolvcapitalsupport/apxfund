@@ -7,15 +7,19 @@ export async function PATCH(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { fullName, phone, country } = await req.json()
-  if (!fullName?.trim()) return NextResponse.json({ error: 'Full name is required' }, { status: 400 })
+  const { fullName, phone, country, preferredLanguage } = await req.json()
+  if (fullName !== undefined && !fullName?.trim()) return NextResponse.json({ error: 'Full name is required' }, { status: 400 })
+  if (preferredLanguage !== undefined && !['en', 'de'].includes(preferredLanguage)) {
+    return NextResponse.json({ error: 'Unsupported language' }, { status: 400 })
+  }
 
   const updated = await prisma.user.update({
     where: { id: session.user.id },
     data: {
-      fullName: fullName.trim(),
-      phone: phone?.trim() || null,
-      country: country?.trim() || null,
+      ...(fullName !== undefined ? { fullName: fullName.trim() } : {}),
+      ...(phone !== undefined ? { phone: phone?.trim() || null } : {}),
+      ...(country !== undefined ? { country: country?.trim() || null } : {}),
+      ...(preferredLanguage ? { preferredLanguage } : {}),
     },
   })
 

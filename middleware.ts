@@ -1,19 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { DEFAULT_LOCALE, isSupportedLocale, localeFromCountry, localeFromLanguageTag, type SupportedLocale } from '@/lib/locale'
 
-const GERMAN_COUNTRIES = new Set(['DE', 'AT', 'CH'])
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
+
+function detectLocale(req: NextRequest): SupportedLocale {
+  const country = req.headers.get('x-vercel-ip-country')
+    || req.headers.get('cf-ipcountry')
+    || req.headers.get('cloudfront-viewer-country')
+  const countryLocale = localeFromCountry(country)
+  if (countryLocale) return countryLocale
+
+  const accepted = req.headers.get('accept-language')?.split(',') || []
+  for (const language of accepted) {
+    const locale = localeFromLanguageTag(language.split(';')[0]?.trim())
+    if (locale) return locale
+  }
+
+  return DEFAULT_LOCALE
+}
 
 export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
-  const isPublic = ['/', '/investment-plans', '/about', '/our-team', '/policies', '/auth'].some(
-    p => pathname === p || pathname.startsWith(p + '/')
-  )
-  if (!isPublic) return NextResponse.next()
-  if (req.cookies.get('lang')?.value) return NextResponse.next()
+  const saved = req.cookies.get('lang')?.value
+  if (isSupportedLocale(saved)) return NextResponse.next()
 
-  const country = req.headers.get('x-vercel-ip-country') || ''
-  const lang = GERMAN_COUNTRIES.has(country.toUpperCase()) ? 'de' : 'en'
+  const lang = detectLocale(req)
   const response = NextResponse.next()
-  response.cookies.set('lang', lang, { path: '/', maxAge: 60 * 60 * 24 * 30, sameSite: 'lax' })
+  response.cookies.set('lang', lang, { path: '/', maxAge: COOKIE_MAX_AGE, sameSite: 'lax' })
   return response
 }
 

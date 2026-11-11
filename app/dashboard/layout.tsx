@@ -8,6 +8,7 @@ import {
   ListOrdered, Receipt, User, LogOut, TrendingUp,
   Menu, X, ChevronRight, Shield, Bell, FileCheck
 } from 'lucide-react'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -214,6 +215,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <LanguageSwitcher />
             <Link href="/dashboard/notifications" className="relative text-gray-400 hover:text-white p-1">
               <Bell size={20} />
               {unreadCount > 0 && (

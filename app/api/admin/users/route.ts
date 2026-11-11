@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
         email: true,
         fullName: true,
         role: true,
+        preferredLanguage: true,
         balance: true,
         apxBalance: true,
         apxRewards: true,

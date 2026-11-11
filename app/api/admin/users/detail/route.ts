@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
       fullName: true,
       phone: true,
       country: true,
+      preferredLanguage: true,
       role: true,
       balance: true,
       apxBalance: true,
