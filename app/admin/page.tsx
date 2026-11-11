@@ -156,6 +156,22 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
     }
   }
 
+  const toggleWithdrawalAccess = async () => {
+    const enabling = !user?.withdrawalAccessOverride
+    if (!window.confirm(`${enabling ? 'Enable' : 'Disable'} withdrawal access for ${user?.email}? This does not change investments or balances.`)) return
+    const res = await fetch('/api/admin/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, action: 'toggleWithdrawalAccess' }),
+    })
+    const data = await res.json()
+    if (!res.ok) return toast.error(data.error || 'Unable to update withdrawal access')
+    const updated = await fetch(`/api/admin/users/detail?userId=${userId}`).then(r => r.json())
+    setUser(updated)
+    onRefresh()
+    toast.success(data.message)
+  }
+
   const selectedPlan = plans.find(p => p.id === investPlanId)
 
   return (
@@ -219,6 +235,12 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
                   }}
                     className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-green-500/30 text-green-400 hover:bg-green-400/10 transition-all">
                     <FileCheck size={13} /> Force KYC ✓
+                  </button>
+                )}
+                {user?.role !== 'ADMIN' && (
+                  <button onClick={toggleWithdrawalAccess}
+                    className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border transition-all ${user?.withdrawalAccessOverride ? 'border-yellow-500/30 text-yellow-400 hover:bg-yellow-400/10' : 'border-cyan-500/30 text-cyan-400 hover:bg-cyan-400/10'}`}>
+                    <ArrowUpCircle size={13} /> {user?.withdrawalAccessOverride ? 'Disable Withdrawals' : 'Enable Withdrawals'}
                   </button>
                 )}
               </div>

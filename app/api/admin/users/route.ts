@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
         totalWithdrawn: true,
         kycStatus: true,
         isActive: true,
+        withdrawalAccessOverride: true,
         createdAt: true,
         _count: { select: { investments: true, transactions: true } },
       },
@@ -100,6 +101,29 @@ export async function PATCH(req: NextRequest) {
     )
 
     return NextResponse.json({ message: `User ${updated.isActive ? 'activated' : 'suspended'}`, user: updated })
+  }
+
+  // ── Targeted withdrawal access override ─────────────────────────────
+  if (action === 'toggleWithdrawalAccess') {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { withdrawalAccessOverride: !user.withdrawalAccessOverride },
+    })
+
+    await createNotification(
+      userId,
+      updated.withdrawalAccessOverride ? 'APX withdrawals enabled' : 'APX withdrawals disabled',
+      updated.withdrawalAccessOverride
+        ? 'An administrator has enabled APX reward withdrawal access for your account.'
+        : 'An administrator has disabled APX reward withdrawal access for your account.',
+      updated.withdrawalAccessOverride ? 'success' : 'warning',
+      '/dashboard/withdraw'
+    )
+
+    return NextResponse.json({
+      message: updated.withdrawalAccessOverride ? 'Withdrawal access enabled' : 'Withdrawal access disabled',
+      user: updated,
+    })
   }
 
   // ── Credit balance ──────────────────────────────────────────────────

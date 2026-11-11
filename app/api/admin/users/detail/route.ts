@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
       kycStatus: true,
       kycRejectedNote: true,
       isActive: true,
+      withdrawalAccessOverride: true,
       createdAt: true,
       investments: {
         include: { plan: true },

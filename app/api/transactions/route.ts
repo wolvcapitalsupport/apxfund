@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       const completedInvestment = await prisma.investment.findFirst({
         where: { userId: session.user.id, status: 'COMPLETED' },
       })
-      if (!completedInvestment) {
+      if (!completedInvestment && !user.withdrawalAccessOverride) {
         return NextResponse.json({ error: 'Withdrawals are only available after at least one investment plan has matured. Please invest and wait for your plan to complete.' }, { status: 400 })
       }
 
