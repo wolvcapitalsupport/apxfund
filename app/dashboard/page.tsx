@@ -10,8 +10,8 @@ import TickingBalance from '@/components/TickingBalance'
 import CompoundingProjector from '@/components/CompoundingProjector'
 import PortfolioAnalytics from '@/components/PortfolioAnalytics'
 import PortfolioIntelligence from '@/components/PortfolioIntelligence'
+import ApxOpportunityCard from '@/components/ApxOpportunityCard'
 import toast from 'react-hot-toast'
-import { APX_EARNINGS_RATE } from '@/lib/apx'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface UserData {
@@ -225,13 +225,16 @@ export default function DashboardPage() {
         lockedCapital={data?.lockedCapital || 0}
       />
 
+      {/* ── APX opportunity ── */}
+      <ApxOpportunityCard />
+
       {/* ── Stat cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         {[
           { label: 'Available Balance', value: data?.balance || 0, icon: DollarSign, color: '#EAB308', isCount: false, sub: 'Ready to invest or withdraw' },
           { label: 'Active Investments', value: activeCount, icon: Zap, color: '#60a5fa', isCount: true, sub: 'Currently earning returns' },
           { label: 'Total Profit', value: data?.totalProfit || 0, icon: TrendingUp, color: '#10B981', isCount: false, sub: 'Lifetime earnings', isTicking: true },
-          { label: 'APX Balance', value: data?.apxBalance || 0, icon: Shield, color: '#22d3ee', isCount: true, sub: `≈ $${((data?.apxBalance || 0) * APX_EARNINGS_RATE).toFixed(2)} USD at internal rate` },
+          { label: 'APX Rewards', value: data?.apxBalance || 0, icon: Shield, color: '#22d3ee', isCount: true, sub: 'Rewards recorded in your APXFund account' },
         ].map(({ label, value, icon: Icon, color, isCount, sub, isTicking }) => (
           <div key={label} style={{ background: '#11131E', border: '1px solid #1E293B', borderRadius: 16, padding: '20px' }}>
             <div className="flex items-start justify-between mb-3">
@@ -246,7 +249,7 @@ export default function DashboardPage() {
                 ? <TickingBalance balance={value} investments={data?.investments || []} />
                 : <>
                     <AnimatedNumber value={value} prefix={isCount ? '' : '$'} decimals={isCount ? 0 : 2} />
-                    {label === 'APX Balance' ? ' APX' : ''}
+                    {label === 'APX Rewards' ? ' APX' : ''}
                   </>
               }
             </p>

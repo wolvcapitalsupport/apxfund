@@ -3,59 +3,24 @@
 import { useEffect, useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import {
-  ArrowDownUp,
-  Coins,
-  ArrowLeftRight,
   Wallet,
-  ExternalLink,
-  Copy,
-  Check,
-  SmartphoneNfc,
-  RefreshCw,
-  Zap
+  RefreshCw
 } from 'lucide-react'
 import { useWallet } from '@/lib/useWallet'
 import { formatApx, parseApx, APX_BUY_RATE, APX_REDEMPTION_RATE } from '@/lib/apx'
+import { APX_CONTRACT_ADDRESS } from '@/lib/web3'
+import ApxWalletGuide from '@/components/ApxWalletGuide'
 
 export default function ApxWalletPage() {
   const [buyUsd, setBuyUsd] = useState('')
   const [redeemApx, setRedeemApx] = useState('')
   const [redeemUsd, setRedeemUsd] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [swapMode, setSwapMode] = useState<'buy' | 'sell'>('buy')
 
-  const { wallet, connect: connectWallet, disconnect: disconnectWallet, getApxBalance, switchToBsc } = useWallet()
+  const { wallet, connect: connectWallet, disconnect: disconnectWallet, getApxBalance } = useWallet()
 
-  const CONTRACT = '0x8d6032443cb7b23c134094c8921f1f37824ea3a2'
-  const TOKEN_SYMBOL = 'APX'
-  const TOKEN_DECIMALS = 18
-
-  const addToWallet = async () => {
-    try {
-      if (!window.ethereum) return toast.error('No Web3 wallet detected. Install MetaMask or Trust Wallet.')
-      await window.ethereum.request({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20',
-          options: {
-            address: CONTRACT,
-            symbol: TOKEN_SYMBOL,
-            decimals: TOKEN_DECIMALS,
-          },
-        },
-      })
-      toast.success('APX token added to your wallet!')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to add token')
-    }
-  }
-
-  const copyContract = async () => {
-    await navigator.clipboard.writeText(CONTRACT)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+  const CONTRACT = APX_CONTRACT_ADDRESS
 
   // Calculate derived values for buy
   const estBuyApx = buyUsd ? parseApx(parseFloat(buyUsd) / APX_BUY_RATE) : '0'
@@ -167,13 +132,11 @@ export default function ApxWalletPage() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-black text-white mb-2">
-              APX Wallet
-            </h1>
-            <p className="text-gray-400 text-sm">
-              Decentralized APX token management - You control your funds
-            </p>
+            <h1 className="text-3xl font-black text-white mb-2">Explore Your APX Opportunity</h1>
+            <p className="text-gray-400 text-sm">APX is the digital token used for APXFund rewards. Start with the simple guide below, then choose whether you want to connect an external wallet.</p>
           </div>
+
+          <ApxWalletGuide />
 
           {/* Wallet Connection Status */}
           <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-4 mb-6">
@@ -183,7 +146,7 @@ export default function ApxWalletPage() {
                   <>
                     <Wallet size={20} className="text-[#34d399]" />
                     <div>
-                      <p className="text-white font-medium">Wallet Connected</p>
+                      <p className="text-white font-medium">Your wallet is connected</p>
                       <p className="text-xs text-gray-400">
                         {wallet.address ? `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}` : 'Connecting...'}
                       </p>
@@ -193,8 +156,8 @@ export default function ApxWalletPage() {
                   <>
                     <Wallet size={20} className="text-gray-400" />
                     <div>
-                      <p className="text-white font-medium">Wallet Disconnected</p>
-                      <p className="text-xs text-gray-400">Connect wallet to trade APX</p>
+                      <p className="text-white font-medium">No wallet connected</p>
+                      <p className="text-xs text-gray-400">Connect a wallet to view blockchain APX</p>
                     </div>
                   </>
                 )}
@@ -206,7 +169,7 @@ export default function ApxWalletPage() {
                 </button>
               ) : (
                 <button onClick={connectWallet} className="btn-gold px-4 py-2 text-sm">
-                  Connect Wallet
+                  Connect a Wallet
                 </button>
               )}
             </div>
@@ -216,14 +179,14 @@ export default function ApxWalletPage() {
           <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-6 mb-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">APX Balance</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">APX in connected wallet</p>
                 <p className="text-2xl font-black text-[#EAB308]">
                   {formattedBalance} APX
                 </p>
                 <p className="text-xs text-gray-400 mt-2">
                   ≈ ${
                     (parseFloat(formattedBalance) * APX_REDEMPTION_RATE).toFixed(2)
-                  } USD
+                  } estimated value
                 </p>
               </div>
 
@@ -234,12 +197,6 @@ export default function ApxWalletPage() {
                 >
                   <RefreshCw size={16} /> Refresh
                 </button>
-                <button
-                  onClick={addToWallet}
-                  className="mt-2 text-xs text-[#c9a84c] hover:text-white transition-colors"
-                >
-                  <Wallet size={14} /> Add to Wallet
-                </button>
               </div>
             </div>
           </div>
@@ -247,7 +204,7 @@ export default function ApxWalletPage() {
           {/* Swap Section */}
           <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-6">
             <h2 className="text-xl font-black text-white mb-6">
-              Swap APX
+              Buy or exchange APX
             </h2>
 
             {/* Mode Toggle */}
@@ -270,7 +227,7 @@ export default function ApxWalletPage() {
             {swapMode === 'buy' && (
               <div className="space-y-4">
                 <p className="text-gray-500 text-sm">
-                  Buy APX with BNB, USDT, or other BSC tokens via PancakeSwap
+                  If you want to buy APX, you can use BNB, USDT, or another BNB Smart Chain token through PancakeSwap.
                 </p>
 
                 <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-4">
@@ -307,7 +264,7 @@ export default function ApxWalletPage() {
                     disabled={submitting || !wallet.isConnected || parseFloat(buyUsd || '0') < 10}
                     className="w-full bg-[#EAB308] text-[#0a0a14] font-bold py-3 px-6 rounded-xl text-sm hover:bg-[#d4af37] transition-colors disabled:opacity-50"
                   >
-                    {submitting ? 'Processing Swap...' : 'Swap for APX'}
+                    {submitting ? 'Preparing...' : 'Continue with APX purchase'}
                   </button>
                 </div>
               </div>
@@ -317,7 +274,7 @@ export default function ApxWalletPage() {
             {swapMode === 'sell' && (
               <div className="space-y-4">
                 <p className="text-gray-500 text-sm">
-                  Sell APX for BNB, USDT, or other BSC tokens via PancakeSwap
+                  If you want to exchange APX, you can use PancakeSwap. Check the amount and network before confirming.
                 </p>
 
                 <div className="bg-[#0a0a14] border border-[#1e1e35] rounded-xl px-4 py-4">
@@ -381,7 +338,7 @@ export default function ApxWalletPage() {
                       (parseFloat(redeemApx || '0') < 1.388889 && parseFloat(redeemUsd || '0') < 1000)}
                     className="w-full bg-[#34d399] text-[#0a0a14] font-bold py-3 px-6 rounded-xl text-sm hover:bg-[#2dd4bf] transition-colors disabled:opacity-50"
                   >
-                    {submitting ? 'Processing Swap...' : 'Swap for USD'}
+                    {submitting ? 'Preparing...' : 'Continue with APX exchange'}
                   </button>
                 </div>
               </div>
@@ -390,16 +347,16 @@ export default function ApxWalletPage() {
 
           {/* Instructions */}
           <div className="mt-8 pt-6 border-t border-[#1e1e35]">
-            <h3 className="text-lg font-black text-white mb-4">How It Works</h3>
+            <h3 className="text-lg font-black text-white mb-4">How APX works here</h3>
             <p className="text-gray-400 text-sm mb-2">
-              Connect your wallet to swap APX tokens directly on PancakeSwap. You maintain full control of your funds at all times.
+              APXFund rewards are recorded in your APXFund account. Your connected wallet only shows APX that is already held on the BNB Smart Chain. Connecting a wallet never gives APXFund access to your recovery phrase or private key.
             </p>
             <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
-              <li>Connect your wallet (MetaMask, WalletConnect, etc.)</li>
-              <li>Ensure you&apos;re on the Binance Smart Chain network</li>
-              <li>Enter the amount you wish to swap</li>
-              <li>Confirm the transaction in your wallet</li>
-              <li>View the transaction on BscScan</li>
+              <li>Add APX to Trust Wallet using the guide above</li>
+              <li>Connect your wallet only when you want to view its blockchain balance</li>
+              <li>Use BNB Smart Chain (BEP-20) for APX</li>
+              <li>Review every transaction in your wallet before confirming it</li>
+              <li>Check confirmed blockchain activity on BscScan</li>
             </ol>
             <p className="mt-4 text-xs text-gray-500">
               APX Contract:{' '}

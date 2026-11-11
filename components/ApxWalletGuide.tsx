@@ -1,0 +1,193 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { Check, ChevronDown, Copy, ExternalLink, ShieldCheck, Smartphone } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useLang } from '@/lib/useLang'
+import { APX_CONTRACT_ADDRESS } from '@/lib/web3'
+
+const APX_SYMBOL = 'APX'
+const APX_DECIMALS = 18
+const TRUST_WALLET_URL = `https://link.trustwallet.com/add_asset?asset=c20000714_t${APX_CONTRACT_ADDRESS}`
+
+type GuideCopy = {
+  title: string
+  intro: string
+  internalTitle: string
+  internalText: string
+  addTitle: string
+  addText: string
+  addButton: string
+  trustButton: string
+  copyButton: string
+  copied: string
+  details: string
+  network: string
+  contract: string
+  symbol: string
+  decimals: string
+  stepsTitle: string
+  steps: string[]
+  safety: string
+  safetyText: string
+  explorer: string
+  notAvailable: string
+}
+
+const COPY: Record<'en' | 'de', GuideCopy> = {
+  en: {
+    title: 'Set up APX in your wallet',
+    intro: 'APX is the token used for APXFund rewards. Add it to Trust Wallet once so it is easy to find later.',
+    internalTitle: 'Important: two different balances',
+    internalText: 'Your APXFund reward balance is tracked inside APXFund. Adding APX to Trust Wallet only displays APX already held in that blockchain wallet; it does not move your APXFund reward balance or ask for your recovery phrase.',
+    addTitle: 'Add APX automatically',
+    addText: 'On Trust Wallet or another compatible wallet, use the button below and approve the request shown by your wallet.',
+    addButton: 'Add APX to this wallet',
+    trustButton: 'Open Trust Wallet and add APX',
+    copyButton: 'Copy',
+    copied: 'Copied',
+    details: 'If the automatic button is not available',
+    network: 'Network',
+    contract: 'Contract address',
+    symbol: 'Token symbol',
+    decimals: 'Decimals',
+    stepsTitle: 'Simple manual steps',
+    steps: [
+      'Open Trust Wallet and tap the token search/manage icon.',
+      'Choose BNB Smart Chain (BEP-20).',
+      'Tap Add Custom Token, then paste the contract address below.',
+      'Check that the symbol is APX and decimals are 18, then tap Import.',
+    ],
+    safety: 'Safety check',
+    safetyText: 'Only use the contract address shown here or on the official APXFund website. APXFund will never ask for your recovery phrase, private key, or wallet password.',
+    explorer: 'Verify on BscScan',
+    notAvailable: 'Your wallet did not show the add-token request. Use the Trust Wallet button or the manual steps below.',
+  },
+  de: {
+    title: 'APX in Ihrer Wallet einrichten',
+    intro: 'APX ist der Token für APXFund-Belohnungen. Fügen Sie ihn einmal zu Trust Wallet hinzu, damit Sie ihn später leicht finden.',
+    internalTitle: 'Wichtig: zwei verschiedene Guthaben',
+    internalText: 'Ihr APXFund-Belohnungsguthaben wird innerhalb von APXFund geführt. Das Hinzufügen von APX zu Trust Wallet zeigt nur APX an, das bereits in dieser Blockchain-Wallet liegt. Es überträgt kein APXFund-Guthaben und fragt niemals nach Ihrer Wiederherstellungsphrase.',
+    addTitle: 'APX automatisch hinzufügen',
+    addText: 'Öffnen Sie diese Seite in Trust Wallet oder einer kompatiblen Wallet. Tippen Sie auf die Schaltfläche und bestätigen Sie die Anfrage Ihrer Wallet.',
+    addButton: 'APX zu dieser Wallet hinzufügen',
+    trustButton: 'Trust Wallet öffnen und APX hinzufügen',
+    copyButton: 'Kopieren',
+    copied: 'Kopiert',
+    details: 'Wenn das automatische Hinzufügen nicht verfügbar ist',
+    network: 'Netzwerk',
+    contract: 'Contract-Adresse',
+    symbol: 'Token-Symbol',
+    decimals: 'Dezimalstellen',
+    stepsTitle: 'Einfache manuelle Schritte',
+    steps: [
+      'Öffnen Sie Trust Wallet und tippen Sie auf das Symbol zum Suchen/Verwalten von Tokens.',
+      'Wählen Sie BNB Smart Chain (BEP-20).',
+      'Tippen Sie auf „Benutzerdefinierten Token hinzufügen“ und fügen Sie die Contract-Adresse ein.',
+      'Prüfen Sie APX und 18 Dezimalstellen und tippen Sie auf Importieren.',
+    ],
+    safety: 'Sicherheitsprüfung',
+    safetyText: 'Verwenden Sie nur die hier angezeigte Contract-Adresse oder die offizielle APXFund-Website. APXFund fragt niemals nach Ihrer Wiederherstellungsphrase, Ihrem Private Key oder Ihrem Wallet-Passwort.',
+    explorer: 'Auf BscScan prüfen',
+    notAvailable: 'Ihre Wallet hat die Anfrage zum Hinzufügen nicht angezeigt. Verwenden Sie die Trust-Wallet-Schaltfläche oder die manuellen Schritte.',
+  },
+}
+
+export default function ApxWalletGuide() {
+  const { lang } = useLang()
+  const copy = COPY[lang]
+  const [open, setOpen] = useState(true)
+  const [copiedField, setCopiedField] = useState<string | null>(null)
+
+  const details = useMemo(() => [
+    [copy.network, 'BNB Smart Chain (BEP-20)'],
+    [copy.contract, APX_CONTRACT_ADDRESS],
+    [copy.symbol, APX_SYMBOL],
+    [copy.decimals, String(APX_DECIMALS)],
+  ], [copy])
+
+  const copyValue = async (field: string, value: string) => {
+    await navigator.clipboard.writeText(value)
+    setCopiedField(field)
+    window.setTimeout(() => setCopiedField(null), 1800)
+  }
+
+  const addToWallet = async () => {
+    try {
+      if (!window.ethereum) {
+        toast.error(copy.notAvailable)
+        return
+      }
+      const added = await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: APX_CONTRACT_ADDRESS,
+            symbol: APX_SYMBOL,
+            decimals: APX_DECIMALS,
+            image: `${window.location.origin}/logo.png`,
+          },
+        },
+      })
+      if (added) toast.success(copy.copied === 'Copied' ? 'APX was added to your wallet.' : 'APX wurde zu Ihrer Wallet hinzugefügt.')
+    } catch {
+      toast.error(copy.notAvailable)
+    }
+  }
+
+  return (
+    <section id="trust-wallet-guide" className="mb-6 rounded-2xl border border-[#c9a84c]/30 bg-gradient-to-br from-[#171522] to-[#0d0f18] p-5 sm:p-6" aria-labelledby="apx-guide-title">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#c9a84c]/15 text-[#EAB308]">
+          <ShieldCheck size={21} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 id="apx-guide-title" className="text-lg font-black text-white">{copy.title}</h2>
+          <p className="mt-1 text-sm leading-6 text-gray-400">{copy.intro}</p>
+        </div>
+        <button type="button" onClick={() => setOpen(value => !value)} className="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white" aria-expanded={open} aria-controls="apx-guide-content">
+          <ChevronDown size={19} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+
+      {open && <div id="apx-guide-content" className="mt-5 space-y-5">
+        <div className="rounded-xl border border-blue-400/20 bg-blue-400/5 p-4">
+          <p className="text-sm font-bold text-blue-200">{copy.internalTitle}</p>
+          <p className="mt-1 text-xs leading-5 text-blue-100/70">{copy.internalText}</p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-xl border border-[#1e1e35] bg-[#0a0a14] p-4">
+            <div className="flex items-center gap-2 text-white"><Smartphone size={17} className="text-[#EAB308]" /><h3 className="font-bold">{copy.addTitle}</h3></div>
+            <p className="mt-2 text-xs leading-5 text-gray-400">{copy.addText}</p>
+            <button type="button" onClick={addToWallet} className="mt-4 w-full rounded-xl bg-[#EAB308] px-4 py-3 text-sm font-black text-[#090A0F] hover:bg-[#facc15]">{copy.addButton}</button>
+            <a href={TRUST_WALLET_URL} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-[#1e1e35] px-4 py-3 text-center text-xs font-bold text-gray-300 hover:border-[#c9a84c]/50 hover:text-white" target="_blank" rel="noopener noreferrer"><ExternalLink size={14} />{copy.trustButton}</a>
+          </div>
+
+          <div className="rounded-xl border border-[#1e1e35] bg-[#0a0a14] p-4">
+            <h3 className="font-bold text-white">{copy.details}</h3>
+            <div className="mt-3 space-y-2">
+              {details.map(([label, value]) => <div key={label} className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.03] px-3 py-2 text-xs">
+                <span className="shrink-0 text-gray-500">{label}</span>
+                <span className="flex min-w-0 items-center gap-2 text-right font-mono text-gray-200"><span className="truncate">{value}</span>{label === copy.contract && <button type="button" onClick={() => copyValue(label, value)} className="shrink-0 text-[#c9a84c]" aria-label={`${copy.copyButton} ${label}`}>{copiedField === label ? <Check size={14} /> : <Copy size={14} />}</button>}</span>
+              </div>)}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-bold text-white">{copy.stepsTitle}</h3>
+          <ol className="mt-3 grid gap-2 text-xs leading-5 text-gray-400 sm:grid-cols-2">
+            {copy.steps.map((step, index) => <li key={step} className="flex gap-2 rounded-lg border border-[#1e1e35] bg-[#0a0a14] p-3"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#c9a84c]/15 text-[10px] font-black text-[#EAB308]">{index + 1}</span><span>{step}</span></li>)}
+          </ol>
+        </div>
+
+        <div className="flex flex-col gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="text-xs font-bold text-emerald-200">{copy.safety}</p><p className="mt-1 text-xs leading-5 text-emerald-100/70">{copy.safetyText}</p></div>
+          <a href={`https://bscscan.com/token/${APX_CONTRACT_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="flex shrink-0 items-center gap-1 text-xs font-bold text-emerald-300 hover:underline">{copy.explorer}<ExternalLink size={13} /></a>
+        </div>
+      </div>}
+    </section>
+  )
+}
