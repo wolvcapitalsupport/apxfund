@@ -247,6 +247,24 @@ model EmailLog {
   @@map("email_logs")
 }
 
+model AdminAuditLog {
+  id           String   @id @default(cuid())
+  adminId      String
+  action       String
+  entityType   String
+  entityId     String?
+  summary      String
+  beforeJson   String?
+  afterJson    String?
+  metadataJson String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@map("admin_audit_logs")
+}
+
 enum Role {
   USER
   ADMIN

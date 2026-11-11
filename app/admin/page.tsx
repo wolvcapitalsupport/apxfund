@@ -14,8 +14,8 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AdminApxWithdrawals from '@/components/AdminApxWithdrawals'
-
-type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email' | 'investments' | 'apx' | 'apxWithdrawals'
+import AdminAuditLog from '@/components/AdminAuditLog'
+type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email' | 'investments' | 'apx' | 'apxWithdrawals' | 'audit'
 
 // ─────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -991,6 +991,7 @@ export default function AdminPage() {
     { id: 'roi',         label: 'ROI Engine',  icon: TrendingUp },
     { id: 'apx',         label: 'APX Redemptions', icon: Coins },
     { id: 'apxWithdrawals', label: 'APX Payouts', icon: ArrowUpCircle },
+    { id: 'audit',         label: 'Audit Log',     icon: Receipt },
   ] as const
 
   return (
@@ -1026,6 +1027,7 @@ export default function AdminPage() {
         {activeTab === 'email' && <EmailTab />}
         {activeTab === 'apx' && <ApxRedemptionsTab />}
         {activeTab === 'apxWithdrawals' && <AdminApxWithdrawals />}
+        {activeTab === 'audit' && <AdminAuditLog />}
       </div>
     </div>
   )

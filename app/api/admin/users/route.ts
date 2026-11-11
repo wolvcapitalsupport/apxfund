@@ -7,6 +7,7 @@ import { sendAccountSuspended, sendAccountReinstated } from '@/lib/mailer'
 import { createNotification } from '@/lib/notifications'
 import { addDays } from 'date-fns'
 import { isStarterPlan, MAX_STARTER_CYCLES } from '@/lib/planRules'
+import { recordAdminAudit } from '@/lib/admin-audit'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -100,6 +101,16 @@ export async function PATCH(req: NextRequest) {
       '/dashboard'
     )
 
+    await recordAdminAudit({
+      adminId: session.user.id,
+      action: updated.isActive ? 'ACCOUNT_REACTIVATED' : 'ACCOUNT_SUSPENDED',
+      entityType: 'USER',
+      entityId: userId,
+      summary: `${updated.isActive ? 'Reactivated' : 'Suspended'} ${user.email}`,
+      before: { isActive: user.isActive },
+      after: { isActive: updated.isActive },
+    })
+
     return NextResponse.json({ message: `User ${updated.isActive ? 'activated' : 'suspended'}`, user: updated })
   }
 
@@ -119,6 +130,16 @@ export async function PATCH(req: NextRequest) {
       updated.withdrawalAccessOverride ? 'success' : 'warning',
       '/dashboard/withdraw'
     )
+
+    await recordAdminAudit({
+      adminId: session.user.id,
+      action: updated.withdrawalAccessOverride ? 'WITHDRAWAL_ACCESS_ENABLED' : 'WITHDRAWAL_ACCESS_DISABLED',
+      entityType: 'USER',
+      entityId: userId,
+      summary: `${updated.withdrawalAccessOverride ? 'Enabled' : 'Disabled'} withdrawal access for ${user.email}`,
+      before: { withdrawalAccessOverride: user.withdrawalAccessOverride },
+      after: { withdrawalAccessOverride: updated.withdrawalAccessOverride },
+    })
 
     return NextResponse.json({
       message: updated.withdrawalAccessOverride ? 'Withdrawal access enabled' : 'Withdrawal access disabled',

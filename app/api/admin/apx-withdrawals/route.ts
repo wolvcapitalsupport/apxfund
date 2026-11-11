@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { formatApx } from '@/lib/apx'
+import { recordAdminAudit } from '@/lib/admin-audit'
 
 const txHashSchema = z.string().regex(/^0x[a-fA-F0-9]{64}$/, 'Enter a valid BNB Smart Chain transaction hash')
 
@@ -73,6 +74,16 @@ export async function PATCH(req: NextRequest) {
       '/dashboard/transactions'
     )
 
+    await recordAdminAudit({
+      adminId: session.user.id,
+      action: 'APX_PAYOUT_PAID',
+      entityType: 'APX_WITHDRAWAL',
+      entityId: row.id,
+      summary: `Marked ${formatApx(row.amount)} APX payout as paid`,
+      after: { status: 'PAID', txHash },
+      metadata: { userId: row.userId, walletAddress: row.walletAddress, network: row.network },
+    })
+
     return NextResponse.json({ message: 'APX payout marked as paid' })
   }
 
@@ -95,6 +106,16 @@ export async function PATCH(req: NextRequest) {
     'error',
     '/dashboard/withdraw'
   )
+
+  await recordAdminAudit({
+    adminId: session.user.id,
+    action: 'APX_PAYOUT_REJECTED',
+    entityType: 'APX_WITHDRAWAL',
+    entityId: row.id,
+    summary: `Rejected ${formatApx(row.amount)} APX payout and returned APX`,
+    after: { status: 'REJECTED' },
+    metadata: { userId: row.userId, walletAddress: row.walletAddress, network: row.network, adminNote: adminNote || null },
+  })
 
   return NextResponse.json({ message: 'APX payout rejected and APX returned' })
 }
