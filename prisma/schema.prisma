@@ -48,6 +48,7 @@ model User {
   kycSubmissions       KycSubmission[]
   notifications        Notification[]
   transactions         Transaction[]
+  apxWithdrawals       ApxWithdrawal[]
 
   @@map("users")
 }
@@ -121,6 +122,7 @@ model Transaction {
   investmentId   String?
   user           User              @relation(fields: [userId], references: [id])
   investment     Investment?       @relation(fields: [investmentId], references: [id])
+  apxWithdrawal  ApxWithdrawal?
 
   @@index([type, currency])
   @@index([investmentId])
@@ -144,6 +146,29 @@ model ApxRedemption {
   @@index([status])
   @@index([userId])
   @@map("apx_redemptions")
+}
+
+model ApxWithdrawal {
+  id            String              @id @default(cuid())
+  userId        String
+  transactionId String?             @unique
+  amount        Float
+  walletAddress String
+  network       String              @default("BSC")
+  status        ApxWithdrawalStatus @default(PENDING)
+  txHash        String?
+  adminNote     String?
+  reviewedBy    String?
+  requestedAt   DateTime            @default(now())
+  reviewedAt    DateTime?
+  paidAt        DateTime?
+  updatedAt     DateTime            @updatedAt
+  user          User                @relation(fields: [userId], references: [id])
+  transaction   Transaction?        @relation(fields: [transactionId], references: [id])
+
+  @@index([status])
+  @@index([userId, requestedAt])
+  @@map("apx_withdrawals")
 }
 
 model KycSubmission {
@@ -263,4 +288,10 @@ enum ApxRedemptionStatus {
   APPROVED
   REJECTED
   SETTLED
+}
+
+enum ApxWithdrawalStatus {
+  PENDING
+  PAID
+  REJECTED
 }

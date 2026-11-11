@@ -29,7 +29,7 @@ const SECTIONS = [
   },
   {
     title: '5. Withdrawals',
-    content: `Withdrawals are only available to users who have at least one fully matured investment plan. Funds deposited must be placed into an active investment plan and allowed to complete its full duration before a withdrawal request can be submitted. The minimum withdrawal amount is $10 USD. Withdrawal requests are processed within 24 hours of submission. Users are responsible for providing accurate wallet addresses — APXFund accepts no liability for funds sent to incorrect addresses. Withdrawals may be subject to compliance checks and may be delayed where suspicious activity is detected.`,
+    content: `APX reward withdrawals are available from the user's available internal APX reward balance. Payouts are sent manually by APXFund administrators from the treasury wallet to the connected BNB Smart Chain (BEP-20) address supplied by the user. The minimum APX payout is the amount displayed on the withdrawal page. A request reserves the APX balance until it is paid or rejected; rejected requests return the reserved APX to the user's available rewards. Users are responsible for checking the wallet address and network before submitting — APXFund accepts no liability for an incorrect address or unsupported network. Manual payouts may be subject to compliance checks and may be delayed where suspicious activity is detected.`,
   },
   {
     title: '6. KYC & Identity Verification',

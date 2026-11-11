@@ -13,8 +13,9 @@ import {
   Send, Inbox, UserPlus, Globe, Coins, ArrowLeftRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import AdminApxWithdrawals from '@/components/AdminApxWithdrawals'
 
-type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email' | 'investments' | 'apx'
+type Tab = 'overview' | 'deposits' | 'withdrawals' | 'kyc' | 'users' | 'roi' | 'wallets' | 'email' | 'investments' | 'apx' | 'apxWithdrawals'
 
 // ─────────────────────────────────────────────────────────────────────
 // Shared helpers
@@ -967,6 +968,7 @@ export default function AdminPage() {
     { id: 'email',       label: 'Email',       icon: Mail },
     { id: 'roi',         label: 'ROI Engine',  icon: TrendingUp },
     { id: 'apx',         label: 'APX Redemptions', icon: Coins },
+    { id: 'apxWithdrawals', label: 'APX Payouts', icon: ArrowUpCircle },
   ] as const
 
   return (
@@ -1001,6 +1003,7 @@ export default function AdminPage() {
         {activeTab === 'wallets' && <WalletsTab />}
         {activeTab === 'email' && <EmailTab />}
         {activeTab === 'apx' && <ApxRedemptionsTab />}
+        {activeTab === 'apxWithdrawals' && <AdminApxWithdrawals />}
       </div>
     </div>
   )
