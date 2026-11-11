@@ -124,8 +124,9 @@ export default function DashboardPage() {
 
       {/* ── Page header ── */}
       <div>
-        <h1 className="text-2xl font-black mb-1">Portfolio Overview</h1>
-        <p className="text-gray-500 text-sm">Your real-time investment dashboard</p>
+        <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#c9a84c]">APXFUND / PRIVATE PORTFOLIO</div>
+        <h1 className="luxury-display text-3xl font-semibold leading-tight text-white sm:text-4xl">Portfolio Overview</h1>
+        <p className="mt-2 text-sm text-gray-500">A clear view of your capital, progress, and APX reward opportunity.</p>
       </div>
 
       {/* ── Hero chart card ── */}

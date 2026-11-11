@@ -6,22 +6,22 @@ import { useLang } from '@/lib/useLang'
 
 const COPY = {
   en: {
-    eyebrow: 'A new way to follow your rewards',
-    title: 'Your rewards can go further with APX.',
-    body: 'APX is the digital token used for APXFund reward credits. Learn how it works, follow your balance, and choose how you want to manage your APX journey.',
-    points: ['Rewards are clearly shown in APX', 'Optional BNB Smart Chain wallet access', 'You stay in control of every wallet action'],
+    eyebrow: 'APXFUND / APX REWARDS',
+    title: 'A clearer path to your APX rewards.',
+    body: 'APX gives your reward experience a visible, trackable layer. Understand what you have received, explore the ecosystem, and decide how you want to manage your APX journey.',
+    points: ['Reward credits tracked in APX', 'Optional BNB Smart Chain access', 'Every wallet action stays yours to approve'],
     primary: 'Explore APX',
     secondary: 'How to add APX to Trust Wallet',
-    note: 'No wallet is required to receive or view your APXFund reward balance.',
+    note: 'Designed for clarity. Review every detail before you act.',
   },
   de: {
-    eyebrow: 'Eine neue Möglichkeit, Ihre Belohnungen zu verfolgen',
-    title: 'Ihre Belohnungen können mit APX weitergehen.',
-    body: 'APX ist der digitale Token für APXFund-Belohnungen. Erfahren Sie, wie APX funktioniert, verfolgen Sie Ihr Guthaben und entscheiden Sie selbst, wie Sie damit umgehen.',
-    points: ['Belohnungen werden klar als APX angezeigt', 'Optionaler Zugang zur BNB-Smart-Chain-Wallet', 'Sie bestätigen jede Wallet-Aktion selbst'],
+    eyebrow: 'APXFUND / APX-BELOHNUNGEN',
+    title: 'Ein klarer Weg zu Ihren APX-Belohnungen.',
+    body: 'APX macht Ihre Belohnungen sichtbar und nachvollziehbar. Verstehen Sie Ihr Guthaben, entdecken Sie das Ökosystem und entscheiden Sie selbst, wie Sie mit APX umgehen.',
+    points: ['Belohnungen werden als APX geführt', 'Optionaler Zugang zur BNB Smart Chain', 'Jede Wallet-Aktion wird von Ihnen bestätigt'],
     primary: 'APX entdecken',
     secondary: 'APX zu Trust Wallet hinzufügen',
-    note: 'Für den Erhalt oder die Anzeige Ihrer APXFund-Belohnung ist keine Wallet erforderlich.',
+    note: 'Klar gestaltet. Prüfen Sie jedes Detail, bevor Sie handeln.',
   },
 } as const
 
@@ -30,27 +30,29 @@ export default function ApxOpportunityCard() {
   const copy = COPY[lang]
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#c9a84c]/45 bg-[radial-gradient(circle_at_85%_15%,rgba(234,179,8,0.18),transparent_35%),linear-gradient(120deg,#111827,#11131E_60%,#171522)] p-5 shadow-[0_18px_60px_rgba(234,179,8,0.08)] sm:p-7" aria-labelledby="apx-opportunity-title">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full border border-[#EAB308]/20" />
-      <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full border border-[#EAB308]/15" />
-      <div className="relative grid gap-6 lg:grid-cols-[1.3fr_0.9fr] lg:items-center">
+    <section className="relative overflow-hidden rounded-[26px] border border-[#c9a84c]/40 bg-[radial-gradient(circle_at_82%_8%,rgba(234,179,8,0.2),transparent_28%),linear-gradient(125deg,#0d1423,#11131E_58%,#1b1924)] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] sm:p-8" aria-labelledby="apx-opportunity-title">
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#e8cc7a] to-transparent opacity-70" />
+      <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full border border-[#EAB308]/15" />
+      <div className="pointer-events-none absolute -right-6 -top-6 h-36 w-36 rounded-full border border-[#EAB308]/10" />
+      <div className="relative grid gap-8 lg:grid-cols-[1.28fr_0.92fr] lg:items-center">
         <div>
-          <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#EAB308]"><Sparkles size={15} />{copy.eyebrow}</div>
-          <h2 id="apx-opportunity-title" className="max-w-xl text-2xl font-black leading-tight text-white sm:text-3xl">{copy.title}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">{copy.body}</p>
+          <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#e8cc7a]"><Sparkles size={14} />{copy.eyebrow}</div>
+          <h2 id="apx-opportunity-title" className="luxury-display max-w-xl text-3xl font-semibold leading-[1.08] text-white sm:text-4xl">{copy.title}</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">{copy.body}</p>
           <div className="mt-5 flex flex-wrap gap-2.5">
             <Link href="/dashboard/apx" className="inline-flex items-center gap-2 rounded-xl bg-[#EAB308] px-4 py-3 text-sm font-black text-[#090A0F] transition hover:bg-[#facc15]">{copy.primary}<ArrowRight size={15} /></Link>
             <Link href="/dashboard/apx#trust-wallet-guide" className="inline-flex items-center gap-2 rounded-xl border border-[#c9a84c]/40 bg-black/15 px-4 py-3 text-sm font-bold text-[#f5d77a] transition hover:bg-[#c9a84c]/10">{copy.secondary}</Link>
           </div>
-          <p className="mt-3 text-[11px] text-gray-500">{copy.note}</p>
+          <p className="mt-4 text-[11px] tracking-wide text-slate-500">{copy.note}</p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5">
-          <div className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">APX</div>
-          <div className="space-y-3">
+        <div className="relative overflow-hidden rounded-2xl border border-[#e8cc7a]/20 bg-[#070b14]/55 p-5 sm:p-6">
+          <div className="pointer-events-none absolute -bottom-8 -right-4 text-[100px] font-black leading-none text-[#e8cc7a]/[0.06]">APX</div>
+          <div className="relative mb-5 flex items-end justify-between border-b border-white/10 pb-4"><div><div className="text-3xl font-black tracking-[0.12em] text-[#e8cc7a]">APX</div><div className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Reward token</div></div><div className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-300">Visible</div></div>
+          <div className="relative space-y-3">
             {copy.points.map(point => <div key={point} className="flex items-start gap-2.5 text-sm text-gray-200"><CheckCircle2 size={17} className="mt-0.5 shrink-0 text-emerald-400" /><span>{point}</span></div>)}
           </div>
-          <div className="mt-5 border-t border-white/10 pt-4 text-xs font-bold tracking-wide text-[#f5d77a]">Explore. Review. Choose.</div>
+          <div className="relative mt-6 border-t border-white/10 pt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#f5d77a]">Explore. Review. Choose.</div>
         </div>
       </div>
     </section>

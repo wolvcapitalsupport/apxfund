@@ -36,9 +36,9 @@ type GuideCopy = {
 
 const COPY: Record<'en' | 'de', GuideCopy> = {
   en: {
-    title: 'Set up APX in your wallet',
-    intro: 'APX is the token used for APXFund rewards. Add it to Trust Wallet once so it is easy to find later.',
-    internalTitle: 'Important: two different balances',
+    title: 'Bring APX into view',
+    intro: 'APX is the token used for APXFund rewards. Add it to Trust Wallet once, then keep your token details close at hand.',
+    internalTitle: 'Know what you are holding',
     internalText: 'Your APXFund reward balance is tracked inside APXFund. Adding APX to Trust Wallet only displays APX already held in that blockchain wallet; it does not move your APXFund reward balance or ask for your recovery phrase.',
     addTitle: 'Add APX automatically',
     addText: 'On Trust Wallet or another compatible wallet, use the button below and approve the request shown by your wallet.',
@@ -64,9 +64,9 @@ const COPY: Record<'en' | 'de', GuideCopy> = {
     notAvailable: 'Your wallet did not show the add-token request. Use the Trust Wallet button or the manual steps below.',
   },
   de: {
-    title: 'APX in Ihrer Wallet einrichten',
-    intro: 'APX ist der Token für APXFund-Belohnungen. Fügen Sie ihn einmal zu Trust Wallet hinzu, damit Sie ihn später leicht finden.',
-    internalTitle: 'Wichtig: zwei verschiedene Guthaben',
+    title: 'APX sichtbar machen',
+    intro: 'APX ist der Token für APXFund-Belohnungen. Fügen Sie ihn einmal zu Trust Wallet hinzu und behalten Sie die Token-Details im Blick.',
+    internalTitle: 'Wissen, was Sie halten',
     internalText: 'Ihr APXFund-Belohnungsguthaben wird innerhalb von APXFund geführt. Das Hinzufügen von APX zu Trust Wallet zeigt nur APX an, das bereits in dieser Blockchain-Wallet liegt. Es überträgt kein APXFund-Guthaben und fragt niemals nach Ihrer Wiederherstellungsphrase.',
     addTitle: 'APX automatisch hinzufügen',
     addText: 'Öffnen Sie diese Seite in Trust Wallet oder einer kompatiblen Wallet. Tippen Sie auf die Schaltfläche und bestätigen Sie die Anfrage Ihrer Wallet.',
@@ -137,13 +137,14 @@ export default function ApxWalletGuide() {
   }
 
   return (
-    <section id="trust-wallet-guide" className="mb-6 rounded-2xl border border-[#c9a84c]/30 bg-gradient-to-br from-[#171522] to-[#0d0f18] p-5 sm:p-6" aria-labelledby="apx-guide-title">
+    <section id="trust-wallet-guide" className="premium-surface relative mb-6 overflow-hidden rounded-[22px] p-5 sm:p-6" aria-labelledby="apx-guide-title">
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#e8cc7a] to-transparent opacity-60" />
       <div className="flex items-start gap-3">
         <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#c9a84c]/15 text-[#EAB308]">
           <ShieldCheck size={21} />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 id="apx-guide-title" className="text-lg font-black text-white">{copy.title}</h2>
+          <h2 id="apx-guide-title" className="luxury-display text-2xl font-semibold text-white">{copy.title}</h2>
           <p className="mt-1 text-sm leading-6 text-gray-400">{copy.intro}</p>
         </div>
         <button type="button" onClick={() => setOpen(value => !value)} className="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white" aria-expanded={open} aria-controls="apx-guide-content">

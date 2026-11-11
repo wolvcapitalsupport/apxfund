@@ -132,14 +132,15 @@ export default function ApxWalletPage() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-black text-white mb-2">Explore Your APX Opportunity</h1>
-            <p className="text-gray-400 text-sm">APX is the digital token used for APXFund rewards. Start with the simple guide below, then choose whether you want to connect an external wallet.</p>
+            <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-[#e8cc7a]">APXFUND / DIGITAL REWARDS</div>
+            <h1 className="luxury-display text-4xl font-semibold leading-tight text-white sm:text-5xl">Explore Your APX Opportunity</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400">APX is the digital token used for APXFund rewards. Start with the simple guide below, then choose whether you want to connect an external wallet.</p>
           </div>
 
           <ApxWalletGuide />
 
           {/* Wallet Connection Status */}
-          <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-4 mb-6">
+          <div className="premium-surface rounded-2xl px-6 py-4 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {wallet.isConnected ? (
