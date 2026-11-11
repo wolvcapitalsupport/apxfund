@@ -8,7 +8,6 @@ import { APX_CONTRACT_ADDRESS } from '@/lib/web3'
 
 const APX_SYMBOL = 'APX'
 const APX_DECIMALS = 18
-const TRUST_WALLET_URL = `https://link.trustwallet.com/add_asset?asset=c20000714_t${APX_CONTRACT_ADDRESS}`
 
 type GuideCopy = {
   title: string
@@ -18,7 +17,6 @@ type GuideCopy = {
   addTitle: string
   addText: string
   addButton: string
-  trustButton: string
   copyButton: string
   copied: string
   details: string
@@ -41,9 +39,8 @@ const COPY: Record<'en' | 'de', GuideCopy> = {
     internalTitle: 'Know what you are holding',
     internalText: 'Your APXFund reward balance is tracked inside APXFund. Adding APX to Trust Wallet only displays APX already held in that blockchain wallet; it does not move your APXFund reward balance or ask for your recovery phrase.',
     addTitle: 'Add APX automatically',
-    addText: 'On Trust Wallet or another compatible wallet, use the button below and approve the request shown by your wallet.',
-    addButton: 'Add APX to this wallet',
-    trustButton: 'Open Trust Wallet and add APX',
+    addText: 'Connect your wallet above, then use the button below. Your wallet will show its own confirmation request.',
+    addButton: 'Add APX to connected wallet',
     copyButton: 'Copy',
     copied: 'Copied',
     details: 'If the automatic button is not available',
@@ -69,9 +66,8 @@ const COPY: Record<'en' | 'de', GuideCopy> = {
     internalTitle: 'Wissen, was Sie halten',
     internalText: 'Ihr APXFund-Belohnungsguthaben wird innerhalb von APXFund geführt. Das Hinzufügen von APX zu Trust Wallet zeigt nur APX an, das bereits in dieser Blockchain-Wallet liegt. Es überträgt kein APXFund-Guthaben und fragt niemals nach Ihrer Wiederherstellungsphrase.',
     addTitle: 'APX automatisch hinzufügen',
-    addText: 'Öffnen Sie diese Seite in Trust Wallet oder einer kompatiblen Wallet. Tippen Sie auf die Schaltfläche und bestätigen Sie die Anfrage Ihrer Wallet.',
+    addText: 'Verbinden Sie zuerst Ihre Wallet. Tippen Sie anschließend auf die Schaltfläche und bestätigen Sie die Anfrage Ihrer Wallet.',
     addButton: 'APX zu dieser Wallet hinzufügen',
-    trustButton: 'Trust Wallet öffnen und APX hinzufügen',
     copyButton: 'Kopieren',
     copied: 'Kopiert',
     details: 'Wenn das automatische Hinzufügen nicht verfügbar ist',
@@ -93,7 +89,11 @@ const COPY: Record<'en' | 'de', GuideCopy> = {
   },
 }
 
-export default function ApxWalletGuide() {
+type WalletProvider = {
+  request: (args: { method: string; params?: unknown }) => Promise<unknown>
+}
+
+export default function ApxWalletGuide({ walletProvider }: { walletProvider?: WalletProvider | null }) {
   const { lang } = useLang()
   const copy = COPY[lang]
   const [open, setOpen] = useState(true)
@@ -114,11 +114,12 @@ export default function ApxWalletGuide() {
 
   const addToWallet = async () => {
     try {
-      if (!window.ethereum) {
+      const provider = walletProvider || (window.ethereum as WalletProvider | undefined)
+      if (!provider) {
         toast.error(copy.notAvailable)
         return
       }
-      const added = await window.ethereum.request({
+      const added = await provider.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',
@@ -163,7 +164,6 @@ export default function ApxWalletGuide() {
             <div className="flex items-center gap-2 text-white"><Smartphone size={17} className="text-[#EAB308]" /><h3 className="font-bold">{copy.addTitle}</h3></div>
             <p className="mt-2 text-xs leading-5 text-gray-400">{copy.addText}</p>
             <button type="button" onClick={addToWallet} className="mt-4 w-full rounded-xl bg-[#EAB308] px-4 py-3 text-sm font-black text-[#090A0F] hover:bg-[#facc15]">{copy.addButton}</button>
-            <a href={TRUST_WALLET_URL} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-[#1e1e35] px-4 py-3 text-center text-xs font-bold text-gray-300 hover:border-[#c9a84c]/50 hover:text-white" target="_blank" rel="noopener noreferrer"><ExternalLink size={14} />{copy.trustButton}</a>
           </div>
 
           <div className="rounded-xl border border-[#1e1e35] bg-[#0a0a14] p-4">

@@ -1,153 +1,72 @@
-import { useState, useEffect, useCallback } from "react";
-import { getProvider, getApxContract, formatApx, parseApx, APX_CONTRACT_ADDRESS } from "./web3";
+import { useCallback } from 'react'
+import {
+  useAppKit,
+  useAppKitAccount,
+  useAppKitNetwork,
+  useAppKitProvider,
+  useDisconnect,
+} from '@reown/appkit/react'
+import { bsc } from '@reown/appkit/networks'
+import { getProvider, getApxContract, formatApx } from './web3'
 
 export interface Wallet {
-  address: string | null;
-  isConnected: boolean;
-  isConnecting: boolean;
+  address: string | null
+  isConnected: boolean
+  isConnecting: boolean
 }
 
 export interface UseWalletReturn {
-  wallet: Wallet;
-  connect: () => Promise<void>;
-  disconnect: () => void;
-  getApxBalance: () => Promise<string>;
-  switchToBsc: () => Promise<void>;
+  wallet: Wallet
+  walletProvider: { request: (args: { method: string; params?: unknown }) => Promise<unknown> } | null
+  connect: () => Promise<void>
+  disconnect: () => Promise<void>
+  getApxBalance: () => Promise<string>
+  switchToBsc: () => Promise<void>
 }
 
 export const useWallet = (): UseWalletReturn => {
-  const [wallet, setWallet] = useState<Wallet>({
-    address: null,
-    isConnected: false,
-    isConnecting: false,
-  });
+  const { open } = useAppKit()
+  const { disconnect: disconnectAppKit } = useDisconnect()
+  const { address, isConnected, status } = useAppKitAccount({ namespace: 'eip155' })
+  const { chainId, switchNetwork } = useAppKitNetwork()
+  const { walletProvider } = useAppKitProvider<{ request: (args: { method: string; params?: unknown }) => Promise<unknown> }>('eip155')
 
   const connect = useCallback(async () => {
-    setWallet((prev) => ({ ...prev, isConnecting: true }));
+    await open({ view: 'Connect' })
+  }, [open])
 
-    try {
-      if (!window.ethereum) {
-        throw new Error("Please install MetaMask or WalletConnect to use this feature");
-      }
-
-      // Request account access
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      const address = accounts[0];
-
-      // Switch to BSC network if not already on it
-      await switchToBsc();
-
-      setWallet({
-        address,
-        isConnected: true,
-        isConnecting: false,
-      });
-    } catch (error) {
-      console.error("Failed to connect wallet:", error);
-      setWallet((prev) => ({ ...prev, isConnecting: false }));
-      throw error;
-    }
-  }, []);
-
-  const disconnect = useCallback(() => {
-    setWallet({
-      address: null,
-      isConnected: false,
-      isConnecting: false,
-    });
-  }, []);
-
-  const getApxBalance = useCallback(async () => {
-    if (!wallet.isConnected || !wallet.address) {
-      return "0";
-    }
-
-    try {
-      const provider = getProvider();
-      const apxContract = getApxContract(provider);
-      const balance = await apxContract.balanceOf(wallet.address);
-      return formatApx(balance);
-    } catch (error) {
-      console.error("Failed to get APX balance:", error);
-      return "0";
-    }
-  }, [wallet.isConnected, wallet.address]);
+  const disconnect = useCallback(async () => {
+    await disconnectAppKit()
+  }, [disconnectAppKit])
 
   const switchToBsc = useCallback(async () => {
-    if (!window.ethereum) {
-      throw new Error("Please install MetaMask or WalletConnect to use this feature");
-    }
+    if (chainId !== bsc.id) await switchNetwork(bsc)
+  }, [chainId, switchNetwork])
+
+  const getApxBalance = useCallback(async () => {
+    if (!isConnected || !address) return '0'
 
     try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x38" }],
-      });
-    } catch (switchError: any) {
-      // If the chain hasn't been added, add it
-      if (switchError.code === 4902) {
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: "0x38",
-              chainName: "Binance Smart Chain",
-              nativeCurrency: {
-                name: "Binance Coin",
-                symbol: "BNB",
-                decimals: 18,
-              },
-              rpcUrls: ["https://bsc-dataseed1.binance.org"],
-              blockExplorerUrls: ["https://bscscan.com"],
-            },
-          ],
-        });
-      } else {
-        throw switchError;
-      }
+      const provider = getProvider()
+      const apxContract = getApxContract(provider)
+      const balance = await apxContract.balanceOf(address)
+      return formatApx(balance)
+    } catch (error) {
+      console.error('Failed to get APX balance:', error)
+      return '0'
     }
-  }, []);
-
-  // Listen for account changes
-  useEffect(() => {
-    const ethereum = window.ethereum
-    if (ethereum) {
-      const handleAccountsChanged = (accounts: string[]) => {
-        if (accounts.length === 0) {
-          // User disconnected wallet
-          disconnect();
-        } else if (accounts[0] !== wallet.address) {
-          // User switched accounts
-          setWallet((prev) => ({
-            ...prev,
-            address: accounts[0],
-          }));
-        }
-      };
-
-      const handleChainChanged = () => {
-        // Optionally reload or handle chain change
-        window.location.reload();
-      };
-
-      ethereum.on("accountsChanged", handleAccountsChanged);
-      ethereum.on("chainChanged", handleChainChanged);
-
-      return () => {
-        ethereum.removeListener("accountsChanged", handleAccountsChanged);
-        ethereum.removeListener("chainChanged", handleChainChanged);
-      };
-    }
-  }, [disconnect, wallet.address]);
+  }, [isConnected, address])
 
   return {
-    wallet,
+    wallet: {
+      address: address || null,
+      isConnected,
+      isConnecting: status === 'connecting' || status === 'reconnecting',
+    },
+    walletProvider,
     connect,
     disconnect,
     getApxBalance,
     switchToBsc,
-  };
-};
+  }
+}

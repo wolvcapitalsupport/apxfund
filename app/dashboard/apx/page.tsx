@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
+import { AppKitAccountButton, AppKitConnectButton } from '@reown/appkit/react'
 import {
   Wallet,
   RefreshCw
@@ -10,15 +11,16 @@ import { useWallet } from '@/lib/useWallet'
 import { formatApx, parseApx, APX_BUY_RATE, APX_REDEMPTION_RATE } from '@/lib/apx'
 import { APX_CONTRACT_ADDRESS } from '@/lib/web3'
 import ApxWalletGuide from '@/components/ApxWalletGuide'
+import { REOWN_PROJECT_ID } from '@/components/ReownProvider'
 
-export default function ApxWalletPage() {
+function ApxWalletPageContent() {
   const [buyUsd, setBuyUsd] = useState('')
   const [redeemApx, setRedeemApx] = useState('')
   const [redeemUsd, setRedeemUsd] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [swapMode, setSwapMode] = useState<'buy' | 'sell'>('buy')
 
-  const { wallet, connect: connectWallet, disconnect: disconnectWallet, getApxBalance } = useWallet()
+  const { wallet, getApxBalance, walletProvider } = useWallet()
 
   const CONTRACT = APX_CONTRACT_ADDRESS
 
@@ -137,8 +139,6 @@ export default function ApxWalletPage() {
             <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400">APX is the digital token used for APXFund rewards. Start with the simple guide below, then choose whether you want to connect an external wallet.</p>
           </div>
 
-          <ApxWalletGuide />
-
           {/* Wallet Connection Status */}
           <div className="premium-surface rounded-2xl px-6 py-4 mb-6">
             <div className="flex items-center justify-between">
@@ -165,16 +165,14 @@ export default function ApxWalletPage() {
               </div>
 
               {wallet.isConnected ? (
-                <button onClick={disconnectWallet} className="text-xs text-gray-400 hover:text-white">
-                  Disconnect
-                </button>
+                <AppKitAccountButton balance="hide" />
               ) : (
-                <button onClick={connectWallet} className="btn-gold px-4 py-2 text-sm">
-                  Connect a Wallet
-                </button>
+                <AppKitConnectButton label="Connect a Wallet" loadingLabel="Opening wallet…" />
               )}
             </div>
           </div>
+
+          <ApxWalletGuide walletProvider={walletProvider} />
 
           {/* Balance Card */}
           <div className="bg-[#0d0f18] border border-[#1e1e35] rounded-xl px-6 py-6 mb-6">
@@ -375,6 +373,22 @@ export default function ApxWalletPage() {
       </div>
     </div>
   )
+}
+
+export default function ApxWalletPage() {
+  if (!REOWN_PROJECT_ID) {
+    return (
+      <div className="min-h-screen bg-[#0a0a14] px-6 py-12">
+        <div className="premium-surface mx-auto max-w-xl rounded-2xl p-8 text-center">
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-[#e8cc7a]">Wallet connection setup</p>
+          <h1 className="luxury-display text-3xl font-semibold text-white">Wallet connection is being configured</h1>
+          <p className="mt-3 text-sm leading-6 text-gray-400">The standard Reown wallet button will be available as soon as the public Reown project ID is added to the deployment environment.</p>
+        </div>
+      </div>
+    )
+  }
+
+  return <ApxWalletPageContent />
 }
 
 // Helper function to refresh balance

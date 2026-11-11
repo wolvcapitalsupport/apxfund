@@ -22,6 +22,9 @@ RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxxxx"
 EMAIL_FROM="noreply@yourdomain.com"
 
 # --- BLOCKCHAIN (BNB Smart Chain) ---
+# Reown AppKit project ID (public browser value; create one at dashboard.reown.com)
+NEXT_PUBLIC_REOWN_PROJECT_ID="your-reown-project-id"
+
 # APX Token Contract Address on BSC
 NEXT_PUBLIC_APX_CONTRACT_ADDRESS="0x8d6032443cb7b23c134094c8921f1f37824ea3a2"
 
