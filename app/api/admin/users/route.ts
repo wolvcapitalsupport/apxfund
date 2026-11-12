@@ -35,35 +35,40 @@ export async function GET(req: NextRequest) {
       }
     : {}
 
-  const [users, total] = await Promise.all([
-    prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        preferredLanguage: true,
-        balance: true,
-        apxBalance: true,
-        apxRewards: true,
-        totalDeposited: true,
-        totalProfit: true,
-        totalWithdrawn: true,
-        kycStatus: true,
-        isActive: true,
-        withdrawalAccessOverride: true,
-        createdAt: true,
-        _count: { select: { investments: true, transactions: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.user.count({ where }),
-  ])
+  try {
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          fullName: true,
+          role: true,
+          preferredLanguage: true,
+          balance: true,
+          apxBalance: true,
+          apxRewards: true,
+          totalDeposited: true,
+          totalProfit: true,
+          totalWithdrawn: true,
+          kycStatus: true,
+          isActive: true,
+          withdrawalAccessOverride: true,
+          createdAt: true,
+          _count: { select: { investments: true, transactions: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.user.count({ where }),
+    ])
 
-  return NextResponse.json({ users, total, page, limit })
+    return NextResponse.json({ users, total, page, limit })
+  } catch (error) {
+    console.error('Admin users query failed:', error)
+    return NextResponse.json({ error: 'Unable to load users right now. Please try again.' }, { status: 503 })
+  }
 }
 
 // ── GET single user detail ────────────────────────────────────────────

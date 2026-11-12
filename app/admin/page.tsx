@@ -76,6 +76,7 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
   const [user, setUser] = useState<any>(null)
   const [plans, setPlans] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [activeAction, setActiveAction] = useState<'credit' | 'debit' | 'creditApx' | 'invest' | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
 
@@ -89,15 +90,34 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
   const [bypassBalance, setBypassBalance] = useState(false)
 
   useEffect(() => {
+    let cancelled = false
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 15000)
+    setLoading(true)
+    setLoadError('')
     Promise.all([
-      fetch(`/api/admin/users/detail?userId=${userId}`).then(r => r.json()),
-      fetch('/api/plans').then(r => r.json()),
+      fetch(`/api/admin/users/detail?userId=${encodeURIComponent(userId)}`, { signal: controller.signal }).then(async r => {
+        const data = await r.json()
+        if (!r.ok) throw new Error(data.error || 'Unable to load user')
+        return data
+      }),
+      fetch('/api/plans', { signal: controller.signal }).then(async r => {
+        const data = await r.json()
+        if (!r.ok) throw new Error(data.error || 'Unable to load plans')
+        return data
+      }),
     ]).then(([u, p]) => {
+      if (cancelled) return
       setUser(u)
       setPlans(Array.isArray(p) ? p : [])
-      if (p.length > 0) setInvestPlanId(p[0].id)
-      setLoading(false)
+      if (Array.isArray(p) && p.length > 0) setInvestPlanId(p[0].id)
+    }).catch((error: any) => {
+      if (cancelled || error.name === 'AbortError') return
+      setLoadError(error.message || 'Unable to load this user')
+    }).finally(() => {
+      if (!cancelled) setLoading(false)
     })
+    return () => { cancelled = true; controller.abort(); window.clearTimeout(timeout) }
   }, [userId])
 
   const doAction = async () => {
@@ -189,6 +209,12 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center"><Spinner /></div>
+        ) : loadError ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 text-center">
+            <AlertTriangle className="text-red-400" size={24} />
+            <p className="text-sm text-red-300">{loadError}</p>
+            <button onClick={onClose} className="text-xs text-[#c9a84c] hover:underline">Close and try again</button>
+          </div>
         ) : (
           <div className="flex-1 overflow-y-auto">
             {/* User info header */}
@@ -792,17 +818,30 @@ function UsersTab() {
   const [users, setUsers] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [search, setSearch] = useState('')
   const [drawerUserId, setDrawerUserId] = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
 
   const fetch_ = useCallback(async (q = '') => {
     setLoading(true)
-    const res = await fetch(`/api/admin/users?search=${q}`)
-    const data = await res.json()
-    setUsers(data.users || [])
-    setTotal(data.total || 0)
-    setLoading(false)
+    setLoadError('')
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 15000)
+    try {
+      const res = await fetch(`/api/admin/users?search=${encodeURIComponent(q)}`, { signal: controller.signal })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Unable to load users')
+      setUsers(data.users || [])
+      setTotal(data.total || 0)
+    } catch (error: any) {
+      setUsers([])
+      setTotal(0)
+      setLoadError(error?.name === 'AbortError' ? 'The user request timed out. Please try again.' : (error?.message || 'Unable to load users'))
+    } finally {
+      window.clearTimeout(timeout)
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => { fetch_() }, [fetch_])
@@ -828,7 +867,13 @@ function UsersTab() {
       </div>
       <div className="card-dark overflow-hidden">
         <div className="px-5 py-4 border-b border-[#1e1e35] text-xs text-gray-500">Showing {users.length} of {total} users</div>
-        {loading ? <div className="flex items-center justify-center h-40"><Spinner /></div> : (
+        {loading ? <div className="flex items-center justify-center h-40"><Spinner /></div> : loadError ? (
+          <div className="flex flex-col items-center justify-center gap-3 h-40 px-6 text-center">
+            <AlertTriangle className="text-red-400" size={22} />
+            <p className="text-sm text-red-300">{loadError}</p>
+            <button onClick={() => fetch_(search)} className="text-xs text-[#c9a84c] hover:underline">Retry</button>
+          </div>
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-[#0a0a14]"><tr>{['User', 'Balance', 'Deposited', 'KYC', 'Status', 'Joined', 'Actions'].map(h => (
