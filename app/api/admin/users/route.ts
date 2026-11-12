@@ -8,6 +8,7 @@ import { createNotification } from '@/lib/notifications'
 import { addDays } from 'date-fns'
 import { isStarterPlan, MAX_STARTER_CYCLES } from '@/lib/planRules'
 import { recordAdminAudit } from '@/lib/admin-audit'
+import { APX_REDEMPTION_RATE, apxToUsd, formatApx } from '@/lib/apx'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -180,6 +181,58 @@ export async function PATCH(req: NextRequest) {
     )
 
     return NextResponse.json({ message: `$${amount} credited to ${user.fullName}`, balance: updated.balance })
+  }
+
+  // ── Credit APX rewards ───────────────────────────────────────────────
+  if (action === 'creditApx') {
+    const { amount, note } = body
+    if (!Number.isFinite(amount) || amount <= 0) return NextResponse.json({ error: 'Invalid APX amount' }, { status: 400 })
+
+    const usdEquivalent = apxToUsd(amount, APX_REDEMPTION_RATE)
+    const [updated] = await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          apxBalance: { increment: amount },
+          apxRewards: { increment: amount },
+        },
+      }),
+      prisma.transaction.create({
+        data: {
+          userId,
+          type: TransactionType.APX_REWARD,
+          status: TransactionStatus.APPROVED,
+          amount,
+          currency: 'APX',
+          usdEquivalent,
+          conversionRate: APX_REDEMPTION_RATE,
+          note: note || `Admin APX reward credit: ${formatApx(amount)} APX`,
+          reviewedBy: session.user.id,
+          reviewedAt: new Date(),
+        },
+      }),
+    ])
+
+    await createNotification(
+      userId,
+      'APX Rewards Credited',
+      `${formatApx(amount)} APX has been added to your rewards balance${note ? ` — ${note}` : ''}.`,
+      'success',
+      '/dashboard/apx'
+    )
+
+    await recordAdminAudit({
+      adminId: session.user.id,
+      action: 'APX_REWARD_CREDITED',
+      entityType: 'USER',
+      entityId: userId,
+      summary: `Credited ${formatApx(amount)} APX to ${user.email}`,
+      before: { apxBalance: user.apxBalance, apxRewards: user.apxRewards },
+      after: { apxBalance: updated.apxBalance, apxRewards: updated.apxRewards },
+      metadata: { amount, usdEquivalent, conversionRate: APX_REDEMPTION_RATE, note: note || null },
+    })
+
+    return NextResponse.json({ message: `${formatApx(amount)} APX credited to ${user.fullName}`, apxBalance: updated.apxBalance })
   }
 
   // ── Debit balance ───────────────────────────────────────────────────

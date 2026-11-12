@@ -76,7 +76,7 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
   const [user, setUser] = useState<any>(null)
   const [plans, setPlans] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeAction, setActiveAction] = useState<'credit' | 'debit' | 'invest' | null>(null)
+  const [activeAction, setActiveAction] = useState<'credit' | 'debit' | 'creditApx' | 'invest' | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
 
   // Credit / Debit form
@@ -109,6 +109,9 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
     if (activeAction === 'credit') {
       if (!adjAmount || parseFloat(adjAmount) <= 0) { toast.error('Enter a valid amount'); setActionLoading(false); return }
       body = { userId, action: 'creditBalance', amount: parseFloat(adjAmount), note: adjNote }
+    } else if (activeAction === 'creditApx') {
+      if (!adjAmount || parseFloat(adjAmount) <= 0) { toast.error('Enter a valid APX amount'); setActionLoading(false); return }
+      body = { userId, action: 'creditApx', amount: parseFloat(adjAmount), note: adjNote }
     } else if (activeAction === 'debit') {
       if (!adjAmount || parseFloat(adjAmount) <= 0) { toast.error('Enter a valid amount'); setActionLoading(false); return }
       body = { userId, action: 'debitBalance', amount: parseFloat(adjAmount), note: adjNote }
@@ -265,9 +268,10 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
             {/* Action buttons */}
             <div className="px-6 py-5 border-b border-[#1e1e35]">
               <div className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3">Admin Actions</div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { id: 'credit', label: 'Credit Balance', icon: PlusCircle, color: '#34d399', bg: 'bg-green-400/10 border-green-400/20 hover:bg-green-400/15', active: 'bg-green-400/20 border-green-400/40 text-green-400' },
+                  { id: 'creditApx', label: 'Credit APX', icon: Coins, color: '#22d3ee', bg: 'bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-400/15', active: 'bg-cyan-400/20 border-cyan-400/40 text-cyan-400' },
                   { id: 'debit', label: 'Debit Balance', icon: MinusCircle, color: '#f87171', bg: 'bg-red-400/10 border-red-400/20 hover:bg-red-400/15', active: 'bg-red-400/20 border-red-400/40 text-red-400' },
                   { id: 'invest', label: 'Assign Plan', icon: TrendingUp, color: '#c9a84c', bg: 'bg-[#c9a84c]/10 border-[#c9a84c]/20 hover:bg-[#c9a84c]/15', active: 'bg-[#c9a84c]/20 border-[#c9a84c]/40 text-[#c9a84c]' },
                 ].map(btn => {
@@ -288,17 +292,17 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
             {/* Action form panel */}
             {activeAction && (
               <div className="px-6 py-5 border-b border-[#1e1e35] bg-[#0a0a14]">
-                {(activeAction === 'credit' || activeAction === 'debit') && (
+                {(activeAction === 'credit' || activeAction === 'debit' || activeAction === 'creditApx') && (
                   <div className="space-y-4">
                     <h3 className="font-semibold text-sm flex items-center gap-2">
-                      {activeAction === 'credit' ? <PlusCircle size={15} className="text-green-400" /> : <MinusCircle size={15} className="text-red-400" />}
-                      {activeAction === 'credit' ? 'Credit Balance' : 'Debit Balance'}
+                      {activeAction === 'creditApx' ? <Coins size={15} className="text-cyan-400" /> : activeAction === 'credit' ? <PlusCircle size={15} className="text-green-400" /> : <MinusCircle size={15} className="text-red-400" />}
+                      {activeAction === 'creditApx' ? 'Credit APX Rewards' : activeAction === 'credit' ? 'Credit Balance' : 'Debit Balance'}
                       <span className="text-gray-500 font-normal">→ {user?.fullName}</span>
                     </h3>
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1.5">Amount (USD) *</label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <label className="block text-xs text-gray-400 mb-1.5">Amount ({activeAction === 'creditApx' ? 'APX' : 'USD'}) *</label>
+                        <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">{activeAction === 'creditApx' ? 'APX' : '$'}</span>
                         <input type="number" min="0.01" value={adjAmount} onChange={e => setAdjAmount(e.target.value)}
                           placeholder="0.00" autoFocus
                           className="w-full bg-[#12121f] border border-[#1e1e35] rounded-xl pl-8 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c]" />
@@ -323,7 +327,7 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
                           activeAction === 'credit' ? 'bg-green-500 text-white hover:bg-green-400' : 'bg-red-500 text-white hover:bg-red-400'
                         }`}>
                         {actionLoading ? <Loader2 size={14} className="animate-spin" /> : null}
-                        {activeAction === 'credit' ? `Credit $${adjAmount || '0'}` : `Debit $${adjAmount || '0'}`}
+                        {activeAction === 'creditApx' ? `Credit ${adjAmount || '0'} APX` : activeAction === 'credit' ? `Credit $${adjAmount || '0'}` : `Debit $${adjAmount || '0'}`}
                       </button>
                     </div>
                   </div>
