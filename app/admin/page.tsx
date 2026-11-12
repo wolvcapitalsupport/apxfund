@@ -99,17 +99,16 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
     const timeout = window.setTimeout(() => controller.abort(), 15000)
     setLoading(true)
     setLoadError('')
+    const readJson = async (response: Response) => {
+      const raw = await response.text()
+      let data: any = {}
+      try { data = raw ? JSON.parse(raw) : {} } catch { throw new Error(`Server returned an invalid response (${response.status})`) }
+      if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`)
+      return data
+    }
     Promise.all([
-      fetch(`/api/admin/users/detail?userId=${encodeURIComponent(userId)}`, { signal: controller.signal }).then(async r => {
-        const data = await r.json()
-        if (!r.ok) throw new Error(data.error || 'Unable to load user')
-        return data
-      }),
-      fetch('/api/plans', { signal: controller.signal }).then(async r => {
-        const data = await r.json()
-        if (!r.ok) throw new Error(data.error || 'Unable to load plans')
-        return data
-      }),
+      fetch(`/api/admin/users/detail?userId=${encodeURIComponent(userId)}`, { signal: controller.signal }).then(readJson),
+      fetch('/api/plans', { signal: controller.signal }).then(readJson),
     ]).then(([u, p]) => {
       if (cancelled) return
       setUser(u)

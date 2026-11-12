@@ -4,17 +4,18 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session || session.user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-  const { searchParams } = new URL(req.url)
-  const userId = searchParams.get('userId')
+    const { searchParams } = new URL(req.url)
+    const userId = searchParams.get('userId')
 
-  if (!userId) return NextResponse.json({ error: 'userId required' }, { status: 400 })
+    if (!userId) return NextResponse.json({ error: 'userId required' }, { status: 400 })
 
-  const user = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
@@ -41,7 +42,6 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: 'desc' },
       },
       transactions: {
-        where: { deletedAt: null },
         orderBy: { createdAt: 'desc' },
         take: 30,
       },
@@ -52,7 +52,11 @@ export async function GET(req: NextRequest) {
     },
   })
 
-  if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
-  return NextResponse.json(user)
+    return NextResponse.json(user)
+  } catch (error) {
+    console.error('Admin user detail query failed:', error)
+    return NextResponse.json({ error: 'Unable to load this user right now. Please try again.' }, { status: 503 })
+  }
 }
