@@ -12,6 +12,7 @@ import PortfolioAnalytics from '@/components/PortfolioAnalytics'
 import PortfolioIntelligence from '@/components/PortfolioIntelligence'
 import ApxOpportunityCard from '@/components/ApxOpportunityCard'
 import toast from 'react-hot-toast'
+import { apxToUsd } from '@/lib/apx'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface UserData {
@@ -254,6 +255,11 @@ export default function DashboardPage() {
                   </>
               }
             </p>
+            {label === 'APX Rewards' && (
+              <p className="mt-2 text-sm font-semibold text-[#e8cc7a]">
+                Current value: {formatCurrency(apxToUsd(Number(value)))}
+              </p>
+            )}
             <p className="text-gray-600 text-xs mt-1">{sub}</p>
           </div>
         ))}
