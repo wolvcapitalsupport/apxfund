@@ -121,6 +121,10 @@ model Transaction {
   usdEquivalent  Float?
   conversionRate Float?
   investmentId   String?
+  editedAt       DateTime?
+  editedBy       String?
+  deletedAt      DateTime?
+  deletedBy      String?
   user           User              @relation(fields: [userId], references: [id])
   investment     Investment?       @relation(fields: [investmentId], references: [id])
   apxWithdrawal  ApxWithdrawal?

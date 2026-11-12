@@ -9,7 +9,7 @@ import {
   FileCheck, CheckCircle, XCircle, Eye, Clock,
   TrendingUp, Shield, BarChart3, AlertTriangle, X,
   MinusCircle, Wallet, ListOrdered, ChevronRight,
-  Receipt, ToggleLeft, ToggleRight, Mail, Edit2, Save,
+  Receipt, ToggleLeft, ToggleRight, Mail, Edit2, Save, Trash2,
   Send, Inbox, UserPlus, Globe, Coins, ArrowLeftRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -79,6 +79,10 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
   const [loadError, setLoadError] = useState('')
   const [activeAction, setActiveAction] = useState<'credit' | 'debit' | 'creditApx' | 'invest' | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<any>(null)
+  const [transactionNote, setTransactionNote] = useState('')
+  const [transactionAdminNote, setTransactionAdminNote] = useState('')
+  const [transactionTxHash, setTransactionTxHash] = useState('')
 
   // Credit / Debit form
   const [adjAmount, setAdjAmount] = useState('')
@@ -160,6 +164,51 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
       }
     } catch {
       toast.error('Action failed')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const editTransaction = async () => {
+    if (!editingTransaction) return
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/admin/transactions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId: editingTransaction.id, action: 'edit', note: transactionNote, adminNote: transactionAdminNote, txHash: transactionTxHash }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Unable to edit transaction')
+      toast.success(data.message)
+      setEditingTransaction(null)
+      const updated = await fetch(`/api/admin/users/detail?userId=${encodeURIComponent(userId)}`).then(r => r.json())
+      setUser(updated)
+      onRefresh()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to edit transaction')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const deleteTransaction = async (transaction: any) => {
+    if (!window.confirm('Remove this transaction from the user history? The balance will not be changed and the action will be audited.')) return
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/admin/transactions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId: transaction.id, action: 'delete' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Unable to remove transaction')
+      toast.success(data.message)
+      const updated = await fetch(`/api/admin/users/detail?userId=${encodeURIComponent(userId)}`).then(r => r.json())
+      setUser(updated)
+      onRefresh()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to remove transaction')
     } finally {
       setActionLoading(false)
     }
@@ -497,9 +546,15 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
                         <div className="text-gray-500 text-xs">{formatDate(tx.createdAt)}</div>
                         {tx.note && <div className="text-gray-600 text-xs mt-0.5 max-w-[160px] truncate">{tx.note}</div>}
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold">{tx.currency === 'APX' ? `${Number(tx.amount).toLocaleString('en-US', { maximumFractionDigits: 8 })} APX` : formatCurrency(tx.amount)}</div>
-                        <StatusBadge status={tx.status} />
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-sm font-bold">{tx.currency === 'APX' ? `${Number(tx.amount).toLocaleString('en-US', { maximumFractionDigits: 8 })} APX` : formatCurrency(tx.amount)}</div>
+                          <StatusBadge status={tx.status} />
+                        </div>
+                        <div className="flex gap-1">
+                          <button title="Edit transaction details" disabled={actionLoading} onClick={() => { setEditingTransaction(tx); setTransactionNote(tx.note || ''); setTransactionAdminNote(tx.adminNote || ''); setTransactionTxHash(tx.txHash || tx.txProofHash || '') }} className="rounded-lg border border-[#1e1e35] p-2 text-gray-500 hover:border-[#c9a84c]/50 hover:text-[#c9a84c] disabled:opacity-50"><Edit2 size={13} /></button>
+                          <button title="Remove from history" disabled={actionLoading} onClick={() => deleteTransaction(tx)} className="rounded-lg border border-red-500/20 p-2 text-gray-500 hover:border-red-500/50 hover:text-red-400 disabled:opacity-50"><Trash2 size={13} /></button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -509,6 +564,22 @@ function UserDrawer({ userId, onClose, onRefresh }: { userId: string; onClose: (
           </div>
         )}
       </div>
+      {editingTransaction && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-[#1e1e35] bg-[#12121f] p-6 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div><p className="text-xs uppercase tracking-widest text-[#c9a84c]">Historical transaction</p><h3 className="mt-1 text-lg font-bold">Edit transaction details</h3><p className="mt-1 text-xs text-gray-500">Amount, currency, status, and dates are locked to preserve accounting history.</p></div>
+              <button onClick={() => setEditingTransaction(null)} className="text-gray-500 hover:text-white"><X size={18} /></button>
+            </div>
+            <div className="mt-5 space-y-3">
+              <label className="block text-xs text-gray-400">User-facing note<input value={transactionNote} onChange={e => setTransactionNote(e.target.value)} className="mt-1 w-full rounded-xl border border-[#1e1e35] bg-[#0a0a14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a84c]" /></label>
+              <label className="block text-xs text-gray-400">Admin note<input value={transactionAdminNote} onChange={e => setTransactionAdminNote(e.target.value)} className="mt-1 w-full rounded-xl border border-[#1e1e35] bg-[#0a0a14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a84c]" /></label>
+              <label className="block text-xs text-gray-400">Transaction hash<input value={transactionTxHash} onChange={e => setTransactionTxHash(e.target.value)} className="mt-1 w-full rounded-xl border border-[#1e1e35] bg-[#0a0a14] px-3 py-2.5 font-mono text-xs text-white outline-none focus:border-[#c9a84c]" /></label>
+            </div>
+            <div className="mt-5 flex gap-3"><button onClick={() => setEditingTransaction(null)} className="flex-1 rounded-xl border border-[#1e1e35] px-4 py-2.5 text-sm text-gray-400">Cancel</button><button onClick={editTransaction} disabled={actionLoading} className="flex-1 rounded-xl bg-[#c9a84c] px-4 py-2.5 text-sm font-bold text-[#0a0a14] disabled:opacity-50">{actionLoading ? 'Saving…' : 'Save changes'}</button></div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

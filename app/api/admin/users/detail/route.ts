@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: 'desc' },
       },
       transactions: {
+        where: { deletedAt: null },
         orderBy: { createdAt: 'desc' },
         take: 30,
       },

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification, Notifs } from '@/lib/notifications'
 import { sendDepositApproved, sendDepositRejected, sendWithdrawalApproved, sendWithdrawalRejected } from '@/lib/mailer'
+import { recordAdminAudit } from '@/lib/admin-audit'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
   const limit = 20
 
   const where: any = {}
+  where.deletedAt = null
   if (status !== 'ALL') where.status = status
   if (type) where.type = type
 
@@ -44,14 +46,14 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ transactions, total, page, limit })
 }
 
-// PATCH — approve or reject a deposit/withdrawal
+// PATCH — approve/reject deposits and withdrawals, or manage historical metadata
 export async function PATCH(req: NextRequest) {
   const session = await requireAdmin()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { transactionId, action, adminNote, txProofHash } = await req.json()
+  const { transactionId, action, adminNote, txProofHash, note, txHash, walletAddress } = await req.json()
 
-  if (!transactionId || !['approve', 'reject'].includes(action)) {
+  if (!transactionId || !['approve', 'reject', 'edit', 'delete'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
@@ -61,6 +63,58 @@ export async function PATCH(req: NextRequest) {
   })
 
   if (!tx) return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
+  if (tx.deletedAt) return NextResponse.json({ error: 'Transaction has already been removed from history' }, { status: 404 })
+
+  if (action === 'edit') {
+    const cleanNote = typeof note === 'string' ? note.trim().slice(0, 1000) : undefined
+    const cleanAdminNote = typeof adminNote === 'string' ? adminNote.trim().slice(0, 1000) : undefined
+    const cleanTxHash = typeof txHash === 'string' ? txHash.trim().slice(0, 200) : undefined
+    const cleanWalletAddress = typeof walletAddress === 'string' ? walletAddress.trim().slice(0, 200) : undefined
+    if ([cleanNote, cleanAdminNote, cleanTxHash, cleanWalletAddress].every(value => value === undefined)) {
+      return NextResponse.json({ error: 'No editable transaction fields supplied' }, { status: 400 })
+    }
+    const before = { note: tx.note, adminNote: tx.adminNote, txHash: tx.txHash, walletAddress: tx.walletAddress }
+    const updated = await prisma.transaction.update({
+      where: { id: tx.id },
+      data: {
+        ...(cleanNote !== undefined ? { note: cleanNote || null } : {}),
+        ...(cleanAdminNote !== undefined ? { adminNote: cleanAdminNote || null } : {}),
+        ...(cleanTxHash !== undefined ? { txHash: cleanTxHash || null } : {}),
+        ...(cleanWalletAddress !== undefined ? { walletAddress: cleanWalletAddress || null } : {}),
+        editedAt: new Date(),
+        editedBy: session.user.id,
+      },
+    })
+    await recordAdminAudit({
+      adminId: session.user.id,
+      action: 'TRANSACTION_EDITED',
+      entityType: 'TRANSACTION',
+      entityId: tx.id,
+      summary: `Edited ${tx.type} transaction for ${tx.user.email}`,
+      before,
+      after: { note: updated.note, adminNote: updated.adminNote, txHash: updated.txHash, walletAddress: updated.walletAddress },
+    })
+    return NextResponse.json({ message: 'Transaction details updated', transaction: updated })
+  }
+
+  if (action === 'delete') {
+    const updated = await prisma.transaction.update({
+      where: { id: tx.id },
+      data: { deletedAt: new Date(), deletedBy: session.user.id },
+    })
+    await recordAdminAudit({
+      adminId: session.user.id,
+      action: 'TRANSACTION_SOFT_DELETED',
+      entityType: 'TRANSACTION',
+      entityId: tx.id,
+      summary: `Removed ${tx.type} transaction from ${tx.user.email}'s history`,
+      before: { status: tx.status, amount: tx.amount, currency: tx.currency, note: tx.note },
+      after: { deletedAt: updated.deletedAt, deletedBy: session.user.id },
+      metadata: { balanceImpact: 'none', recovery: 'restore deletedAt/deletedBy fields' },
+    })
+    return NextResponse.json({ message: 'Transaction removed from history' })
+  }
+
   if (tx.status !== 'PENDING') {
     return NextResponse.json({ error: 'Transaction already reviewed' }, { status: 400 })
   }
