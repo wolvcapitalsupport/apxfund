@@ -4,10 +4,12 @@ import { useMemo, useState } from 'react'
 import { Check, ChevronDown, Copy, ExternalLink, ShieldCheck, Smartphone } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLang } from '@/lib/useLang'
-import { APX_CONTRACT_ADDRESS } from '@/lib/web3'
 
 const APX_SYMBOL = 'APX'
 const APX_DECIMALS = 18
+const BSC_CHAIN_ID = 56
+const BSC_TRUST_WALLET_COIN = '20000714'
+const CHECKSUMMED_APX_CONTRACT = '0x8d6032443cb7B23c134094c8921F1F37824EA3a2'
 
 type GuideCopy = {
   title: string
@@ -101,7 +103,7 @@ export default function ApxWalletGuide({ walletProvider }: { walletProvider?: Wa
 
   const details = useMemo(() => [
     [copy.network, 'BNB Smart Chain (BEP-20)'],
-    [copy.contract, APX_CONTRACT_ADDRESS],
+    [copy.contract, CHECKSUMMED_APX_CONTRACT],
     [copy.symbol, APX_SYMBOL],
     [copy.decimals, String(APX_DECIMALS)],
   ], [copy])
@@ -112,29 +114,59 @@ export default function ApxWalletGuide({ walletProvider }: { walletProvider?: Wa
     window.setTimeout(() => setCopiedField(null), 1800)
   }
 
+  const openTrustWalletAsset = () => {
+    const asset = `c${BSC_TRUST_WALLET_COIN}_t${CHECKSUMMED_APX_CONTRACT}`
+    const trustWalletUrl = `https://link.trustwallet.com/add_asset?asset=${encodeURIComponent(asset)}`
+    toast(copy.copied === 'Copied' ? 'Opening Trust Wallet to add APX…' : 'Trust Wallet zum Hinzufügen von APX wird geöffnet…')
+    window.location.assign(trustWalletUrl)
+  }
+
   const addToWallet = async () => {
-    try {
-      const provider = walletProvider || (window.ethereum as WalletProvider | undefined)
-      if (!provider) {
-        toast.error(copy.notAvailable)
-        return
-      }
-      const added = await provider.request({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20',
-          options: {
-            address: APX_CONTRACT_ADDRESS,
-            symbol: APX_SYMBOL,
-            decimals: APX_DECIMALS,
-            image: `${window.location.origin}/logo.png`,
+    const provider = walletProvider || (window.ethereum as WalletProvider | undefined)
+    if (provider) {
+      try {
+        const added = await provider.request({
+          method: 'wallet_watchAsset',
+          params: {
+            type: 'ERC20',
+            options: {
+              address: CHECKSUMMED_APX_CONTRACT,
+              symbol: APX_SYMBOL,
+              decimals: APX_DECIMALS,
+              chainId: BSC_CHAIN_ID,
+            },
           },
-        },
-      })
-      if (added) toast.success(copy.copied === 'Copied' ? 'APX was added to your wallet.' : 'APX wurde zu Ihrer Wallet hinzugefügt.')
-    } catch {
-      toast.error(copy.notAvailable)
+        })
+        if (added === true) {
+          toast.success(copy.copied === 'Copied' ? 'APX was added to your wallet.' : 'APX wurde zu Ihrer Wallet hinzugefügt.')
+          return
+        }
+      } catch {
+        // Some Trust Wallet mobile WalletConnect sessions reject wallet_watchAsset.
+      }
+
+      try {
+        const legacyAdded = await provider.request({
+          method: 'wallet_watchAsset',
+          params: {
+            type: 'ERC20',
+            options: {
+              address: CHECKSUMMED_APX_CONTRACT,
+              symbol: APX_SYMBOL,
+              decimals: APX_DECIMALS,
+            },
+          },
+        })
+        if (legacyAdded === true) {
+          toast.success(copy.copied === 'Copied' ? 'APX was added to your wallet.' : 'APX wurde zu Ihrer Wallet hinzugefügt.')
+          return
+        }
+      } catch {
+        // Fall through to Trust Wallet's native add-asset route.
+      }
     }
+
+    openTrustWalletAsset()
   }
 
   return (
@@ -186,7 +218,7 @@ export default function ApxWalletGuide({ walletProvider }: { walletProvider?: Wa
 
         <div className="flex flex-col gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div><p className="text-xs font-bold text-emerald-200">{copy.safety}</p><p className="mt-1 text-xs leading-5 text-emerald-100/70">{copy.safetyText}</p></div>
-          <a href={`https://bscscan.com/token/${APX_CONTRACT_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="flex shrink-0 items-center gap-1 text-xs font-bold text-emerald-300 hover:underline">{copy.explorer}<ExternalLink size={13} /></a>
+          <a href={`https://bscscan.com/token/${CHECKSUMMED_APX_CONTRACT}`} target="_blank" rel="noopener noreferrer" className="flex shrink-0 items-center gap-1 text-xs font-bold text-emerald-300 hover:underline">{copy.explorer}<ExternalLink size={13} /></a>
         </div>
       </div>}
     </section>
