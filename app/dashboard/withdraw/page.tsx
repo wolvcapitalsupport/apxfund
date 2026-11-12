@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { AppKitAccountButton, AppKitConnectButton } from '@reown/appkit/react'
-import { ArrowUpCircle, CheckCircle2, Clock3, Loader2, ShieldCheck, XCircle } from 'lucide-react'
+import { ArrowUpCircle, Check, CheckCircle2, Clock3, Copy, Loader2, ShieldCheck, XCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { formatApx } from '@/lib/apx'
 import { useWallet } from '@/lib/useWallet'
 import { REOWN_PROJECT_ID } from '@/components/ReownProvider'
 import { useLang } from '@/lib/useLang'
+import ApxWalletGuide from '@/components/ApxWalletGuide'
 
 type RequestRow = {
   id: string
@@ -38,6 +39,7 @@ function WithdrawalContent() {
   const [requests, setRequests] = useState<RequestRow[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [addressCopied, setAddressCopied] = useState(false)
 
   const load = async () => {
     const [userRes, requestRes] = await Promise.all([fetch('/api/user/me'), fetch('/api/apx/withdraw')])
@@ -49,6 +51,14 @@ function WithdrawalContent() {
   }
 
   useEffect(() => { load().catch(() => setLoading(false)) }, [])
+
+  const copyAddress = async () => {
+    if (!wallet.address) return
+    await navigator.clipboard.writeText(wallet.address)
+    setAddressCopied(true)
+    toast.success(lang === 'de' ? 'Wallet-Adresse kopiert' : 'Wallet address copied')
+    window.setTimeout(() => setAddressCopied(false), 1800)
+  }
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -95,11 +105,13 @@ function WithdrawalContent() {
         <div className="premium-surface rounded-2xl p-5">
           <p className="text-xs uppercase tracking-wider text-gray-500">{text.destination}</p>
           <div className="mt-3 flex items-center justify-between gap-3">
-            {wallet.isConnected ? <p className="truncate font-mono text-sm text-white">{wallet.address}</p> : <p className="text-sm text-gray-400">{text.connect}</p>}
+            {wallet.isConnected ? <div className="flex min-w-0 items-center gap-2"><p className="truncate font-mono text-sm text-white">{wallet.address}</p><button type="button" onClick={copyAddress} className="shrink-0 rounded-lg border border-[#c9a84c]/30 p-2 text-[#e8cc7a] hover:bg-[#c9a84c]/10" title={addressCopied ? 'Copied' : 'Copy wallet address'}>{addressCopied ? <Check size={14} /> : <Copy size={14} />}</button></div> : <p className="text-sm text-gray-400">{text.connect}</p>}
             {wallet.isConnected ? <AppKitAccountButton balance="hide" /> : <AppKitConnectButton label={text.connect} loadingLabel="Opening wallet…" />}
           </div>
         </div>
       </div>
+
+      <ApxWalletGuide walletProvider={walletProvider} />
 
       <form onSubmit={submit} className="premium-surface rounded-2xl p-6">
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">{text.amount}</label>
