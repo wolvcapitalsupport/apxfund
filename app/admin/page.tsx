@@ -1424,6 +1424,169 @@ const EMAIL_TEMPLATES = [
   <p style="color:#666;font-size:12px;">APXFund | support@apxfund.xyz</p>
 </div>`,
   },
+  {
+    name: 'Kontoübersicht – Jörg Schneider',
+    subject: 'Ihre APXFund-Kontoübersicht – 12. November 2026',
+    body: `<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <title>APXFund – Vertrauliche Kontoübersicht</title>
+</head>
+<body style="margin:0;padding:0;background-color:#070711;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">
+  <div style="display:none;font-size:1px;color:#070711;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+    Vertrauliche APXFund-Kontoübersicht für Jörg Schneider – Stand: 12. November 2026.
+  </div>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#070711;border-collapse:collapse;">
+    <tr><td align="center" style="padding:28px 12px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="680" style="width:100%;max-width:680px;border-collapse:separate;background-color:#0d0d19;border:1px solid #292638;border-radius:14px;overflow:hidden;">
+        <tr><td align="center" style="padding:32px 24px 24px;border-bottom:1px solid #292638;">
+          <div style="font-size:28px;line-height:34px;font-weight:700;letter-spacing:1px;color:#c9a84c;">APX<span style="color:#ffffff;">Fund</span></div>
+          <div style="margin-top:9px;color:#c9a84c;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Vertrauliche Kontoübersicht</div>
+          <div style="margin-top:12px;color:#b9b7c4;font-size:13px;">Erstellt für Jörg Schneider · Stand: 12. November 2026</div>
+        </td></tr>
+        <tr><td style="padding:26px 24px 8px;">
+          <h1 style="margin:0 0 12px;color:#c9a84c;font-size:22px;line-height:29px;">Ihre APXFund-Kontoübersicht</h1>
+          <p style="margin:0 0 18px;color:#d8d6df;font-size:14px;line-height:22px;">Diese vertrauliche Übersicht fasst die zum Erstellungszeitpunkt im APXFund-Kontobuch erfasste Kontoposition, das Investmentportfolio, die APX-Belohnungen und die Transaktionshistorie zusammen.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background:#141421;border:1px solid #302d40;">
+            <tr>
+              <td style="padding:12px;border-bottom:1px solid #302d40;color:#a9a6b5;font-size:12px;">Kontoinhaber</td>
+              <td style="padding:12px;border-bottom:1px solid #302d40;color:#ffffff;font-size:13px;font-weight:bold;">Jörg Schneider</td>
+            </tr>
+            <tr>
+              <td style="padding:12px;border-bottom:1px solid #302d40;color:#a9a6b5;font-size:12px;">Registrierte E-Mail</td>
+              <td style="padding:12px;border-bottom:1px solid #302d40;color:#ffffff;font-size:13px;word-break:break-word;">joerg_schneider@mnet-online.de</td>
+            </tr>
+            <tr>
+              <td style="padding:12px;border-bottom:1px solid #302d40;color:#a9a6b5;font-size:12px;">Konto eröffnet</td>
+              <td style="padding:12px;border-bottom:1px solid #302d40;color:#ffffff;font-size:13px;">15.08.2026</td>
+            </tr>
+            <tr>
+              <td style="padding:12px;color:#a9a6b5;font-size:12px;">Kontostatus</td>
+              <td style="padding:12px;color:#7bd9a5;font-size:13px;font-weight:bold;">Aktiv</td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <tr><td style="padding:22px 24px 4px;">
+          <h2 style="margin:0 0 13px;color:#c9a84c;font-size:17px;">1. Finanzielle Position</h2>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-size:12px;line-height:18px;">
+            <tr style="background:#242133;color:#c9a84c;"><th align="left" style="padding:10px 8px;">Kontoposition</th><th align="right" style="padding:10px 8px;">Aktueller Betrag</th></tr>
+            <tr><td style="padding:10px 8px;border-bottom:1px solid #292638;color:#d8d6df;">Verfügbares USD-Guthaben</td><td align="right" style="padding:10px 8px;border-bottom:1px solid #292638;color:#fff;">71.290,00 $</td></tr>
+            <tr><td style="padding:10px 8px;border-bottom:1px solid #292638;color:#d8d6df;">Gesamteinzahlungen</td><td align="right" style="padding:10px 8px;border-bottom:1px solid #292638;color:#fff;">1.290,00 $</td></tr>
+            <tr><td style="padding:10px 8px;border-bottom:1px solid #292638;color:#d8d6df;">Gesamtgewinn</td><td align="right" style="padding:10px 8px;border-bottom:1px solid #292638;color:#fff;">20.459,99 $</td></tr>
+            <tr><td style="padding:10px 8px;border-bottom:1px solid #292638;color:#d8d6df;">Gesamtauszahlungen</td><td align="right" style="padding:10px 8px;border-bottom:1px solid #292638;color:#fff;">0,00 $</td></tr>
+            <tr><td style="padding:10px 8px;border-bottom:1px solid #292638;color:#d8d6df;">APX-Belohnungsguthaben</td><td align="right" style="padding:10px 8px;border-bottom:1px solid #292638;color:#fff;">53.352.765,28 AP.</td></tr>
+            <tr><td style="padding:10px 8px;border-bottom:1px solid #292638;color:#d8d6df;">Aktueller APX-Plattformwert</td><td align="right" style="padding:10px 8px;border-bottom:1px solid #292638;color:#fff;">38.413,99 $</td></tr>
+            <tr style="background:#242133;"><td style="padding:12px 8px;color:#c9a84c;font-weight:bold;">Zusammengefasster Kontowert</td><td align="right" style="padding:12px 8px;color:#c9a84c;font-weight:bold;">109.703,99 $</td></tr>
+          </table>
+          <p style="margin:10px 0 0;color:#aaa7b5;font-size:11px;line-height:17px;">Erläuterung: Verfügbares Guthaben im APXFund-Konto; kumulierte Einzahlungen und Gewinne; erfasste USD-Auszahlungen; verfügbare APX im APXFund-Belohnungskonto. Der APX-Plattformwert wird mit 0,00072 $ pro APX berechnet. Der zusammengefasste Kontowert entspricht USD-Guthaben plus aktuellem APX-Plattformwert.</p>
+          <p style="margin:10px 0 0;padding:12px;background:#171624;border-left:3px solid #c9a84c;color:#c5c2ce;font-size:11px;line-height:17px;">Das APX-Guthaben wird im APXFund-Belohnungskonto geführt. Der aktuelle angezeigte Wert wird mit dem Plattformkurs von 0,00072 $ pro APX berechnet. Dieser Wert ist keine Aussage über einen externen Marktpreis.</p>
+        </td></tr>
+
+        <tr><td style="padding:22px 24px 4px;">
+          <h2 style="margin:0 0 13px;color:#c9a84c;font-size:17px;">2. Investmentportfolio</h2>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-size:11px;line-height:16px;">
+            <tr style="background:#242133;color:#c9a84c;"><th align="left" style="padding:8px 5px;">Plan / Kapital</th><th align="left" style="padding:8px 5px;">Rendite</th><th align="left" style="padding:8px 5px;">Zeitraum</th><th align="left" style="padding:8px 5px;">Status</th><th align="right" style="padding:8px 5px;">Erwarteter Gewinn</th></tr>
+            <tr><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#ddd;">Apex Fund<br>30.000,00 $</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">22%</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">25.10.–24.11.2026</td><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#f0a0a0;">STORNIERT</td><td align="right" style="padding:9px 5px;border-bottom:1px solid #292638;">6.600,00 $</td></tr>
+            <tr><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#ddd;">Apex Fund<br>69.995,00 $</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">22%</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">25.10.–24.11.2026</td><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#f0a0a0;">STORNIERT</td><td align="right" style="padding:9px 5px;border-bottom:1px solid #292638;">15.398,90 $</td></tr>
+            <tr><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#ddd;">Apex Fund<br>30.000,00 $</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">22%</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">26.10.–25.11.2026</td><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#7bd9a5;">AKTIV</td><td align="right" style="padding:9px 5px;border-bottom:1px solid #292638;">6.600,00 $</td></tr>
+            <tr><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#ddd;">Apex Fund<br>70.000,00 $</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">22%</td><td style="padding:9px 5px;border-bottom:1px solid #292638;">26.10.–25.11.2026</td><td style="padding:9px 5px;border-bottom:1px solid #292638;color:#9db9f8;">ABGESCHLOSSEN</td><td align="right" style="padding:9px 5px;border-bottom:1px solid #292638;">15.400,00 $</td></tr>
+          </table>
+          <p style="margin:10px 0 0;color:#c5c2ce;font-size:12px;line-height:18px;">Portfolioübersicht: 1 aktives Investment, 1 abgeschlossenes Investment und 2 stornierte Investments. Aktuell gebundenes Kapital: <strong style="color:#fff;">30.000,00 $</strong>.</p>
+        </td></tr>
+
+        <tr><td style="padding:22px 24px 4px;">
+          <h2 style="margin:0 0 13px;color:#c9a84c;font-size:17px;">3. APX-Belohnungen</h2>
+          <p style="margin:0 0 10px;color:#d0ced8;font-size:12px;line-height:19px;">APX-Belohnungen werden im APXFund-Konto gutgeschrieben. Bei Fälligkeit wird die Rendite nach den Plattformregeln in APX gutgeschrieben, während das USD-Kapital dem USD-Guthaben zugeordnet wird. Durch die Gutschrift selbst wird keine automatische Überweisung auf eine externe Blockchain-Wallet ausgelöst.</p>
+          <p style="margin:0 0 10px;color:#d0ced8;font-size:12px;line-height:19px;">Ältere Transaktionen können mit dem früheren Kurs von 0,0008 $ pro APX berechnet worden sein. Diese historischen Einträge bleiben unverändert erhalten. Die aktuelle manuelle Gutschrift und der aktuelle Dashboard-Wert verwenden den Plattformkurs von 0,00072 $ pro APX.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-size:12px;line-height:17px;">
+            <tr style="background:#242133;color:#c9a84c;"><th align="left" style="padding:9px 7px;">APX-Position</th><th align="right" style="padding:9px 7px;">Menge</th><th align="right" style="padding:9px 7px;">USD-Wert bei 0,00072 $/APX</th></tr>
+            <tr><td style="padding:9px 7px;border-bottom:1px solid #292638;">APX-Belohnungsguthaben</td><td align="right" style="padding:9px 7px;border-bottom:1px solid #292638;">53.352.765,28 AP.</td><td align="right" style="padding:9px 7px;border-bottom:1px solid #292638;">38.413,99 $</td></tr>
+            <tr><td style="padding:9px 7px;border-bottom:1px solid #292638;">Letzte manuelle APX-Gutschrift</td><td align="right" style="padding:9px 7px;border-bottom:1px solid #292638;">27.777.777,78 AP.</td><td align="right" style="padding:9px 7px;border-bottom:1px solid #292638;">20.000,00 $</td></tr>
+            <tr><td style="padding:9px 7px;">Mindestbetrag für Auszahlung</td><td align="right" style="padding:9px 7px;">1.388.889 AP.</td><td align="right" style="padding:9px 7px;">1.000,00 $</td></tr>
+          </table>
+        </td></tr>
+
+        <tr><td style="padding:22px 24px 4px;">
+          <h2 style="margin:0 0 8px;color:#c9a84c;font-size:17px;">4. Vollständige Investment- und Transaktionsübersicht</h2>
+          <p style="margin:0 0 12px;color:#c5c2ce;font-size:11px;line-height:17px;">Das Konto enthält 36 erfasste Transaktionen. Die folgende Übersicht enthält die vollständige zum Erstellungszeitpunkt verfügbare Transaktionshistorie.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-size:10px;line-height:14px;">
+            <tr style="background:#242133;color:#c9a84c;"><th align="left" style="padding:7px 4px;">Datum</th><th align="left" style="padding:7px 4px;">Art / Status</th><th align="right" style="padding:7px 4px;">Betrag</th><th align="left" style="padding:7px 4px;">Beschreibung</th></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">09.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>ABGELEHNT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">100,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Einzahlung über ETH</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">21.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>ABGESCHLOSSEN</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">300,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Interne Überweisung — Absender: Ihr Upline</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">21.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">200,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Einzahlung über ETH</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">23.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>ABGESCHLOSSEN</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">200,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Einzahlung vom Upline-Konto über eine interne Überweisung</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">23.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">305,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Einzahlung über ETH</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">25.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">30.000,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Investment erworben — Apex Fund</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">25.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">69.995,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Investment erworben — Apex Fund</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">285,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Einzahlung über BTC</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 2 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">ANPASSUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">30.000,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Investment vom Administrator storniert — Kapital zurückerst…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">ANPASSUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">69.995,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Investment vom Administrator storniert — Kapital zurückerst…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">AUSZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">100.000,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Administrator-Belastung</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">ANPASSUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">100.000,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Ausgleichende Rückbuchung der Administrator-Belastung cmvpj…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">30.000,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Investment erworben — Apex Fund</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">26.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">EINZAHLUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">70.000,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Investment erworben — Apex Fund</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">27.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 1 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">27.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">641.662,50 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 1 von 30: $513.33 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">28.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 2 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">28.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">641.662,50 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 2 von 30: $513.33 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">29.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 3 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">29.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">641.662,50 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 3 von 30: $513.33 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">30.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 4 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">31.10.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 5 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">01.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 6 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">02.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 7 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">03.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 8 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">04.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 9 von 30: $220.00 …</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">05.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 10 von 30: $220.00…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">06.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 11 von 30: $220.00…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">07.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 12 von 30: $220.00…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">08.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 13 von 30: $220.00…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">09.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 14 von 30: $220.00…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">10.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">275.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Tägliche Rendite aus dem Apex Fund — Tag 15 von 30: $220.00…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">10.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">GEWINN<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">70.000,00 $</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Kapital zurückerstattet — Investment vom Administrator manu…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">10.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">19.250.000,00 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Rendite aus dem manuellen Abschluss durch den Administrator…</td></tr>
+            <tr><td style="padding:7px 4px;border-bottom:1px solid #292638;">12.11.2026</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">APX-BELOHNUNG<br>GENEHMIGT</td><td align="right" style="padding:7px 4px;border-bottom:1px solid #292638;">27.777.777,78 AP.</td><td style="padding:7px 4px;border-bottom:1px solid #292638;">Manuelle APX-Belohnungsgutschrift im Gegenwert von 20.000 $…</td></tr>
+          </table>
+          <p style="margin:8px 0 0;color:#aaa7b5;font-size:10px;line-height:15px;">Hinweis: Die Beschreibungen mit Auslassungszeichen sind in der bereitgestellten Kontoübersicht ebenfalls gekürzt wiedergegeben.</p>
+        </td></tr>
+
+        <tr><td style="padding:22px 24px 4px;">
+          <h2 style="margin:0 0 10px;color:#c9a84c;font-size:17px;">5. APX-Auszahlungsstatus</h2>
+          <p style="margin:0;color:#d0ced8;font-size:12px;line-height:19px;">Für dieses Konto ist derzeit kein APX-Auszahlungsantrag erfasst. Der Ablauf ist manuell: Der Nutzer verbindet eine BNB-Smart-Chain-Wallet und stellt den Antrag. Danach sendet ein Administrator APX aus der Treasury-Wallet und hinterlegt den bestätigten Transaktions-Hash.</p>
+        </td></tr>
+
+        <tr><td style="padding:22px 24px 4px;">
+          <h2 style="margin:0 0 10px;color:#c9a84c;font-size:17px;">6. Kontohinweise und nächste Schritte</h2>
+          <ul style="margin:0;padding-left:19px;color:#d0ced8;font-size:12px;line-height:20px;">
+            <li>Das Konto ist aktiv und der KYC-Status ist genehmigt.</li>
+            <li>Das aktuelle APX-Belohnungsguthaben kann vorbehaltlich der Plattformregeln und des Mindestbetrags für einen berechtigten APX-Auszahlungsantrag verwendet werden.</li>
+            <li>Die APX-Gutschrift im Gegenwert von 20.000 $ wurde als genehmigte Belohnungstransaktion erfasst und dem APXFund-Konto hinzugefügt.</li>
+            <li>Die APX-Gutschrift ist keine automatische Blockchain-Überweisung. Für eine externe Wallet ist ein Auszahlungsantrag und anschließend eine manuelle Treasury-Auszahlung erforderlich.</li>
+          </ul>
+        </td></tr>
+
+        <tr><td style="padding:22px 24px 26px;">
+          <h2 style="margin:0 0 10px;color:#c9a84c;font-size:17px;">Hinweis zur Kontoübersicht</h2>
+          <p style="margin:0;color:#aaa7b5;font-size:11px;line-height:18px;">Diese Übersicht wurde aus dem APXFund-Kontobuch erstellt und soll die Kontoposition, die erfassten Aktivitäten und die Behandlung der APX-Belohnungen verständlich erläutern. Sie ist kein Kontoauszug einer Bank, kein Steuerdokument und keine unabhängige Bewertung eines externen Marktpreises.</p>
+        </td></tr>
+        <tr><td align="center" style="padding:18px 20px;background:#090912;border-top:1px solid #292638;">
+          <div style="color:#c9a84c;font-size:15px;font-weight:bold;letter-spacing:1px;">APX<span style="color:#ffffff;">Fund</span></div>
+          <p style="margin:8px 0 0;color:#858292;font-size:10px;line-height:16px;">Vertrauliche Kontoinformationen · Erstellt am 12. November 2026</p>
+          <p style="margin:5px 0 0;color:#6f6c7b;font-size:10px;">Diese Nachricht enthält vertrauliche Kontoinformationen und ist ausschließlich für den vorgesehenen Empfänger bestimmt.</p>
+        </td></tr>
+      </table>
+      <div style="max-width:680px;padding:12px 8px;color:#666475;font-size:10px;line-height:15px;text-align:center;">APXFund · Vertrauliche Kontoübersicht</div>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+  },
 ]
 
 function EmailTab() {
