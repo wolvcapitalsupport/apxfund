@@ -23,10 +23,10 @@ type RequestRow = {
 
 const copy = {
   en: {
-    eyebrow: 'APX REWARDS / MANUAL PAYOUT', title: 'Withdraw your APX rewards', subtitle: 'Your APX reward is sent to the connected BNB Smart Chain wallet after an administrator confirms the payout.', available: 'Available APX rewards', destination: 'Payout wallet', connect: 'Connect wallet to continue', connected: 'Connected wallet', amount: 'APX amount to withdraw', placeholder: 'Enter APX amount', max: 'Use all available APX', submit: 'Request APX payout', submitting: 'Submitting request…', note: 'Manual payout review: an administrator sends APX from the treasury wallet, records the transaction hash, and you receive a notification.', security: 'Safety check', securityText: 'Check the wallet address and BNB Smart Chain network before submitting. APXFund will never ask for your recovery phrase or private key.', history: 'Your APX payout requests', empty: 'No APX payout requests yet.', pending: 'Pending admin payout', paid: 'Paid', rejected: 'Rejected and returned', tx: 'View transaction', setup: 'Wallet connection setup', setupText: 'Add the public Reown project ID to the deployment environment before enabling APX wallet payouts.', invalid: 'Enter a valid APX amount.', insufficient: 'The amount is greater than your available APX rewards.', connectFirst: 'Connect your wallet first.', success: 'APX payout request submitted for admin review.',
+    eyebrow: 'APX REWARDS / MANUAL PAYOUT', title: 'Withdraw your APX rewards', subtitle: 'Your APX reward is sent to the connected BNB Smart Chain wallet after an administrator confirms the payout.', available: 'Available APX rewards', destination: 'Payout wallet', connect: 'Connect wallet to continue', connected: 'Connected wallet', amount: 'APX amount to withdraw', placeholder: 'Enter APX amount', max: 'Use all available APX', receivingAddress: 'Receiving wallet address (BSC)', receivingPlaceholder: '0x… destination address', receivingHelp: 'Enter the BNB Smart Chain (BEP-20) wallet that should receive the APX. Connecting a wallet only prefills this field; it does not transfer funds.', submit: 'Request APX payout', submitting: 'Submitting request…', note: 'Manual payout review: an administrator sends APX from the treasury wallet to the address above, records the transaction hash, and you receive a notification.', security: 'Safety check', securityText: 'Confirm the receiving address and BNB Smart Chain network before submitting. APXFund will never ask for your recovery phrase or private key.', history: 'Your APX payout requests', empty: 'No APX payout requests yet.', pending: 'Pending admin payout', paid: 'Paid', rejected: 'Rejected and returned', tx: 'View transaction', setup: 'Wallet connection setup', setupText: 'Add the public Reown project ID to the deployment environment before enabling APX wallet payouts.', invalid: 'Enter a valid APX amount.', invalidAddress: 'Enter a valid BNB Smart Chain wallet address.', insufficient: 'The amount is greater than your available APX rewards.', connectFirst: 'Connect your wallet first.', success: 'APX payout request submitted for admin review.',
   },
   de: {
-    eyebrow: 'APX-BELohnungen / MANUELLE AUSZAHLUNG', title: 'APX-Belohnungen auszahlen', subtitle: 'Ihre APX-Belohnung wird nach der Bestätigung durch den Administrator an die verbundene BNB-Smart-Chain-Wallet gesendet.', available: 'Verfügbare APX-Belohnungen', destination: 'Auszahlungs-Wallet', connect: 'Wallet verbinden', connected: 'Verbundene Wallet', amount: 'APX-Betrag', placeholder: 'APX-Betrag eingeben', max: 'Alle verfügbaren APX nutzen', submit: 'APX-Auszahlung anfordern', submitting: 'Anfrage wird gesendet…', note: 'Manuelle Prüfung: Ein Administrator sendet APX aus der Treasury-Wallet, trägt den Transaktions-Hash ein und Sie erhalten eine Benachrichtigung.', security: 'Sicherheitsprüfung', securityText: 'Prüfen Sie Wallet-Adresse und BNB-Smart-Chain-Netzwerk. APXFund fragt niemals nach Ihrer Wiederherstellungsphrase oder Ihrem Private Key.', history: 'Ihre APX-Auszahlungsanfragen', empty: 'Noch keine APX-Auszahlungsanfragen.', pending: 'Wartet auf Admin-Auszahlung', paid: 'Ausgezahlt', rejected: 'Abgelehnt und zurückgebucht', tx: 'Transaktion ansehen', setup: 'Wallet-Verbindung wird eingerichtet', setupText: 'Fügen Sie zuerst die öffentliche Reown-Projekt-ID in der Deployment-Umgebung hinzu.', invalid: 'Geben Sie einen gültigen APX-Betrag ein.', insufficient: 'Der Betrag ist höher als Ihre verfügbaren APX-Belohnungen.', connectFirst: 'Verbinden Sie zuerst Ihre Wallet.', success: 'APX-Auszahlungsanfrage zur Prüfung eingereicht.',
+    eyebrow: 'APX-BELohnungen / MANUELLE AUSZAHLUNG', title: 'APX-Belohnungen auszahlen', subtitle: 'Ihre APX-Belohnung wird nach der Bestätigung durch den Administrator an die verbundene BNB-Smart-Chain-Wallet gesendet.', available: 'Verfügbare APX-Belohnungen', destination: 'Auszahlungs-Wallet', connect: 'Wallet verbinden', connected: 'Verbundene Wallet', amount: 'APX-Betrag', placeholder: 'APX-Betrag eingeben', max: 'Alle verfügbaren APX nutzen', receivingAddress: 'Empfangsadresse (BSC)', receivingPlaceholder: '0x… Zieladresse', receivingHelp: 'Geben Sie die BNB-Smart-Chain-(BEP-20)-Wallet ein, die APX erhalten soll. Das Verbinden einer Wallet füllt dieses Feld nur vor aus und überträgt keine Gelder.', submit: 'APX-Auszahlung anfordern', submitting: 'Anfrage wird gesendet…', note: 'Manuelle Prüfung: Ein Administrator sendet APX aus der Treasury-Wallet an die oben angegebene Adresse, trägt den Transaktions-Hash ein und Sie erhalten eine Benachrichtigung.', security: 'Sicherheitsprüfung', securityText: 'Prüfen Sie die Empfangsadresse und das BNB-Smart-Chain-Netzwerk. APXFund fragt niemals nach Ihrer Wiederherstellungsphrase oder Ihrem Private Key.', history: 'Ihre APX-Auszahlungsanfragen', empty: 'Noch keine APX-Auszahlungsanfragen.', pending: 'Wartet auf Admin-Auszahlung', paid: 'Ausgezahlt', rejected: 'Abgelehnt und zurückgebucht', tx: 'Transaktion ansehen', setup: 'Wallet-Verbindung wird eingerichtet', setupText: 'Fügen Sie zuerst die öffentliche Reown-Projekt-ID in der Deployment-Umgebung hinzu.', invalid: 'Geben Sie einen gültigen APX-Betrag ein.', invalidAddress: 'Geben Sie eine gültige BNB-Smart-Chain-Wallet-Adresse ein.', insufficient: 'Der Betrag ist höher als Ihre verfügbaren APX-Belohnungen.', connectFirst: 'Verbinden Sie zuerst Ihre Wallet.', success: 'APX-Auszahlungsanfrage zur Prüfung eingereicht.',
   },
 } as const
 
@@ -36,6 +36,7 @@ function WithdrawalContent() {
   const { wallet, walletProvider, switchToBsc } = useWallet()
   const [available, setAvailable] = useState(0)
   const [amount, setAmount] = useState('')
+  const [destinationAddress, setDestinationAddress] = useState('')
   const [requests, setRequests] = useState<RequestRow[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -52,6 +53,10 @@ function WithdrawalContent() {
 
   useEffect(() => { load().catch(() => setLoading(false)) }, [])
 
+  useEffect(() => {
+    if (wallet.address && !destinationAddress) setDestinationAddress(wallet.address)
+  }, [wallet.address, destinationAddress])
+
   const copyAddress = async () => {
     if (!wallet.address) return
     await navigator.clipboard.writeText(wallet.address)
@@ -63,17 +68,17 @@ function WithdrawalContent() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     const parsed = Number(amount)
-    if (!wallet.isConnected || !wallet.address || !walletProvider) return toast.error(text.connectFirst)
     if (!Number.isFinite(parsed) || parsed <= 0) return toast.error(text.invalid)
     if (parsed > available) return toast.error(text.insufficient)
+    if (!/^0x[a-fA-F0-9]{40}$/.test(destinationAddress.trim())) return toast.error(text.invalidAddress)
 
     setSubmitting(true)
     try {
-      await switchToBsc()
+      if (wallet.isConnected) await switchToBsc()
       const response = await fetch('/api/apx/withdraw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: parsed, walletAddress: wallet.address }),
+        body: JSON.stringify({ amount: parsed, walletAddress: destinationAddress.trim() }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Unable to submit request')
@@ -119,9 +124,12 @@ function WithdrawalContent() {
           <input type="number" min={0} step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder={text.placeholder} className="min-w-0 flex-1 rounded-xl border border-[#1e1e35] bg-[#0a0a14] px-4 py-3 text-white outline-none focus:border-[#c9a84c]" disabled={submitting} />
           <button type="button" onClick={() => setAmount(String(available))} className="rounded-xl border border-[#c9a84c]/30 px-4 text-xs font-bold text-[#e8cc7a] hover:bg-[#c9a84c]/10">{text.max}</button>
         </div>
+        <label className="mt-5 mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400" htmlFor="receiving-address">{text.receivingAddress}</label>
+        <input id="receiving-address" type="text" inputMode="text" autoComplete="off" value={destinationAddress} onChange={e => setDestinationAddress(e.target.value)} placeholder={text.receivingPlaceholder} className="w-full rounded-xl border border-[#1e1e35] bg-[#0a0a14] px-4 py-3 font-mono text-sm text-white outline-none focus:border-[#c9a84c]" disabled={submitting} />
+        <p className="mt-2 text-xs leading-5 text-gray-500">{text.receivingHelp}</p>
         <div className="mt-5 flex items-start gap-3 rounded-xl border border-blue-400/20 bg-blue-400/5 p-4 text-xs leading-5 text-blue-300"><ShieldCheck size={16} className="mt-0.5 shrink-0" />{text.securityText}</div>
         <p className="mt-4 text-xs leading-5 text-gray-500">{text.note}</p>
-        <button type="submit" disabled={submitting || !wallet.isConnected || !amount} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#EAB308] to-[#FDE047] px-4 py-3 text-sm font-black text-[#090A0F] disabled:cursor-not-allowed disabled:opacity-50"><ArrowUpCircle size={17} />{submitting ? <><Loader2 size={16} className="animate-spin" />{text.submitting}</> : text.submit}</button>
+        <button type="submit" disabled={submitting || !amount || !destinationAddress} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#EAB308] to-[#FDE047] px-4 py-3 text-sm font-black text-[#090A0F] disabled:cursor-not-allowed disabled:opacity-50"><ArrowUpCircle size={17} />{submitting ? <><Loader2 size={16} className="animate-spin" />{text.submitting}</> : text.submit}</button>
       </form>
 
       <section className="premium-surface rounded-2xl p-6">
