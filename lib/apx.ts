@@ -1,7 +1,6 @@
 export const APX_SUPPLY = 5_000_000_000
 export const APX_BUY_RATE = 0.0008        // rate investors buy APX with balance
-// Confirmed internal accounting rate for ROI credits. This is not a market
-// price and does not initiate or imply an on-chain transfer.
+// Platform rate for ROI credits.
 export const APX_EARNINGS_RATE = 0.00072
 export const APX_REDEMPTION_RATE = 0.00072
 export const APX_REWARD_SHARE = 0.08      // kept for tokenomics display — not used in ROI engine

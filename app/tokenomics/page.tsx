@@ -60,7 +60,7 @@ export default function TokenomicsPage() {
           <div className="grid md:grid-cols-3 gap-4 text-sm">
             <FlowCard
               title="1. Buy Flow"
-              body="User spends USD balance and receives APX at the internal buy rate."
+              body="User spends USD balance and receives APX at the platform buy rate."
               tone="#60a5fa"
             />
             <FlowCard
@@ -70,7 +70,7 @@ export default function TokenomicsPage() {
             />
             <FlowCard
               title="3. Redemption Flow"
-              body="User submits APX request. Admin approves and settles in USD based on redemption rate."
+              body="User submits an APX request. Admin approves and settles in USD using the platform redemption rate."
               tone="#34d399"
             />
           </div>

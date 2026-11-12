@@ -307,7 +307,7 @@ export async function sendInvestmentMatured(to: string, name: string, planName: 
     ${statusBox('ROI Basis', `$${profit.toFixed(2)}`, '#34d399')}
     ${statusBox('APX Credited (Internal Ledger)', `${apxAmount.toLocaleString('en-US', { maximumFractionDigits: 8 })} APX`, '#22d3ee')}
     ${divider()}
-    ${para('The APX credit is an internal accounting entry at the fixed rate of $0.00072 per APX. No on-chain token transfer was made. Your USD principal is available in your USD balance.')}
+    ${para('Your APX reward was recorded at the platform rate of $0.00072 per APX. No on-chain token transfer was made. Your USD principal is available in your USD balance.')}
     ${btn('Reinvest Now', `${BASE}/dashboard/plans`)}
     ${btn('Withdraw Funds', `${BASE}/dashboard/withdraw`)}
   `)
