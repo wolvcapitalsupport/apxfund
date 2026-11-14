@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendWelcome } from '@/lib/mailer'
+import { checkRateLimit, generateOtp, getClientKey, hashToken } from '@/lib/security'
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(getClientKey(req, 'verify-email'), 8, 15 * 60 * 1000)
+  if (!limit.allowed) return NextResponse.json({ error: 'Too many verification attempts. Please try again later.' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } })
   const { email, otp } = await req.json()
 
   if (!email || !otp) {
@@ -14,7 +17,9 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
   if (user.isEmailVerified) return NextResponse.json({ message: 'Already verified' })
 
-  if (!user.emailVerifyOtp || user.emailVerifyOtp !== otp.trim()) {
+  const submittedOtp = otp.trim()
+  const otpMatches = user.emailVerifyOtp && (user.emailVerifyOtp === hashToken(submittedOtp) || user.emailVerifyOtp === submittedOtp)
+  if (!otpMatches) {
     return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 })
   }
 
@@ -39,6 +44,8 @@ export async function POST(req: NextRequest) {
 
 // Resend OTP
 export async function PATCH(req: NextRequest) {
+  const limit = checkRateLimit(getClientKey(req, 'verify-resend'), 3, 15 * 60 * 1000)
+  if (!limit.allowed) return NextResponse.json({ error: 'Too many code requests. Please try again later.' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } })
   const { email } = await req.json()
   if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 })
 
@@ -46,12 +53,12 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
   if (user.isEmailVerified) return NextResponse.json({ message: 'Already verified' })
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+  const otp = generateOtp()
   const expiry = new Date(Date.now() + 15 * 60 * 1000)
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { emailVerifyOtp: otp, emailVerifyOtpExpiry: expiry },
+    data: { emailVerifyOtp: hashToken(otp), emailVerifyOtpExpiry: expiry },
   })
 
   const { sendVerificationOtp } = await import('@/lib/mailer')

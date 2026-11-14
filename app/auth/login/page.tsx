@@ -118,7 +118,7 @@ export default function LoginPage() {
                   className="w-full bg-[#12121f] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c] transition-colors" />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5">{t(lang, 'auth.password')}</label>
+                <div className="mb-1.5 flex items-center justify-between"><label className="block text-xs text-gray-400">{t(lang, 'auth.password')}</label><a href="/auth/forgot-password" className="text-xs text-[#EAB308] hover:underline">Forgot password?</a></div>
                 <div className="relative">
                   <input type={showPass ? 'text' : 'password'} value={form.password}
                     onChange={e => setForm({ ...form, password: e.target.value })}

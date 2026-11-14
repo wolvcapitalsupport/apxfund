@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { sendVerificationOtp } from '@/lib/mailer'
+import { checkRateLimit, generateOtp, getClientKey, hashToken } from '@/lib/security'
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -23,6 +24,8 @@ function generateReferralCode(): string {
 }
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(getClientKey(req, 'register'), 5, 15 * 60 * 1000)
+  if (!limit.allowed) return NextResponse.json({ error: 'Too many registration attempts. Please try again later.' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } })
   try {
     const body = await req.json()
     const data = registerSchema.parse(body)
@@ -52,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 12)
-    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+    const otp = generateOtp()
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000)
 
     const user = await prisma.user.create({
@@ -66,7 +69,7 @@ export async function POST(req: NextRequest) {
         referralCode: newReferralCode,
         isActive: true,
         isEmailVerified: false,
-        emailVerifyOtp: otp,
+        emailVerifyOtp: hashToken(otp),
         emailVerifyOtpExpiry: otpExpiry,
       },
       select: {

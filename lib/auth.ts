@@ -37,6 +37,8 @@ export const authOptions: NextAuthOptions = {
       // Force expire if session older than 24h
       const loginAt = token.loginAt as number
       if (loginAt && Date.now() - loginAt > 24 * 60 * 60 * 1000) {
+        token.id = undefined as any
+        token.role = undefined as any
         return token
       }
       return token

@@ -493,3 +493,44 @@ export async function sendMigrationAvailable(
   `)
   await send(to, 'Migration Available — Release Your Locked Capital', html)
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// 18. PASSWORD RESET
+// ═══════════════════════════════════════════════════════════════════════
+export async function sendPasswordReset(to: string, name: string, token: string) {
+  const resetUrl = `${BASE}/auth/reset-password?token=${encodeURIComponent(token)}`
+  const html = wrap(`
+    ${heading('Reset Your Password')}
+    ${para(`Hi <strong style="color:#fff">${name}</strong>, we received a request to reset your APXFund password.`)}
+    ${btn('Reset Password', resetUrl)}
+    ${note('This link expires in 30 minutes and can only be used once. If you did not request this, you can safely ignore this email. APXFund will never ask for your password or recovery phrase.')}
+  `)
+  await send(to, 'Reset Your APXFund Password', html)
+}
+
+export async function sendWithdrawalSecurityAlert(to: string, name: string, amount: number, walletAddress: string) {
+  const html = wrap(`
+    ${heading('APX Withdrawal Request Received')}
+    ${para(`Hi <strong style="color:#fff">${name}</strong>, a withdrawal request was submitted from your APXFund account.`)}
+    ${statusBox('Amount', `${amount.toLocaleString('en-US', { maximumFractionDigits: 8 })} APX`, '#c9a84c')}
+    ${statusBox('Network', 'BNB Smart Chain (BEP-20)', '#60a5fa')}
+    ${statusBox('Destination', `${walletAddress.slice(0, 10)}…${walletAddress.slice(-8)}`, '#a78bfa')}
+    ${divider()}
+    ${para('If you did not make this request, contact official support immediately. Do not send additional funds and never share your password, private key, or recovery phrase.')}
+    ${btn('Review Withdrawal', `${BASE}/dashboard/withdraw`)}
+  `)
+  await send(to, 'Security Alert — APX Withdrawal Request', html)
+}
+
+export async function sendWalletChangeAlert(to: string, name: string, walletAddress: string) {
+  const html = wrap(`
+    ${heading('Payout Wallet Changed')}
+    ${para(`Hi <strong style="color:#fff">${name}</strong>, a new BNB Smart Chain payout address was recorded on your APXFund account.`)}
+    ${statusBox('New Destination', `${walletAddress.slice(0, 10)}…${walletAddress.slice(-8)}`, '#f59e0b')}
+    ${statusBox('Security Hold', '24 hours', '#f59e0b')}
+    ${divider()}
+    ${para('For your protection, withdrawals to a newly changed address remain blocked for 24 hours. If you did not make this change, contact official support immediately.')}
+    ${btn('Review Account', `${BASE}/dashboard/withdraw`)}
+  `)
+  await send(to, 'Security Alert — Payout Wallet Changed', html)
+}
