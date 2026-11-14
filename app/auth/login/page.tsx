@@ -14,16 +14,24 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false)
+  const [otp, setOtp] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     const result = await signIn('credentials', {
-      email: form.email, password: form.password, redirect: false,
+      email: form.email, password: form.password, otp: twoFactorRequired ? otp : '', redirect: false,
     })
     setLoading(false)
     if (result?.error) {
-      if (result.error === 'EMAIL_NOT_VERIFIED') {
+      if (result.error.includes('2FA_REQUIRED')) {
+        setTwoFactorRequired(true)
+        toast('Enter the 6-digit code from your authenticator app')
+      } else if (result.error.includes('INVALID_2FA')) {
+        setTwoFactorRequired(true)
+        toast.error('Invalid authenticator code')
+      } else if (result.error === 'EMAIL_NOT_VERIFIED') {
         router.push(`/auth/verify-email?email=${encodeURIComponent(form.email)}`)
       } else {
         toast.error(result.error)
@@ -130,6 +138,15 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
+              {twoFactorRequired && (
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5">Authenticator code</label>
+                  <input type="text" inputMode="numeric" autoComplete="one-time-code" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="000000" required maxLength={6}
+                    className="w-full bg-[#12121f] border border-[#1e1e35] rounded-xl px-4 py-3 text-sm tracking-[0.4em] text-white placeholder-gray-600 focus:outline-none focus:border-[#c9a84c] transition-colors" />
+                  <p className="mt-2 text-xs text-gray-500">Open your authenticator app to get your current code.</p>
+                </div>
+              )}
               <button type="submit" disabled={loading}
                 className="w-full btn-gold py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
                 {loading ? <><Loader2 size={16} className="animate-spin" />{t(lang, 'auth.verifying')}</> : t(lang, 'auth.login')}
