@@ -523,7 +523,7 @@ Currently, testing is manual via:
 ## 🚧 Roadmap & Future Features
 
 ### Planned Features
-- [x] **2FA (TOTP) for user accounts** — Authenticator-app setup and login verification (admin 2FA remains separate)
+- [ ] **2FA (TOTP)** — Two-factor authentication
 - [ ] **Live Chat** — Tawk.to / Crisp integration
 - [ ] **Payment Gateway** — Stripe/Crypto payment processing
 - [ ] **Advanced Analytics** — AI-powered insights & recommendations

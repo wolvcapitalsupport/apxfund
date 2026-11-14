@@ -46,8 +46,6 @@ model User {
   apxRewards               Float                @default(0)
   payoutWalletAddress      String?
   payoutWalletChangedAt    DateTime?
-  twoFactorEnabled         Boolean              @default(false)
-  twoFactorSecret          String?
   apxRedemptions           ApxRedemption[]
   investments              Investment[]
   kycSubmissions           KycSubmission[]

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { User, Mail, Phone, Globe, Shield, Edit2, Save, Loader2, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLang } from '@/lib/useLang'
-import UserTwoFactorPanel from '@/components/UserTwoFactorPanel'
 import { t } from '@/lib/i18n'
 
 export default function ProfilePage() {
@@ -132,11 +131,10 @@ export default function ProfilePage() {
           </div>
           <div className="flex-1">
             <div className="text-sm font-medium">Password</div>
-            <div className="text-xs text-gray-500">Use the forgot-password flow to change your password securely</div>
+            <div className="text-xs text-gray-500">Contact support to reset your password</div>
           </div>
           <CheckCircle size={16} style={{ color: '#10B981' }} />
         </div>
-        <UserTwoFactorPanel />
       </div>
     </div>
   )
