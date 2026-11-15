@@ -1,114 +1,22 @@
+import Link from 'next/link'
 import PublicHeader from '@/components/layout/PublicHeader'
 import PublicFooter from '@/components/layout/PublicFooter'
-import Link from 'next/link'
 import { APX_SUPPLY, APX_BUY_RATE, APX_REDEMPTION_RATE, APX_REWARD_SHARE } from '@/lib/apx'
 
 const CONTRACT = '0x8d6032443cb7B23c134094c8921F1F37824EA3a2'
 
 export default function TokenomicsPage() {
-  return (
-    <div className="min-h-screen bg-[#0a0a14] text-white">
-      <PublicHeader />
+  return <div className="min-h-screen bg-[#0a0a14] text-white"><PublicHeader /><main className="max-w-6xl mx-auto px-6 py-14 space-y-7">
+    <section className="premium-surface rounded-3xl p-8 md:p-11"><p className="text-[11px] uppercase tracking-[0.2em] text-[#c9a84c]">APX economics framework</p><h1 className="mt-4 text-4xl md:text-6xl font-black">Tokenomics built around use.</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-gray-300">This page shows the configured APX parameters and how the token moves through the platform economy as the ecosystem expands.</p><div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-3"><Metric label="Supply cap" value={`${APX_SUPPLY.toLocaleString()} APX`} /><Metric label="Internal buy rate" value={`$${APX_BUY_RATE}`} /><Metric label="Internal redemption" value={`$${APX_REDEMPTION_RATE}`} /><Metric label="Reward share" value={`${APX_REWARD_SHARE * 100}% of cycle profit`} /></div></section>
 
-      <section className="max-w-6xl mx-auto px-6 py-16 space-y-6">
-        <div className="card-dark p-8 md:p-10">
-          <p className="text-xs tracking-[0.18em] text-[#c9a84c] mb-4 uppercase">APX Economics Framework</p>
-          <h1 className="text-4xl md:text-5xl font-black mb-3">APX Tokenomics</h1>
-          <p className="text-gray-400 max-w-3xl">
-            This page defines how APX is issued, used, rewarded, and redeemed before public liquidity listing.
-            It is aligned with the live APXFund platform logic and Option B redemption model.
-          </p>
+    <section className="grid lg:grid-cols-3 gap-4">{[['01', 'Acquire', 'Users exchange platform USD balance for APX at the configured internal buy rate.', 'Live'], ['02', 'Allocate', 'APX rewards are recorded through the platform reward workflow when eligible cycles mature.', 'Live'], ['03', 'Redeem', 'Users submit APX redemption requests for review and settlement through the platform queue.', 'Live']].map(([num, title, body, status]) => <div key={num} className="card-dark card-hover p-6"><div className="flex items-center justify-between"><span className="text-sm font-bold text-[#e8cc7a]">{num}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-1 text-[10px] uppercase tracking-wider text-emerald-300">{status}</span></div><h2 className="mt-7 text-xl font-bold">{title}</h2><p className="mt-3 text-sm leading-7 text-gray-400">{body}</p></div>)}</section>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-8">
-            <Metric label="Total Supply Cap" value={`${APX_SUPPLY.toLocaleString()} APX`} />
-            <Metric label="Internal Buy Rate" value={`$${APX_BUY_RATE} / APX`} />
-            <Metric label="Internal Redemption Rate" value={`$${APX_REDEMPTION_RATE} / APX`} />
-            <Metric label="Reward Emission Formula" value={`${(APX_REWARD_SHARE * 100).toFixed(0)}% of cycle profit`} />
-          </div>
-        </div>
+    <section className="grid lg:grid-cols-2 gap-6"><div className="card-dark p-7"><p className="text-[11px] uppercase tracking-[0.2em] text-[#c9a84c]">Economic flow</p><h2 className="mt-3 text-2xl font-bold">How the current model works</h2><div className="mt-6 space-y-5">{[['Platform balance', 'USD balance is used for platform participation and APX acquisition.'], ['APX wallet', 'The account tracks APX holdings and reward allocations with a clear unit balance.'], ['Redemption queue', 'A user submits a request, the platform reviews it, and settlement follows the configured operating process.']].map(([title, body], i) => <div key={title} className="flex gap-4"><div className="h-7 w-7 shrink-0 rounded-full border border-[#c9a84c]/50 text-center text-xs leading-7 text-[#e8cc7a]">{i + 1}</div><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm leading-6 text-gray-400">{body}</p></div></div>)}</div></div><div className="card-dark p-7"><p className="text-[11px] uppercase tracking-[0.2em] text-[#c9a84c]">Market access</p><h2 className="mt-3 text-2xl font-bold">On-chain reference</h2><p className="mt-4 text-sm leading-7 text-gray-400">APX is deployed on BNB Smart Chain and has external market access through supported decentralized-exchange infrastructure. The pair provides a live on-chain reference for APX market access, price discovery, and community participation.</p><div className="mt-6 rounded-xl bg-[#0a0a14] p-4"><p className="text-xs text-gray-500">Contract</p><p className="mt-2 break-all font-mono text-xs text-gray-200">{CONTRACT}</p><p className="mt-3 text-xs text-gray-500">BNB Smart Chain · APX · 18 decimals</p></div><div className="mt-5 flex flex-wrap gap-3"><a href={`https://bscscan.com/token/${CONTRACT}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#e8cc7a] hover:underline">BscScan ↗</a><a href={`https://pancakeswap.finance/swap?chain=bsc&inputCurrency=BNB&outputCurrency=${CONTRACT}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#e8cc7a] hover:underline">PancakeSwap ↗</a></div></div></section>
 
-        <div className="grid lg:grid-cols-2 gap-5">
-          <div className="card-dark p-6">
-            <h2 className="text-xl font-bold mb-3">Core Utility</h2>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li>Users buy APX from dashboard USD balance.</li>
-              <li>Users earn APX automatically when cycles mature.</li>
-              <li>Users submit APX redemptions through internal queue.</li>
-              <li>Admin processes approvals and weekly settlements to USD balance.</li>
-            </ul>
-          </div>
+    <section className="card-dark p-7"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[11px] uppercase tracking-[0.2em] text-[#c9a84c]">Development path</p><h2 className="mt-3 text-2xl font-bold">What comes next</h2></div><Link href="/litepaper#roadmap" className="text-sm text-[#e8cc7a] hover:underline">Read the full roadmap →</Link></div><div className="mt-6 grid md:grid-cols-3 gap-4">{[['Now', 'Operational clarity', 'Improve documentation, wallet visibility, reporting, and the user experience around APX.'], ['Next', 'Broader utility', 'Evaluate additional platform features and partner integrations that create practical APX use.'], ['Later', 'Ecosystem depth', 'Assess further liquidity, market-access, and ecosystem opportunities as requirements are met.']].map(([title, heading, body]) => <div key={title} className="rounded-2xl border border-[#2a2a45] bg-[#0d0f18] p-5"><p className="text-xs uppercase tracking-wider text-[#e8cc7a]">{title}</p><h3 className="mt-3 font-bold">{heading}</h3><p className="mt-2 text-sm leading-6 text-gray-400">{body}</p></div>)}</div></section>
 
-          <div className="card-dark p-6">
-            <h2 className="text-xl font-bold mb-3">Pre-Listing Rules</h2>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li>APX accounting is active inside platform wallet.</li>
-              <li>Redemption follows Option B (queue + scheduled settlement).</li>
-              <li>External exchange price discovery is not guaranteed pre-listing.</li>
-              <li>
-                Contract: <span className="font-mono text-xs break-all text-gray-200">{CONTRACT}</span>
-                <div className="text-xs text-gray-600 mt-1">Network: BNB Smart Chain (BSC)</div>
-                <a href="https://pancakeswap.finance/swap?chain=bsc&inputCurrency=BNB&outputCurrency=0x8d6032443cb7B23c134094c8921F1F37824EA3a2" className="inline-block mt-2 text-[#c9a84c] hover:underline text-sm" target="_self" rel="noopener noreferrer">
-                  Buy on PancakeSwap
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="card-dark p-6">
-          <h2 className="text-xl font-bold mb-4">Economic Flows</h2>
-          <div className="grid md:grid-cols-3 gap-4 text-sm">
-            <FlowCard
-              title="1. Buy Flow"
-              body="User spends USD balance and receives APX at the platform buy rate."
-              tone="#60a5fa"
-            />
-            <FlowCard
-              title="2. Reward Flow"
-              body="At maturity, APX reward is minted using reward share formula tied to realized cycle profit."
-              tone="#22d3ee"
-            />
-            <FlowCard
-              title="3. Redemption Flow"
-              body="User submits an APX request. Admin approves and settles in USD using the platform redemption rate."
-              tone="#34d399"
-            />
-          </div>
-        </div>
-
-        <div className="card-dark p-6">
-          <h2 className="text-xl font-bold mb-3">Governance Notes</h2>
-          <p className="text-sm text-gray-300 leading-relaxed">
-            Rate parameters and settlement cadence may be adjusted by APXFund operations based on treasury capacity,
-            market conditions, and platform risk controls. Material changes should be disclosed publicly in advance.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <Link href="/token" className="btn-gold px-5 py-3 rounded-xl text-sm font-bold">Back to APX Token Page</Link>
-          <Link href="/litepaper" className="px-5 py-3 rounded-xl text-sm font-bold border border-[#1e1e35] text-gray-200 hover:border-[#c9a84c]/50">Read Litepaper</Link>
-        </div>
-      </section>
-
-      <PublicFooter />
-    </div>
-  )
+    <section className="rounded-2xl border border-[#c9a84c]/20 bg-[#c9a84c]/5 p-6"><h2 className="font-bold text-[#e8cc7a]">Operating note</h2><p className="mt-2 text-sm leading-7 text-gray-300">The APX economy is designed to expand in stages. As the platform grows, the team will continue adding utility, improving access, and documenting important operating updates for the community.</p></section>
+  </main><PublicFooter /></div>
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-[#1e1e35] bg-[#0d0f18] p-4">
-      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-base md:text-lg font-black text-[#e8cc7a]" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</p>
-    </div>
-  )
-}
-
-function FlowCard({ title, body, tone }: { title: string; body: string; tone: string }) {
-  return (
-    <div className="rounded-xl border p-4" style={{ borderColor: `${tone}50`, background: `${tone}12` }}>
-      <h3 className="font-bold mb-2" style={{ color: tone }}>{title}</h3>
-      <p className="text-gray-300 leading-relaxed">{body}</p>
-    </div>
-  )
-}
+function Metric({ label, value }: { label: string; value: string }) { return <div className="rounded-2xl border border-[#2a2a45] bg-[#0d0f18] p-4"><p className="text-xs uppercase tracking-wider text-gray-500">{label}</p><p className="mt-2 text-lg font-black text-[#e8cc7a]">{value}</p></div> }
