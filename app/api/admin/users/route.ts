@@ -25,15 +25,18 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
   const search = searchParams.get('search') || ''
+  const includeUnverified = searchParams.get('includeUnverified') === 'true'
 
+  const verificationFilter = includeUnverified ? {} : { isEmailVerified: true }
   const where = search
     ? {
+        ...verificationFilter,
         OR: [
           { email: { contains: search, mode: 'insensitive' as const } },
           { fullName: { contains: search, mode: 'insensitive' as const } },
         ],
       }
-    : {}
+    : verificationFilter
 
   try {
     const [users, total] = await Promise.all([

@@ -5,11 +5,13 @@ import { prisma } from '@/lib/prisma'
 import { createNotification, Notifs } from '@/lib/notifications'
 import { sendDepositPending, sendWithdrawalPending } from '@/lib/mailer'
 import { z } from 'zod'
+import { clientIp, rateLimit } from '@/lib/request-guard'
+import { isPlausibleTransactionHash, normalizeTransactionHash } from '@/lib/tx-validation'
 
 const depositSchema = z.object({
-  amount: z.number().min(10, 'Minimum deposit is $10'),
-  currency: z.string().default('BTC'),
-  txHash: z.string().min(5, 'Transaction hash is required'),
+  amount: z.number().finite().min(10, 'Minimum deposit is $10'),
+  currency: z.string().trim().min(2).max(20).default('BTC'),
+  txHash: z.string().trim().min(1, 'Transaction hash is required').max(128),
   proofImageUrl: z.string().url().optional(),
 })
 
@@ -30,10 +32,19 @@ export async function POST(req: NextRequest) {
 
     // ── DEPOSIT ─────────────────────────────────────────────
     if (type === 'DEPOSIT') {
-      const { amount, currency, txHash, proofImageUrl } = depositSchema.parse(body)
+      const parsed = depositSchema.parse(body)
+      const currency = parsed.currency.toUpperCase()
+      const txHash = normalizeTransactionHash(parsed.txHash)
+      const { amount, proofImageUrl } = parsed
+
+      const limit = rateLimit(`deposit:${session.user.id}:${clientIp(req)}`, 5, 60 * 60 * 1000)
+      if (!limit.ok) return NextResponse.json({ error: 'Too many deposit submissions. Please wait before trying again.' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } })
+      if (!isPlausibleTransactionHash(txHash)) {
+        return NextResponse.json({ error: 'Enter the complete transaction hash from the correct network explorer.' }, { status: 400 })
+      }
 
       // Check for duplicate txHash
-      const existing = await prisma.transaction.findFirst({ where: { txHash } })
+      const existing = await prisma.transaction.findFirst({ where: { txHash }, select: { id: true } })
       if (existing) {
         return NextResponse.json({ error: 'This transaction hash has already been submitted' }, { status: 400 })
       }

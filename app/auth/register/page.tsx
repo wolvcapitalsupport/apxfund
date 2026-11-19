@@ -16,6 +16,7 @@ export default function RegisterPage() {
   })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [website, setWebsite] = useState('')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -36,7 +37,7 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, website }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -135,6 +136,10 @@ export default function RegisterPage() {
             <p className="text-gray-500 mb-8">{t(lang, 'auth.registerSub')}</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+                <label htmlFor="website">Website</label>
+                <input id="website" name="website" tabIndex={-1} autoComplete="off" value={website} onChange={e => setWebsite(e.target.value)} />
+              </div>
               {fields.map(({ key, label, type, placeholder }) => (
                 <div key={key}>
                   <label className="block text-xs text-gray-400 mb-1.5">{label}</label>

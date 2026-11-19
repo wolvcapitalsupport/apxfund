@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { sendVerificationOtp } from '@/lib/mailer'
+import { clientIp, rateLimit } from '@/lib/request-guard'
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -11,7 +12,10 @@ const registerSchema = z.object({
   phone: z.string().optional(),
   country: z.string().optional(),
   referralCode: z.string().optional(),
+  website: z.string().max(0).optional(),
 })
+
+const RESERVED_TEST_DOMAINS = new Set(['example.com', 'example.net', 'example.org', 'localhost', 'test', 'invalid'])
 
 function generateReferralCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -24,8 +28,19 @@ function generateReferralCode(): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const limit = rateLimit(`register:${clientIp(req)}`, 8, 60 * 60 * 1000)
+    if (!limit.ok) {
+      return NextResponse.json({ error: 'Too many registration attempts. Please try again later.' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } })
+    }
+
     const body = await req.json()
     const data = registerSchema.parse(body)
+
+    if (data.website) return NextResponse.json({ error: 'Registration could not be completed.' }, { status: 400 })
+    const emailDomain = data.email.toLowerCase().split('@')[1] || ''
+    if (RESERVED_TEST_DOMAINS.has(emailDomain) || emailDomain.endsWith('.test')) {
+      return NextResponse.json({ error: 'Please use a valid email address.' }, { status: 400 })
+    }
 
     const existingUser = await prisma.user.findUnique({
       where: { email: data.email.toLowerCase() },

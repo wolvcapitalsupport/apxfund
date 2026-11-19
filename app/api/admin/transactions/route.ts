@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { createNotification, Notifs } from '@/lib/notifications'
 import { sendDepositApproved, sendDepositRejected, sendWithdrawalApproved, sendWithdrawalRejected } from '@/lib/mailer'
 import { recordAdminAudit } from '@/lib/admin-audit'
+import { isPlausibleTransactionHash } from '@/lib/tx-validation'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -124,6 +125,9 @@ export async function PATCH(req: NextRequest) {
   if (action === 'approve') {
     // ── APPROVE ────────────────────────────────────────────
     if (tx.type === 'DEPOSIT') {
+      if (!tx.txHash || !isPlausibleTransactionHash(tx.txHash)) {
+        return NextResponse.json({ error: 'Deposit cannot be approved until a complete transaction hash is recorded.' }, { status: 400 })
+      }
       // Credit user balance and update totals
       await prisma.$transaction([
         prisma.transaction.update({
