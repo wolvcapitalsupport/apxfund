@@ -1,36 +1,20 @@
-# APX Token Information Rebuild
 
-## Direction
 
-**Chosen style:** institutional dark-finance editorial (0.62 probability), with a restrained gold accent and clear evidence/status labels. Alternatives considered: crypto-terminal dashboard (0.08) and luxury investment brochure (0.05).
+# WhatsApp Bridge Implementation
 
-**Design movement:** a compact investor brief with strong section hierarchy, wide cards, and a milestone rail rather than a generic marketing grid.
+## Product and privacy decisions
 
-**Core principles:** distinguish live functionality from planned work; make contract and economic parameters scannable; use plain language for market and redemption mechanics; keep the page credible on mobile.
+The bridge uses a custom floating widget with a required visitor name, WhatsApp number, and explicit consent before creating a chat session. Tawk.to loads only after the visitor has accepted the site's analytics/tracking consent. The widget explains WhatsApp forwarding and Tawk.to analytics and links to `/policies`.
 
-**Color philosophy:** near-black surfaces convey focus, gold marks the APX brand and key metrics, cool blue/green accents identify blockchain and operational flows without implying performance.
-
-**Layout paradigm:** editorial hero followed by a two-column evidence panel, a horizontal-to-vertical roadmap rail, and compact reference sections.
-
-**Signature elements:** APX logo lockup, status chips (Live / Building / Planned), and a milestone rail with numbered phases.
-
-**Interaction philosophy:** direct links to BscScan, PancakeSwap, tokenomics and litepaper; no exaggerated CTAs or unsupported price claims.
-
-**Typography:** existing site system with large high-contrast headings, compact uppercase labels, and tabular numerals for rates and supply.
-
-**Brand essence:** APX is a BNB Smart Chain utility and rewards token connected to the APXFund platform; practical, transparent, evolving.
-
-## Implementation
-
-- Rebuild `/token` as the canonical APX overview with live contract details, utility, market access, and roadmap preview.
-- Rebuild `/tokenomics` as a structured economic model with parameters, flows, status labels, and risk-aware operating notes.
-- Replace the current incorrect `/litepaper` implementation with a complete long-form litepaper covering thesis, product utility, token mechanics, roadmap, governance, security, and glossary.
-- Reuse configured values from `lib/apx.ts`; do not invent dates, guarantees, or completed milestones.
-- Add the prepared square APX logo asset to the token overview.
+Chat sessions retain `consentAcceptedAt` and a 30-day `expiresAt` value. Session deletion removes the session and messages through an authenticated token-based endpoint. WhatsApp replies are routed only when Meta supplies a `context.id` matching a stored outbound message; otherwise an `UnroutedAdminMessage` record is created and an explanatory reminder is sent to the admin number.
 
 ## Project structure
 
-- `app/token/page.tsx`: public APX overview and roadmap preview.
-- `app/tokenomics/page.tsx`: economic mechanics and token flows.
-- `app/litepaper/page.tsx`: long-form APX litepaper.
-- `public/apx-token-logo-100kb.png`: wallet-ready APX logo.
+- `prisma/schema.prisma` and `prisma/migrations/...`: chat persistence and unrouted-message queue.
+- `lib/whatsapp.ts`: Graph API send helpers and webhook signature verification.
+- `app/api/chat/session/route.ts`: create/resume/delete visitor sessions.
+- `app/api/chat/messages/route.ts`: history, visitor forwarding, and retention checks.
+- `app/api/webhooks/whatsapp/route.ts`: Meta verification, HMAC validation, deduplication, strict context routing.
+- `components/WhatsAppChatWidget.tsx`: consent gate, launcher, polling, deletion control.
+- `components/TawkChat.tsx`: consent-gated Tawk.to loader.
+- `app/layout.tsx`: global widget and tracking components.

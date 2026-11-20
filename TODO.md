@@ -1,7 +1,12 @@
-# APX Public Information Rebuild
 
-- [ ] Rebuild `/token` with a professional APX overview, verified contract details, live utility, market access links, and a status-based roadmap preview.
-- [ ] Rebuild `/tokenomics` with configured supply/rates, clear buy/reward/redemption flows, current-vs-planned status labels, and operational notes.
-- [ ] Replace `/litepaper` with a complete investor-readable litepaper covering product thesis, utility, economics, roadmap, security, governance, risks, and glossary.
-- [ ] Use the prepared square APX logo asset in the public token overview.
-- [ ] Validate TypeScript, lint, build, and working-tree cleanliness; commit and push the public-page rebuild.
+
+## WhatsApp Bridge
+
+- [ ] Add `ChatSession`, `ChatMessage`, and `UnroutedAdminMessage` Prisma models, including consent timestamp, 30-day retention expiry, wamid references, and migration SQL.
+- [ ] Implement WhatsApp Cloud API helpers with server-only credentials, HMAC webhook verification, Graph API forwarding, and optional 24-hour template fallback.
+- [ ] Implement `/api/chat/session` create/resume/delete behavior with token ownership, consent fields, expiry cleanup, and personal-data deletion.
+- [ ] Implement `/api/chat/messages` history and visitor-send behavior with strict session/retention checks and wamid persistence.
+- [ ] Implement `/api/webhooks/whatsapp` GET verification and POST handling with wamid deduplication, context-only routing, unrouted queue creation, and admin reminder.
+- [ ] Add the consent-gated floating WhatsApp widget with pre-chat gate, privacy notice, polling, unread state, sound cue, and Delete Chat History control.
+- [ ] Gate Tawk.to loading behind existing/local tracking consent and document required environment variables and Meta webhook setup.
+- [ ] Validate schema, TypeScript, lint, production build, and push the implementation without applying a production database migration automatically.

@@ -61,3 +61,12 @@ ADMIN_EMAIL="admin@yourdomain.com"
 # --- OPTIONAL: WEBHOOK ---
 # If using Supabase auth webhook for welcome emails
 SUPABASE_WEBHOOK_SECRET="your-webhook-secret"
+
+# --- WHATSAPP CLOUD API (server-only) ---
+WHATSAPP_ACCESS_TOKEN=""
+WHATSAPP_PHONE_NUMBER_ID=""
+WHATSAPP_VERIFY_TOKEN=""
+META_APP_SECRET=""
+ADMIN_WHATSAPP_NUMBER=""
+WHATSAPP_ALERT_TEMPLATE_NAME=""
+GRAPH_API_VERSION="v21.0"

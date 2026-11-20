@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import { Toaster } from 'react-hot-toast'
 import CryptoTicker from './components/CryptoTicker' 
 import TawkChat from '@/components/TawkChat'
+import WhatsAppChatWidget from '@/components/WhatsAppChatWidget'
 
 const inter = localFont({
   src: './fonts/Inter-Variable.ttf',
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           
           {/* This renders your custom component with the correct initialization key */}
       <TawkChat />
+          <WhatsAppChatWidget />
           <Toaster
             position="top-right"
             toastOptions={{
